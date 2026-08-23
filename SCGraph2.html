@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SCGraph2 — Single-Case Graphing & Analysis</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --panel:#ffffff; --ink:#111827; --muted:#5f6b7a; --line:#d7dde5;
+    --accent:#1f4e79; --accent2:#2f6690; --soft:#eef4f8; --danger:#a63b32; --ok:#2f6f44;
+    --shadow:0 8px 24px rgba(15,23,42,.08); --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial, Helvetica, sans-serif}
+  body{min-height:100vh}
+  header{
+    height:58px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;
+    justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:10
+  }
+  .brand{display:flex;align-items:baseline;gap:10px}.brand h1{font-size:20px;margin:0;letter-spacing:.1px}.brand span{font-size:12px;color:var(--muted)}
+  .header-actions{display:flex;gap:8px;flex-wrap:wrap}
+  button,select,input,textarea{font:inherit}
+  button{border:1px solid #b9c4d1;background:#fff;color:var(--ink);padding:7px 11px;border-radius:8px;cursor:pointer;font-weight:600}
+  button:hover{background:#f6f8fa} button.primary{background:var(--accent);color:#fff;border-color:var(--accent)} button.primary:hover{background:#163d61}
+  button.danger{color:var(--danger)} button.small{padding:5px 8px;font-size:12px}
+  main{padding:12px 14px 18px;max-width:1700px;margin:0 auto}
+  .workspace{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(330px,.78fr);gap:12px;align-items:start}
+  .primary-stack,.secondary-stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .primary-stack > details.module:first-child{min-height:0}
+  .secondary-stack{position:sticky;top:70px;overflow:visible;padding-bottom:2px}
+  details.module{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;min-width:0}
+  /* IMPORTANT: constrain the scrollable body itself, not <details>. Native <details>
+     uses special internal layout in Chromium/Safari; clipping the outer element can
+     hide content without making .module-body a scroll container. */
+  details.module[open]{display:block;min-height:0;max-height:none}
+  summary{list-style:none;cursor:pointer;padding:11px 14px;font-weight:700;background:#fbfcfd;border-bottom:1px solid transparent;display:flex;align-items:center;justify-content:space-between;user-select:none;flex:0 0 auto}
+  details[open] > summary{border-bottom-color:var(--line)} summary::-webkit-details-marker{display:none}
+  summary::after{content:'▸';font-size:15px;color:var(--muted);transform:rotate(0deg);transition:.15s}details[open] summary::after{transform:rotate(90deg)}
+  .module-body{padding:12px;min-height:0;overflow-y:auto;overflow-x:auto;max-height:56vh;max-height:56dvh;scrollbar-gutter:stable both-edges;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y pan-x}
+  .graph-body{padding:8px 10px 10px;display:flex;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:auto;max-height:68vh;max-height:68dvh;scrollbar-gutter:stable both-edges}
+  .primary-stack > details.module[data-module="data"][open] > .module-body{max-height:44vh;max-height:44dvh}
+  /* On a two-column desktop, the right-hand modules divide the usable viewport.
+     Their BODY gets the fixed height; this guarantees clientHeight < scrollHeight
+     when content is long, so wheel/trackpad/touch scrolling works reliably. */
+  .secondary-stack > details.module[open] > .module-body{height:calc((100vh - 166px)/2);height:calc((100dvh - 166px)/2);min-height:190px;max-height:480px}
+  .module-body::-webkit-scrollbar{width:12px;height:12px}.module-body::-webkit-scrollbar-track{background:#f1f4f7}.module-body::-webkit-scrollbar-thumb{background:#a8b3bf;border:3px solid #f1f4f7;border-radius:999px}.module-body::-webkit-scrollbar-thumb:hover{background:#8795a3}
+  #graphWrap{background:#fff;flex:0 0 auto;min-height:380px;border:1px solid #e2e6ea;display:flex;align-items:stretch;justify-content:stretch;overflow-x:auto;overflow-y:visible}
+  #graphWrap svg{width:100%;height:auto;min-height:380px;display:block}
+  .graph-toolbar{display:flex;gap:6px;flex-wrap:wrap;padding:0 0 8px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+  label{display:block;font-size:12px;font-weight:700;color:#374151;margin:0 0 4px}
+  input[type="text"],input[type="number"],select,textarea{width:100%;border:1px solid #c8d1dc;border-radius:8px;background:#fff;padding:8px 9px;color:#111827}
+  textarea{resize:vertical;min-height:92px;line-height:1.35}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .field{margin-bottom:9px}.row{display:flex;gap:7px;align-items:center}.row > *{min-width:0}.row.grow > input,.row.grow > textarea{flex:1}
+  .hint{font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:5px}.subhead{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#667085;font-weight:700;margin:12px 0 7px}
+  .checks{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}.checks label{font-weight:500;display:flex;align-items:center;gap:6px;margin:0}
+  #status{font-size:12px;color:var(--muted);padding:5px 2px 0}.error{color:var(--danger)!important;font-weight:700}.ok{color:var(--ok)!important}
+  .quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:10px}.quick-grid button{text-align:left;font-size:12px}
+  #results{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto;padding-right:2px}
+  .result{border:1px solid #dce2e8;border-left:4px solid var(--accent2);border-radius:9px;padding:9px 10px;background:#fff}.result h3{font-size:13px;margin:0 0 5px}.result p{font-size:12px;color:#45515f;line-height:1.4;margin:3px 0}.result .meta{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#334155}
+  .pill{display:inline-flex;align-items:center;border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:3px 7px;font-size:11px;color:#475569;margin-right:5px}
+  .empty{color:#7b8794;font-size:12px;padding:6px 0}
+  .divider{height:1px;background:#e5e7eb;margin:10px 0}
+  .command-box{background:var(--soft);border:1px solid #d9e5ee;border-radius:10px;padding:9px}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#eef0f3;border:1px solid #d4d8de;border-bottom-width:2px;border-radius:4px;padding:1px 4px;font-size:11px}
+  .footer-note{font-size:11px;color:#6b7280;margin-top:9px}
+  dialog.help-dialog{width:min(860px,92vw);max-height:86vh;border:1px solid var(--line);border-radius:14px;padding:0;box-shadow:0 24px 70px rgba(15,23,42,.28);color:var(--ink)}
+  dialog.help-dialog::backdrop{background:rgba(15,23,42,.36)}
+  .help-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:12px 16px;z-index:1}
+  .help-head h2{font-size:18px;margin:0}.help-body{padding:15px 18px 22px;overflow:auto;line-height:1.48;font-size:13px}
+  .help-body h3{font-size:14px;margin:17px 0 6px;color:#243b53}.help-body h3:first-child{margin-top:0}
+  .help-body p{margin:6px 0}.help-body ul{margin:6px 0 8px 20px;padding:0}.help-body li{margin:4px 0}
+  .help-example{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#f6f8fa;border:1px solid #dfe5eb;border-radius:8px;padding:8px 10px;margin:7px 0;white-space:pre-wrap}
+  dialog.save-dialog{width:min(460px,92vw);border:1px solid var(--line);border-radius:14px;padding:0;box-shadow:0 24px 70px rgba(15,23,42,.28);color:var(--ink)}
+  dialog.save-dialog::backdrop{background:rgba(15,23,42,.36)}
+  .save-body{padding:16px 18px 18px}.save-body p{font-size:12px;color:var(--muted);margin:0 0 12px}.save-body label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
+  .save-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+  @media (max-width: 1050px){.workspace{grid-template-columns:1fr}.secondary-stack{position:static;overflow:visible}.primary-stack > details.module:first-child{min-height:0}details.module[open]{max-height:none;min-height:0}.module-body,.graph-body,.secondary-stack > details.module[open] > .module-body{height:auto;min-height:0;max-height:58vh;max-height:58dvh;overflow-y:auto}.primary-stack > details.module[data-module="data"][open] > .module-body{max-height:48vh;max-height:48dvh}.grid3{grid-template-columns:1fr 1fr}}
+  @media (max-width: 620px){header{height:auto;min-height:58px;align-items:flex-start;padding:10px;gap:8px}.brand span{display:none}.grid2,.grid3,.checks{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.header-actions{justify-content:flex-end}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis</span></div>
+  <div class="header-actions">
+    <button id="helpBtn" class="small">Help</button>
+    <button id="saveStateBtn" class="small">Save State</button>
+    <button id="loadStateBtn" class="small">Load State</button>
+    <input id="loadStateInput" type="file" accept="application/json,.json" hidden>
+    <button id="exportSvgBtn" class="small">Export SVG</button>
+    <button id="exportPngBtn" class="small">Export PNG</button>
+    <button id="resetBtn" class="small danger">Reset</button>
+  </div>
+</header>
+<main>
+  <section class="workspace">
+    <div class="primary-stack">
+<details class="module" data-module="graph" open>
+      <summary>Graph</summary>
+      <div class="module-body graph-body">
+        <div class="graph-toolbar">
+          <span class="pill" id="seriesPill">1 series</span><span class="pill" id="phasePill">2 phases</span><span class="pill" id="activePill">8 active observations</span>
+        </div>
+        <div id="graphWrap" aria-label="APA-style single-case graph"></div>
+        <div id="status">Ready.</div>
+      </div>
+    </details>
+
+<details class="module" data-module="data" open>
+      <summary>Data Input</summary>
+      <div class="module-body">
+        <div class="field"><label for="dataInput">Single-case data</label><textarea id="dataInput" class="mono">Sniffing: 2,4,5,2|6,7,4,5</textarea>
+          <div class="hint">Format: <span class="kbd">Series Label: 1,2,3|4,5,6</span>. Use <span class="kbd">|</span> for a phase boundary. Plain adjacent series are plotted together. Put <span class="kbd">+</span> alone on a line between series to create stacked multiple-baseline tiers sharing one Session axis; put <span class="kbd">-</span> alone on a line to start a separate graph (up to 3 graph panels). Ghost a value with parentheses, e.g. <span class="kbd">1,2,(3)|4,5,6</span>.</div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="phaseNamesData">Phase names (all series)</label><input id="phaseNamesData" type="text" placeholder="Baseline, Intervention"></div>
+          <div class="field"><label for="directionSelect">Improvement direction</label><select id="directionSelect"><option value="increase">Higher scores = improvement</option><option value="decrease">Lower scores = improvement</option></select></div>
+        </div>
+        <div class="field"><label for="notesInput">Notes / context</label><textarea id="notesInput" style="min-height:70px" placeholder="Optional context for interpretation"></textarea></div>
+        <div class="row"><button id="renderBtn" class="primary">Load & Graph Data</button><button id="restoreGhostsBtn">Un-ghost all points</button></div>
+        <div class="footer-note">Data are processed locally in this HTML file. SCGraph2 does not send the dataset anywhere.</div>
+      </div>
+    </details>
+    </div>
+
+    <div class="secondary-stack">
+<details class="module" data-module="controls" open>
+      <summary>Graph Controls</summary>
+      <div class="module-body">
+        <div class="field"><label for="titleInput">Title</label><input id="titleInput" type="text" value="Performance Scores Over Sessions"></div>
+        <div class="grid2">
+          <div class="field"><label for="xLabelInput">X-axis label</label><input id="xLabelInput" type="text" value="Session"></div>
+          <div class="field"><label for="yLabelInput">Y-axis label</label><input id="yLabelInput" type="text" value="Score"></div>
+        </div>
+        <div class="grid3">
+          <div class="field"><label for="yMinInput">Y minimum</label><input id="yMinInput" type="number" step="any" value="0"></div>
+          <div class="field"><label for="yMaxInput">Y maximum</label><input id="yMaxInput" type="number" step="any" value="100"></div>
+          <div class="field"><label for="markerSizeInput">Marker size</label><input id="markerSizeInput" type="number" min="2" max="12" step="1" value="5"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="phaseLabelInput">Phase labels</label><input id="phaseLabelInput" type="text" placeholder="Baseline, Intervention"></div>
+          <div class="field"><label for="lineWidthInput">Data line width</label><input id="lineWidthInput" type="number" min="1" max="6" step="0.25" value="2"></div>
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" id="gridCheck"> Light gridlines</label>
+          <label><input type="checkbox" id="legendCheck" checked> Legend when needed</label>
+          <label><input type="checkbox" id="phaseLabelsCheck" checked> Phase labels</label>
+          <label><input type="checkbox" id="showGhostCheck" checked> Show ghosted points</label>
+        </div>
+        <div class="divider"></div>
+        <div class="command-box">
+          <label for="graphCommand">Natural-language graph command</label>
+          <div class="row grow"><input id="graphCommand" type="text" placeholder="e.g., place level lines in both phases"><button id="graphCommandBtn" class="primary">Apply</button></div>
+          <div class="hint">Try: “set y-axis 0 to 20”, “hide gridlines”, “title: Reading Fluency”, or “place trend lines in both phases”.</div>
+        </div>
+        <div class="row" style="margin-top:10px"><button id="applyGraphBtn">Apply controls</button><button id="clearOverlaysBtn">Clear overlays</button></div>
+      </div>
+    </details>
+
+<details class="module" data-module="analysis" open>
+      <summary>Analysis</summary>
+      <div class="module-body">
+        <div class="quick-grid">
+          <button data-analysis="Level, 1">Level — phase 1</button>
+          <button data-analysis="Trend, 1">Trend — phase 1</button>
+          <button data-analysis="IQRLevel, 1">IQR Level — phase 1</button>
+          <button data-analysis="IQRTrend, 1">IQR Trend — phase 1</button>
+          <button data-analysis="PND, 1, 2">PND — 1 vs 2</button>
+          <button data-analysis="M-W, 1, 2">Mann–Whitney — 1 vs 2</button>
+          <button data-analysis="TrendBinomial, 1, 2">Trend + 0.3 IQR — 1 vs 2</button>
+          <button data-analysis="T-U, 1, 2">Tau-U — 1 vs 2</button>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="analysisSeriesSelect">Series to analyze</label><select id="analysisSeriesSelect"></select><div class="hint">With multiple series or graphs, choose the exact series here or specify it in the command.</div></div>
+          <div class="field"><label>Series-specific command syntax</label><div class="help-example" style="margin:0">T-U, series=Accuracy, 1, 2</div><div class="hint">You can also use <span class="kbd">series=2</span> or a series label.</div></div>
+        </div>
+        <div class="field"><label for="analysisCommand">Analysis command or request</label>
+          <div class="row grow"><input id="analysisCommand" type="text" value="T-U, 1, 2"><button id="runAnalysisBtn" class="primary">Run</button></div>
+          <div class="hint">Compact commands and natural language both work: <span class="kbd">Level, 1</span>, <span class="kbd">T-U, series=Accuracy, 1, 2</span>, “perform Tau-U on series Accuracy, phases 1 and 2”, <span class="kbd">TrendBinomial, 1, 2</span>, or “place level lines in both phases for series 2”. Ghosting is stored directly in the data stream with parentheses.</div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="alphaInput">Alpha</label><input id="alphaInput" type="number" min="0.001" max="0.5" step="0.001" value="0.05"></div>
+          <div class="field"><label for="tauCorrectionSelect">Tau-U baseline correction</label><select id="tauCorrectionSelect"><option value="auto">Auto when baseline trend is substantial</option><option value="yes">Always correct</option><option value="no">Do not correct</option></select></div>
+        </div>
+        <div class="subhead">Results</div>
+        <div id="results"><div class="empty">Run an analysis to see results and interpretation.</div></div>
+      </div>
+    </details>
+    </div>
+  </section>
+</main>
+
+<dialog id="helpDialog" class="help-dialog" aria-labelledby="helpTitle">
+  <div class="help-head">
+    <h2 id="helpTitle">SCGraph2 Help</h2>
+    <button id="closeHelpBtn" class="small">Close</button>
+  </div>
+  <div class="help-body">
+    <h3>Interface layout</h3>
+    <p>The <strong>Data Input</strong> module always appears immediately below the <strong>Graph</strong>. On wide screens, <strong>Graph Controls</strong> and <strong>Analysis</strong> appear in a right-hand column; on narrower screens they move below Data Input. Every module remains independently collapsible. The scrollable region is the module content area itself: place the pointer over the open panel and use the mouse wheel/trackpad, or drag its scrollbar, when the contents exceed the panel height.</p>
+
+    <h3>Data entry</h3>
+    <p>Enter one series per line using <strong>Label: values</strong>. Commas separate observations and a vertical bar creates a phase boundary. Session numbers continue across phases.</p>
+    <div class="help-example">Sniffing: 2,4,5,2|6,7,4,5</div>
+    <p>Plain adjacent series lines are plotted together in the same graph. All series use the same phase-name list and must have the same number of phases.</p>
+
+    <h3>Multiple graphs and multiple-baseline layouts</h3>
+    <p>Use a separator on its own line between series. A <strong>minus sign (-)</strong> starts a new independent graph panel. SCGraph2 supports up to three graph panels.</p>
+    <div class="help-example">Accuracy: 2,3,4|7,8,9
+-
+Rate: 10,11,12|15,17,18
+-
+Errors: 8,7,6|3,2,1</div>
+    <p>Use a <strong>plus sign (+)</strong> to create a multiple-baseline group. Each joined series receives its own vertically stacked tier, but the tiers use one common horizontal Session timeline. Their phase changes may occur at different sessions.</p>
+    <div class="help-example">Student A: 2,3,3|6,7,8
++
+Student B: 2,2,3,3,4|6,7,8
++
+Student C: 1,2,2,3,3,4,4|7,8,9</div>
+    <p>You can combine the syntax: <strong>-</strong> separates graph panels; <strong>+</strong> creates shared-timeline tiers inside a graph panel. Plain adjacent series inside the same tier are overlaid and therefore must use matching phase-boundary locations.</p>
+    <p>In a <strong>+</strong> multiple-baseline display, corresponding phase-change lines are connected across adjacent tiers. This visually links the same phase transition (for example, Baseline → Intervention) even when its onset is staggered across tiers. Independent graph panels separated by <strong>-</strong> are not connected.</p>
+    <p>Each multiple-baseline tier has its own horizontal axis line and Session tick marks so the common timeline is visible at every tier. Session numbers are printed only on the bottom tier.</p>
+
+    <h3>Analyzing one series when several are graphed</h3>
+    <p>Analyses are always performed on one specified series at a time, regardless of which graph panel or multiple-baseline tier contains it. Use the <strong>Series to analyze</strong> menu, or include the series in the analysis command.</p>
+    <div class="help-example">Trend, series=2, 1<br>T-U, series=Accuracy, 1, 2</div>
+    <p>Series may be referenced by its number (1–4) or by its exact label. Natural-language requests such as <strong>“perform Tau-U on series Accuracy, phases 1 and 2”</strong> are also accepted. With only one series, SCGraph2 selects it automatically. With multiple series, if neither the selector nor the command identifies a series, SCGraph2 asks you to choose one rather than silently analyzing Series 1.</p>
+
+    <h3>Ghosting observations</h3>
+    <p>Ghosting is encoded <strong>inside the data stream</strong>. Surround one numerical value with parentheses.</p>
+    <div class="help-example">Sniffing: 2,4,(5),2|6,7,4,5</div>
+    <p>Here, Session 3 remains at Session 3 but is displayed in gray, omitted from active connecting lines, and excluded from visual and quantitative calculations. Parentheses do not consume or change session numbers. Remove the parentheses to restore the point, or use <strong>Un-ghost all points</strong>.</p>
+
+    <h3>Phase boundaries and graph conventions</h3>
+    <ul>
+      <li>Each <span class="kbd">|</span> creates a thin solid vertical phase line halfway between the adjoining sessions.</li>
+      <li>Observations are connected only within a phase; lines never cross a phase boundary.</li>
+      <li>Ghosted observations break the active connecting line rather than being bridged.</li>
+      <li>Phase names can be entered in the Data Input or Graph Controls module.</li>
+    </ul>
+
+    <h3>Visual analysis</h3>
+    <p>Use the Analysis module or type commands such as:</p>
+    <div class="help-example">Level, 1
+IQRLevel, 1
+Trend, 1
+IQRTrend, 1
+whiskerTrend, 1
+whisker-Level, 1</div>
+    <p>Level uses the active phase median. <strong>Trend</strong> uses a Theil–Sen estimator and displays the fitted trend line only. <strong>IQRTrend</strong> adds the residual Q1/Q3 trend band. The separate <strong>Trend + 0.3 IQR</strong> analysis adds symmetric bounds at trend ± 0.30 × residual IQR and performs the phase-comparison binomial test. IQR and whisker variants are based on active observations only.</p>
+
+    <h3>Quantitative analysis</h3>
+    <div class="help-example">PND, 1, 2
+M-W, 1, 2
+TrendBinomial, 1, 2
+T-U, 1, 2</div>
+    <p>The first phase is the control/comparison phase and the second is the treatment/comparison phase. <strong>TrendBinomial</strong> (the “Trend + 0.3 IQR” button) fits the Theil–Sen trend in the first phase, computes its residual IQR, projects parallel bounds at trend ± 0.30 × IQR, and tests how many second-phase observations cross the improvement-side boundary. Counts above, below, and within the envelope are reported. The legacy command <span class="kbd">binomial, 1, 2</span> remains accepted as an alias. Ghosted observations are excluded. Use the improvement-direction control when lower values represent improvement.</p>
+
+    <h3>Natural-language graph commands</h3>
+    <div class="help-example">place level lines in both phases
+place trend lines in both phases
+set y-axis 0 to 20
+hide gridlines
+title: Reading Fluency</div>
+    <p>Graph changes modify only the requested display feature. Analysis overlays can be cleared without altering the data.</p>
+
+    <h3>Save and load SCGraph2 state</h3>
+    <p><strong>Save State</strong> opens a filename dialog, then downloads a versioned <span class="kbd">.json</span> file containing the current SCGraph2 session: the complete data stream (including <strong>+</strong>, <strong>-</strong>, phase boundaries, and parenthesized ghost points), graph controls, phase labels, analysis settings, the selected analysis series, current overlays/results, commands, notes, and which accordion modules are open.</p>
+    <p><strong>Load State</strong> restores a previously saved SCGraph2 JSON session. The data are reparsed and verified before saved analyses and overlays are restored.</p>
+
+    <h3>Export</h3>
+    <p>Use <strong>Export SVG</strong> for a scalable publication-quality figure or <strong>Export PNG</strong> for a high-resolution raster image. Processing occurs locally in the HTML file.</p>
+  </div>
+</dialog>
+<dialog id="saveStateDialog" class="save-dialog" aria-labelledby="saveStateTitle">
+  <div class="help-head">
+    <h2 id="saveStateTitle">Save SCGraph2 State</h2>
+    <button id="closeSaveStateBtn" class="small secondary" type="button">Cancel</button>
+  </div>
+  <div class="save-body">
+    <p>Name the JSON file that will store the complete current SCGraph2 session.</p>
+    <label for="saveStateFilename">File name</label>
+    <input id="saveStateFilename" type="text" value="SCGraph2-session.json" autocomplete="off" spellcheck="false">
+    <div class="save-actions">
+      <button id="cancelSaveStateBtn" class="secondary" type="button">Cancel</button>
+      <button id="confirmSaveStateBtn" type="button">Save JSON</button>
+    </div>
+  </div>
+</dialog>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const els = {
+    dataInput:$('dataInput'), phaseNamesData:$('phaseNamesData'), directionSelect:$('directionSelect'), notesInput:$('notesInput'),
+    titleInput:$('titleInput'), xLabelInput:$('xLabelInput'), yLabelInput:$('yLabelInput'), yMinInput:$('yMinInput'), yMaxInput:$('yMaxInput'),
+    markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
+    phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisSeriesSelect:$('analysisSeriesSelect'), alphaInput:$('alphaInput'),
+    tauCorrectionSelect:$('tauCorrectionSelect'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill')
+  };
+
+  const state = { parsed:null, ghosted:new Set(), overlays:[], results:[], sourceText:'', direction:'increase' };
+  const seriesStyles = [
+    {stroke:'#111827', marker:'circle'}, {stroke:'#4b5563', marker:'square'}, {stroke:'#7c2d12', marker:'triangle'}, {stroke:'#1f4e79', marker:'diamond'}
+  ];
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const fmt=(v,d=3)=> Number.isFinite(v) ? Number(v.toFixed(d)).toString() : 'NA';
+  const mean=a=>a.length?a.reduce((s,v)=>s+v,0)/a.length:NaN;
+  const median=a=>{if(!a.length)return NaN;const b=[...a].sort((x,y)=>x-y),m=Math.floor(b.length/2);return b.length%2?b[m]:(b[m-1]+b[m])/2};
+  function quantile(arr,q){ if(!arr.length)return NaN; const a=[...arr].sort((x,y)=>x-y), p=(a.length-1)*q, lo=Math.floor(p), hi=Math.ceil(p); return lo===hi?a[lo]:a[lo]+(a[hi]-a[lo])*(p-lo); }
+  function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+
+  function parseData(text){
+    const rawLines=text.split(/\n/); const series=[]; const ghostedKeys=[]; const graphs=[];
+    let graphIndex=0, tierIndex=0, phaseCount=null, maxSessions=0, seriesInCurrentTier=0, seriesInCurrentGraph=0;
+    const ensureGraph=()=>{while(graphs.length<=graphIndex)graphs.push({graphIndex:graphs.length,tiers:[],seriesIndexes:[]});const g=graphs[graphIndex];while(g.tiers.length<=tierIndex)g.tiers.push({tierIndex:g.tiers.length,seriesIndexes:[]});return g;};
+    ensureGraph();
+    rawLines.forEach((rawLine,lineIndex)=>{
+      const line=rawLine.trim(); if(!line)return;
+      if(line==='-'){
+        if(seriesInCurrentGraph===0) throw new Error('A “-” graph separator must come between data series.');
+        graphIndex++; if(graphIndex>=3) throw new Error('SCGraph2 supports up to 3 graph panels separated by “-”.');
+        tierIndex=0; seriesInCurrentTier=0; seriesInCurrentGraph=0; ensureGraph(); return;
+      }
+      if(line==='+'){
+        if(seriesInCurrentTier===0) throw new Error('A “+” multiple-baseline separator must come between data series.');
+        tierIndex++; seriesInCurrentTier=0; ensureGraph(); return;
+      }
+      const si=series.length, colon=line.indexOf(':'); if(colon<0) throw new Error(`Line ${lineIndex+1}: use “Label: values”, “+”, or “-”.`);
+      const label=line.slice(0,colon).trim()||`Series ${si+1}`; const raw=line.slice(colon+1).trim();
+      const phaseChunks=raw.split('|'); if(phaseCount===null) phaseCount=phaseChunks.length; if(phaseChunks.length!==phaseCount) throw new Error('All series must use the same number of phases.');
+      let session=1; const phases=[]; const points=[];
+      phaseChunks.forEach((chunk,pi)=>{
+        const tokens=chunk.split(',').map(v=>v.trim()).filter(v=>v!=='');
+        if(!tokens.length) throw new Error(`No data in ${label}, phase ${pi+1}.`);
+        const values=tokens.map(token=>{
+          let ghost=false, numericText=token; const wrapped=token.match(/^\(\s*(.*?)\s*\)$/);
+          if(wrapped){ghost=true;numericText=wrapped[1];}
+          else if(token.includes('(')||token.includes(')')) throw new Error(`Invalid ghost notation “${token}” in ${label}, phase ${pi+1}. Put one number entirely inside parentheses, e.g. (5).`);
+          const value=Number(numericText); if(!Number.isFinite(value)) throw new Error(`Invalid number “${token}” in ${label}, phase ${pi+1}.`); return {value,ghost};
+        });
+        const start=session;
+        values.forEach(item=>{const key=`${si}:${session}`;points.push({seriesIndex:si,phaseIndex:pi,session,score:item.value,key,ghosted:item.ghost});if(item.ghost)ghostedKeys.push(key);session++;});
+        phases.push({phaseIndex:pi,startSession:start,endSession:session-1});
+      });
+      const boundaries=[];for(let i=0;i<phases.length-1;i++)boundaries.push(phases[i].endSession+.5);
+      const ser={label,points,phases,boundaries,maxSessions:session-1,graphIndex,tierIndex,sourceLineIndex:lineIndex};
+      series.push(ser); maxSessions=Math.max(maxSessions,ser.maxSessions);
+      const g=ensureGraph();g.seriesIndexes.push(si);g.tiers[tierIndex].seriesIndexes.push(si);seriesInCurrentTier++;seriesInCurrentGraph++;
+    });
+    if(!series.length) throw new Error('Enter numerical data first.');
+    if(seriesInCurrentGraph===0) throw new Error('The data stream cannot end with a “-” separator.');
+    const compactGraphs=graphs.filter(g=>g.seriesIndexes.length);
+    compactGraphs.forEach((g,gi)=>{
+      g.graphIndex=gi; g.tiers=g.tiers.filter(t=>t.seriesIndexes.length); g.tiers.forEach((t,ti)=>{t.tierIndex=ti;t.seriesIndexes.forEach(si=>{series[si].graphIndex=gi;series[si].tierIndex=ti;});
+        if(t.seriesIndexes.length>1){const base=series[t.seriesIndexes[0]].boundaries;for(const si of t.seriesIndexes.slice(1)){const b=series[si].boundaries;if(b.length!==base.length||b.some((v,i)=>v!==base[i]))throw new Error(`Series plotted together in Graph ${gi+1} must have matching phase boundaries. Use “+” between them for staggered multiple-baseline tiers.`);}}
+      });
+      g.mode=g.tiers.length>1?'multiple-baseline':'standard';g.maxSessions=Math.max(...g.seriesIndexes.map(si=>series[si].maxSessions));
+    });
+    const names=getPhaseNames(phaseCount);
+    return {series,graphs:compactGraphs,phaseCount,maxSessions,phaseNames:names,ghostedKeys};
+  }
+  function getPhaseNames(n){
+    const raw=(els.phaseNamesData.value||els.phaseLabelInput.value||'').trim();
+    const names=raw?raw.split(',').map(s=>s.trim()).filter(Boolean):[];
+    return Array.from({length:n},(_,i)=>names[i]||`Phase ${i+1}`);
+  }
+  function syncPhaseNameInputs(){
+    const a=els.phaseNamesData.value.trim(), b=els.phaseLabelInput.value.trim(); if(a&&!b)els.phaseLabelInput.value=a; else if(b&&!a)els.phaseNamesData.value=b;
+  }
+  function phaseIndex(ref){
+    if(!state.parsed) return -1; const s=String(ref).trim(); const num=Number(s); if(Number.isInteger(num)&&num>=1&&num<=state.parsed.phaseCount)return num-1;
+    return state.parsed.phaseNames.findIndex(n=>n.toLowerCase()===s.toLowerCase());
+  }
+  function seriesIndex(ref){
+    if(!state.parsed) return -1;
+    if(ref===undefined||ref===null||String(ref).trim()==='') return -1;
+    const s=String(ref).trim();
+    const num=Number(s);
+    if(Number.isInteger(num)&&num>=1&&num<=state.parsed.series.length) return num-1;
+    return state.parsed.series.findIndex(x=>x.label.toLowerCase()===s.toLowerCase());
+  }
+  function selectedAnalysisSeries(){
+    if(!state.parsed) return -1;
+    if(state.parsed.series.length===1) return 0;
+    const v=els.analysisSeriesSelect ? els.analysisSeriesSelect.value : '';
+    return v==='' ? -1 : Number(v);
+  }
+  function requireAnalysisSeries(explicitRef=null){
+    const idx=explicitRef!==null&&explicitRef!==undefined ? seriesIndex(explicitRef) : selectedAnalysisSeries();
+    if(idx<0){
+      if(state.parsed.series.length===1) return 0;
+      throw new Error('Choose a Series to analyze or specify one in the command, e.g. series=2 or series=Accuracy.');
+    }
+    return idx;
+  }
+  function activePoints(phase,seriesIndex){return state.parsed.series[seriesIndex].points.filter(p=>p.phaseIndex===phase&&!state.ghosted.has(p.key));}
+  function activeScores(phase,seriesIndex){return activePoints(phase,seriesIndex).map(p=>p.score);}
+  function updateAnalysisSeriesOptions(preserveLabel=''){
+    if(!els.analysisSeriesSelect||!state.parsed)return;
+    const prev=preserveLabel || (els.analysisSeriesSelect.selectedOptions[0]?.dataset?.label||''); els.analysisSeriesSelect.innerHTML='';
+    if(state.parsed.series.length>1){const prompt=document.createElement('option');prompt.value='';prompt.textContent='Choose series…';els.analysisSeriesSelect.appendChild(prompt);}
+    state.parsed.series.forEach((ser,i)=>{const g=state.parsed.graphs[ser.graphIndex];const tierText=g.tiers.length>1?` · Tier ${ser.tierIndex+1}`:'';const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${ser.label} · Graph ${ser.graphIndex+1}${tierText}`;o.dataset.label=ser.label;els.analysisSeriesSelect.appendChild(o);});
+    const match=state.parsed.series.findIndex(x=>x.label===prev); if(state.parsed.series.length===1)els.analysisSeriesSelect.value='0';else if(match>=0)els.analysisSeriesSelect.value=String(match);else els.analysisSeriesSelect.value=''; els.analysisSeriesSelect.disabled=state.parsed.series.length===1;
+  }
+
+  function svgEl(tag,attrs={},text=''){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag); Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v)); if(text!=='' ) e.textContent=text; return e; }
+  function drawMarker(svg,p,style,r,ghost=false){
+    const common={stroke:ghost?'#9ca3af':style.stroke,'stroke-width':2,fill:'#fff',opacity:ghost?.6:1}; let el;
+    if(style.marker==='square') el=svgEl('rect',{x:p.x-r,y:p.y-r,width:r*2,height:r*2,...common});
+    else if(style.marker==='triangle') el=svgEl('polygon',{points:`${p.x},${p.y-r-1} ${p.x-r-1},${p.y+r} ${p.x+r+1},${p.y+r}`,...common});
+    else if(style.marker==='diamond') el=svgEl('polygon',{points:`${p.x},${p.y-r-1} ${p.x-r-1},${p.y} ${p.x},${p.y+r+1} ${p.x+r+1},${p.y}`,...common});
+    else el=svgEl('circle',{cx:p.x,cy:p.y,r,...common}); svg.appendChild(el);
+  }
+  function niceTicks(min,max,count=10){ const span=max-min||1, raw=span/count, pow=Math.pow(10,Math.floor(Math.log10(raw))), n=raw/pow; const step=(n<1.5?1:n<3?2:n<7?5:10)*pow; const start=Math.ceil(min/step)*step; const out=[]; for(let v=start;v<=max+step*.001;v+=step) out.push(Number(v.toPrecision(12))); return out; }
+  function graphMetrics(){
+    const W=1000,left=86,right=38,plotH=220,tierGap=34,groupGap=42,titleBand=58,xBand=58,phaseBand=34;
+    let ymin=Number(els.yMinInput.value),ymax=Number(els.yMaxInput.value);const all=state.parsed.series.flatMap(s=>s.points.map(p=>p.score));
+    if(!Number.isFinite(ymin))ymin=0;if(!Number.isFinite(ymax))ymax=Math.max(100,...all);if(ymax<=ymin)ymax=ymin+1;
+    let cursor=titleBand;const groups=[];
+    state.parsed.graphs.forEach((group,gi)=>{
+      const tierLayouts=[];const groupTop=cursor;
+      group.tiers.forEach((tier,ti)=>{const top=cursor+phaseBand,innerW=W-left-right,innerH=plotH,xmax=Math.max(15,group.maxSessions);const x=s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,y=v=>top+innerH-((v-ymin)/(ymax-ymin))*innerH;tierLayouts.push({tier,top,innerW,innerH,xmax,x,y,m:{left,right,top,bottom:0},W});cursor=top+plotH+(ti<group.tiers.length-1?tierGap:0);});
+      const first=tierLayouts[0],last=tierLayouts[tierLayouts.length-1],xAxisY=last.top+last.innerH;cursor=xAxisY+xBand;groups.push({group,groupTop,tierLayouts,xAxisY,x:first.x,xmax:first.xmax,innerW:first.innerW,bottom:cursor});if(gi<state.parsed.graphs.length-1)cursor+=groupGap;
+    });
+    return {W,H:cursor+18,left,right,ymin,ymax,groups};
+  }
+  function renderGraph(){
+    if(!state.parsed)return;syncPhaseNameInputs();state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);
+    const layout=graphMetrics(),svg=svgEl('svg',{viewBox:`0 0 ${layout.W} ${layout.H}`,role:'img','aria-label':'APA-style single-case graph'});svg.appendChild(svgEl('rect',{x:0,y:0,width:layout.W,height:layout.H,fill:'#fff'}));
+    const title=els.titleInput.value.trim()||'Performance Scores Over Sessions';svg.appendChild(svgEl('text',{x:layout.W/2,y:29,'text-anchor':'middle','font-size':19,'font-weight':700,fill:'#111827'},title));
+    layout.groups.forEach((gl,gi)=>{
+      const group=gl.group;if(state.parsed.graphs.length>1)svg.appendChild(svgEl('text',{x:layout.left,y:gl.groupTop+15,'font-size':12,'font-weight':700,fill:'#4b5563'},`Graph ${gi+1}`));
+      gl.tierLayouts.forEach(tg=>{
+        const tier=tg.tier,refSer=state.parsed.series[tier.seriesIndexes[0]];
+        if(els.gridCheck.checked)niceTicks(layout.ymin,layout.ymax,7).forEach(v=>svg.appendChild(svgEl('line',{x1:layout.left,y1:tg.y(v),x2:layout.left+tg.innerW,y2:tg.y(v),stroke:'#e5e7eb','stroke-width':1})));
+        svg.appendChild(svgEl('line',{x1:layout.left,y1:tg.top,x2:layout.left,y2:tg.top+tg.innerH,stroke:'#111827','stroke-width':1.5}));
+        niceTicks(layout.ymin,layout.ymax,7).forEach(v=>{svg.appendChild(svgEl('line',{x1:layout.left-6,y1:tg.y(v),x2:layout.left,y2:tg.y(v),stroke:'#111827'}));svg.appendChild(svgEl('text',{x:layout.left-10,y:tg.y(v)+4,'text-anchor':'end','font-size':11,fill:'#111827'},fmt(v,2)));});
+        refSer.boundaries.forEach(b=>svg.appendChild(svgEl('line',{x1:tg.x(b),y1:tg.top-8,x2:tg.x(b),y2:tg.top+tg.innerH,stroke:'#8b8f94','stroke-width':1.1})));
+        if(els.phaseLabelsCheck.checked)refSer.phases.forEach((p,i)=>{const c=(p.startSession+p.endSession)/2;svg.appendChild(svgEl('text',{x:tg.x(c),y:tg.top-15,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#374151'},state.parsed.phaseNames[i]||`Phase ${i+1}`));});
+        if(group.tiers.length>1){const labels=tier.seriesIndexes.map(si=>state.parsed.series[si].label).join(' / ');svg.appendChild(svgEl('text',{x:layout.left+8,y:tg.top+18,'font-size':12,'font-weight':700,fill:'#374151'},labels));}
+        state.overlays.filter(o=>tier.seriesIndexes.includes(o.seriesIndex)).forEach(o=>drawOverlay(svg,tg,o));
+        tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyles[si%seriesStyles.length],lw=Number(els.lineWidthInput.value)||2,r=Number(els.markerSizeInput.value)||5;
+          ser.phases.forEach(ph=>{const pts=ser.points.filter(p=>p.phaseIndex===ph.phaseIndex&&!state.ghosted.has(p.key));for(let i=0;i<pts.length-1;i++)if(pts[i+1].session===pts[i].session+1)svg.appendChild(svgEl('line',{x1:tg.x(pts[i].session),y1:tg.y(pts[i].score),x2:tg.x(pts[i+1].session),y2:tg.y(pts[i+1].score),stroke:st.stroke,'stroke-width':lw,fill:'none'}));});
+          ser.points.forEach(p=>{const ghost=state.ghosted.has(p.key);if(ghost&&!els.showGhostCheck.checked)return;drawMarker(svg,{x:tg.x(p.session),y:tg.y(p.score)},st,r,ghost);});
+        });
+        if(els.legendCheck.checked&&tier.seriesIndexes.length>1){let ly=tg.top+18;tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyles[si%seriesStyles.length];svg.appendChild(svgEl('line',{x1:layout.W-202,y1:ly-4,x2:layout.W-178,y2:ly-4,stroke:st.stroke,'stroke-width':2}));drawMarker(svg,{x:layout.W-190,y:ly-4},st,4,false);svg.appendChild(svgEl('text',{x:layout.W-170,y:ly,'font-size':11,fill:'#374151'},ser.label));ly+=18;});}
+      });
+      if(group.tiers.length>1){
+        for(let ti=0;ti<gl.tierLayouts.length-1;ti++){
+          const upper=gl.tierLayouts[ti],lower=gl.tierLayouts[ti+1];
+          const upperSer=state.parsed.series[upper.tier.seriesIndexes[0]],lowerSer=state.parsed.series[lower.tier.seriesIndexes[0]];
+          const n=Math.min(upperSer.boundaries.length,lowerSer.boundaries.length);
+          for(let bi=0;bi<n;bi++){
+            const ub=upperSer.boundaries[bi],lb=lowerSer.boundaries[bi];
+            svg.appendChild(svgEl('line',{
+              x1:upper.x(ub),y1:upper.top+upper.innerH,
+              x2:lower.x(lb),y2:lower.top-8,
+              stroke:'#8b8f94','stroke-width':1.1,fill:'none'
+            }));
+          }
+        }
+      }
+      const last=gl.tierLayouts[gl.tierLayouts.length-1];
+      const xStep=gl.xmax<=20?1:gl.xmax<=40?2:5;
+      // Every multiple-baseline tier gets its own horizontal axis and tick marks.
+      // Session-number labels are printed only on the final (bottom) tier.
+      gl.tierLayouts.forEach((tg,ti)=>{
+        const axisY=tg.top+tg.innerH;
+        const isLast=ti===gl.tierLayouts.length-1;
+        svg.appendChild(svgEl('line',{x1:layout.left,y1:axisY,x2:layout.left+tg.innerW,y2:axisY,stroke:'#111827','stroke-width':1.5}));
+        for(let ss=1;ss<=gl.xmax;ss+=xStep){
+          svg.appendChild(svgEl('line',{x1:tg.x(ss),y1:axisY,x2:tg.x(ss),y2:axisY+6,stroke:'#111827'}));
+          if(isLast)svg.appendChild(svgEl('text',{x:tg.x(ss),y:axisY+23,'text-anchor':'middle','font-size':12,fill:'#111827'},String(ss)));
+        }
+      });
+      svg.appendChild(svgEl('text',{x:layout.left+last.innerW/2,y:gl.xAxisY+47,'text-anchor':'middle','font-size':14,'font-weight':600},els.xLabelInput.value||'Session'));
+      const yCenter=(gl.tierLayouts[0].top+gl.tierLayouts[gl.tierLayouts.length-1].top+gl.tierLayouts[gl.tierLayouts.length-1].innerH)/2;svg.appendChild(svgEl('text',{x:20,y:yCenter,'text-anchor':'middle','font-size':14,'font-weight':600,transform:`rotate(-90 20 ${yCenter})`},els.yLabelInput.value||'Score'));
+      if(gi<layout.groups.length-1)svg.appendChild(svgEl('line',{x1:layout.left,y1:gl.bottom+18,x2:layout.W-layout.right,y2:gl.bottom+18,stroke:'#d1d5db','stroke-width':1}));
+    });
+    els.graphWrap.innerHTML='';els.graphWrap.appendChild(svg);updatePills();
+  }
+  function drawOverlay(svg,g,o){
+    const col=o.color||'#6b4f8a'; const dash=o.dash||'7 5';
+    if(o.type==='hline') svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.y),x2:g.x(o.x2),y2:g.y(o.y),stroke:col,'stroke-width':2,'stroke-dasharray':dash}));
+    if(o.type==='trend'){svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.slope*o.x1+o.intercept),x2:g.x(o.x2),y2:g.y(o.slope*o.x2+o.intercept),stroke:col,'stroke-width':2,'stroke-dasharray':dash}));}
+    if(o.type==='band'){
+      const x1=g.x(o.x1),x2=g.x(o.x2), y1=g.y(o.high), y2=g.y(o.low); svg.appendChild(svgEl('rect',{x:x1,y:Math.min(y1,y2),width:x2-x1,height:Math.abs(y2-y1),fill:col,opacity:.10}));
+      svg.appendChild(svgEl('line',{x1,x2,y1:g.y(o.low),y2:g.y(o.low),stroke:col,'stroke-width':1.4,'stroke-dasharray':'4 4'}));svg.appendChild(svgEl('line',{x1,x2,y1:g.y(o.high),y2:g.y(o.high),stroke:col,'stroke-width':1.4,'stroke-dasharray':'4 4'}));
+    }
+    if(o.type==='trendMargin'){
+      const xs=[o.x1,o.x2]; [-o.margin,o.margin].forEach(offset=>svg.appendChild(svgEl('line',{x1:g.x(xs[0]),y1:g.y(o.slope*xs[0]+o.intercept+offset),x2:g.x(xs[1]),y2:g.y(o.slope*xs[1]+o.intercept+offset),stroke:col,'stroke-width':1.5,'stroke-dasharray':'3 3'})));
+    }
+    if(o.type==='trendBand'){
+      const xs=[o.x1,o.x2]; ['q1','q3'].forEach(k=>svg.appendChild(svgEl('line',{x1:g.x(xs[0]),y1:g.y(o.slope*xs[0]+o.intercept+o[k]),x2:g.x(xs[1]),y2:g.y(o.slope*xs[1]+o.intercept+o[k]),stroke:col,'stroke-width':1.4,'stroke-dasharray':'6 4'})));
+    }
+    if(o.type==='criterion'){
+      svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.y),x2:g.x(o.x2),y2:g.y(o.y),stroke:o.color||'#8a6d1d','stroke-width':1.7,'stroke-dasharray':'5 4'}));
+    }
+  }
+  function updatePills(){
+    const total=state.parsed.series.reduce((n,s)=>n+s.points.length,0), ghost=state.ghosted.size;
+    els.seriesPill.textContent=`${state.parsed.graphs.length} graph${state.parsed.graphs.length===1?'':'s'} · ${state.parsed.series.length} series`; els.phasePill.textContent=`${state.parsed.phaseCount} phases`; els.activePill.textContent=`${total-ghost} active observations`;
+  }
+  function status(msg,kind=''){els.status.textContent=msg;els.status.className=kind;}
+
+  function theilSen(points){
+    const p=points.filter(x=>Number.isFinite(x.session)&&Number.isFinite(x.score)); if(p.length<2)return {slope:0,intercept:p.length?p[0].score:NaN};
+    const slopes=[]; for(let i=0;i<p.length;i++)for(let j=i+1;j<p.length;j++)if(p[j].session!==p[i].session)slopes.push((p[j].score-p[i].score)/(p[j].session-p[i].session));
+    const slope=median(slopes), intercept=median(p.map(q=>q.score-slope*q.session)); return {slope,intercept};
+  }
+  function trendIQRMargin(points,tr){
+    const residuals=points.map(p=>p.score-(tr.slope*p.session+tr.intercept));
+    const q1=quantile(residuals,.25),q3=quantile(residuals,.75),iqr=q3-q1,margin=.30*iqr;
+    return {residuals,q1,q3,iqr,margin};
+  }
+  function classifyAgainstTrendMargin(points,tr,margin,direction){
+    let above=0,below=0,within=0;
+    points.forEach(p=>{const center=tr.slope*p.session+tr.intercept,upper=center+margin,lower=center-margin;if(p.score>upper)above++;else if(p.score<lower)below++;else within++;});
+    const successes=direction==='decrease'?below:above;
+    const opposite=direction==='decrease'?above:below;
+    return {above,below,within,successes,opposite,n:points.length};
+  }
+  function mannWhitney(a,b){
+    const combined=[...a.map(v=>({v,g:0})),...b.map(v=>({v,g:1}))].sort((x,y)=>x.v-y.v); let i=0;
+    while(i<combined.length){let j=i+1;while(j<combined.length&&combined[j].v===combined[i].v)j++;const r=((i+1)+j)/2;for(let k=i;k<j;k++)combined[k].r=r;i=j;}
+    const n1=a.length,n2=b.length, R2=combined.filter(x=>x.g===1).reduce((s,x)=>s+x.r,0),U2=R2-n2*(n2+1)/2,U1=n1*n2-U2,U=Math.min(U1,U2);
+    // tie-corrected normal approximation
+    const N=n1+n2; const counts={}; combined.forEach(x=>counts[x.v]=(counts[x.v]||0)+1); const tieSum=Object.values(counts).reduce((s,t)=>s+(t*t*t-t),0);
+    const mu=n1*n2/2, variance=n1*n2/12*((N+1)-(tieSum/(N*(N-1)||1))); const sd=Math.sqrt(Math.max(variance,0)); const z=sd?(Math.abs(U2-mu)-0.5)/sd:0; const p=2*(1-normalCDF(Math.abs(z))); return {U,U1,U2,z,p};
+  }
+  function erf(x){const sign=x<0?-1:1;x=Math.abs(x);const a1=.254829592,a2=-.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=.3275911,t=1/(1+p*x);const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);return sign*y;}
+  const normalCDF=z=>.5*(1+erf(z/Math.sqrt(2)));
+  function binomAtLeast(k,n,p=.5){let s=0;for(let i=k;i<=n;i++)s+=comb(n,i)*Math.pow(p,i)*Math.pow(1-p,n-i);return s;}
+  function comb(n,k){if(k<0||k>n)return 0;k=Math.min(k,n-k);let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return r;}
+  function pairwiseDominance(a,b,direction){let favorable=0,unfavorable=0,ties=0;b.forEach(y=>a.forEach(x=>{if(y===x)ties++;else if(direction==='decrease'?(y<x):(y>x))favorable++;else unfavorable++;}));const pairs=a.length*b.length;return {favorable,unfavorable,ties,pairs,tau:pairs?(favorable-unfavorable)/pairs:NaN};}
+  function kendallTrend(points,direction){let fav=0,unfav=0,ties=0;for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++){const d=points[j].score-points[i].score;if(d===0)ties++;else if(direction==='decrease'?(d<0):(d>0))fav++;else unfav++;}const pairs=fav+unfav+ties;return {tau:pairs?(fav-unfav)/pairs:0,fav,unfav,ties,pairs};}
+  function tauUTest(a,b,pointsA,direction,mode){
+    const raw=pairwiseDominance(a,b,direction), base=kendallTrend(pointsA,direction); let correct=mode==='yes'||(mode==='auto'&&Math.abs(base.tau)>=.20); let tau=raw.tau-(correct?base.tau:0); tau=clamp(tau,-1,1);
+    const nA=a.length,nB=b.length,se=Math.sqrt((nA+nB+1)/(3*nA*nB)),z=se?tau/se:0,p=2*(1-normalCDF(Math.abs(z))); return {rawTau:raw.tau,baselineTau:base.tau,correct,tau,se,z,p,...raw};
+  }
+
+  function addResult(title,lines,meta=''){
+    state.results.unshift({title,lines,meta}); renderResults();
+  }
+  function renderResults(){
+    if(!state.results.length){els.results.innerHTML='<div class="empty">Run an analysis to see results and interpretation.</div>';return;}
+    els.results.innerHTML=state.results.map(r=>`<div class="result"><h3>${escapeHtml(r.title)}</h3>${r.meta?`<p class="meta">${escapeHtml(r.meta)}</p>`:''}${r.lines.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`).join('');
+  }
+  function phaseSpanFrom(phase,seriesIndex){const ser=state.parsed.series[seriesIndex],p=ser.phases[phase];return {x1:p.startSession,x2:ser.maxSessions};}
+  function parseSeriesFromCommand(command){
+    let s=String(command||'').trim(), explicit=null;
+    // Compact form: series=2 or series=Series Label, terminated by the next comma.
+    const compact=s.match(/(?:^|,\s*)series\s*=\s*([^,]+)/i);
+    if(compact){explicit=compact[1].trim();s=s.replace(compact[0],compact[0].startsWith(',')?'':'').replace(/,\s*,/g,',').replace(/^\s*,|,\s*$/g,'').trim();}
+    else {
+      // Natural language: "series Accuracy" / "series 2" followed by a phase phrase, comma, or end.
+      const natural=s.match(/\bseries\s+(.+?)(?=\s*,|\s+(?:on|for|in|across|phase|phases)\b|$)/i);
+      if(natural){explicit=natural[1].trim();s=(s.slice(0,natural.index)+s.slice(natural.index+natural[0].length)).replace(/\s{2,}/g,' ').trim();}
+    }
+    return {command:s,seriesRef:explicit};
+  }
+  function runAnalysis(command, inheritedSeriesRef=null){
+    if(!state.parsed){status('Load valid data first.','error');return;} const raw=String(command||'').trim(); if(!raw)return;
+    try{
+      const extracted=parseSeriesFromCommand(raw);
+      const natural=normalizeCommand(extracted.command);
+      const seriesRef=extracted.seriesRef!==null?extracted.seriesRef:inheritedSeriesRef;
+      if(natural.multi){ natural.commands.forEach(c=>runAnalysis(c,seriesRef)); return; }
+      const parts=natural.command.split(',').map(s=>s.trim()).filter(Boolean), kind=parts[0].toLowerCase();
+      const si=requireAnalysisSeries(seriesRef), ser=state.parsed.series[si], overlayColor=seriesStyles[si%seriesStyles.length].stroke;
+      if(kind==='ghost'){ghostSession(Number(parts[1]),si);return;}
+      if(kind==='restore'){restoreSession(Number(parts[1]),si);return;}
+      if(['level','iqrlevel','trend','iqrtrend','whiskertrend','whisker-level','whiskerlevel'].includes(kind)){
+        const ph=phaseIndex(parts[1]||'1');if(ph<0)throw new Error('Phase not found.'); const pts=activePoints(ph,si); if(!pts.length)throw new Error(`No active observations in ${ser.label}, ${state.parsed.phaseNames[ph]}.`); const span=phaseSpanFrom(ph,si);
+        if(kind==='level'||kind==='iqrlevel'||kind==='whisker-level'||kind==='whiskerlevel'){
+          const med=median(pts.map(p=>p.score)); state.overlays.push({type:'hline',...span,y:med,color:overlayColor,seriesIndex:si}); let lines=[`Median level = ${fmt(med,3)}.`];
+          if(kind!=='level'){const res=pts.map(p=>p.score-med),q1=quantile(res,.25),q3=quantile(res,.75);state.overlays.push({type:'band',...span,low:med+q1,high:med+q3,color:overlayColor,seriesIndex:si});lines.push(`Residual Q1 = ${fmt(q1,3)}; Q3 = ${fmt(q3,3)}.`);}
+          addResult(`${displayKind(kind)} — ${ser.label} — ${state.parsed.phaseNames[ph]}`,lines,`Series ${si+1}; n=${pts.length}`); renderGraph(); return;
+        }
+        const tr=theilSen(pts), angle=Math.atan(tr.slope)*180/Math.PI, dir=tr.slope>0?'increasing':tr.slope<0?'decreasing':'flat';
+        state.overlays.push({type:'trend',...span,...tr,color:overlayColor,seriesIndex:si});
+        let lines=[`Theil–Sen slope = ${fmt(tr.slope,3)} per session (${dir}); angle = ${fmt(angle,1)}°.`];
+        if(kind==='iqrtrend'||kind==='whiskertrend'){
+          const iqrStats=trendIQRMargin(pts,tr);
+          state.overlays.push({type:'trendBand',...span,...tr,q1:iqrStats.q1,q3:iqrStats.q3,color:overlayColor,seriesIndex:si});
+          lines.push(`Residual Q1 = ${fmt(iqrStats.q1,3)}; Q3 = ${fmt(iqrStats.q3,3)}; residual IQR = ${fmt(iqrStats.iqr,3)}.`);
+        }
+        addResult(`${displayKind(kind)} — ${ser.label} — ${state.parsed.phaseNames[ph]}`,lines,`Series ${si+1}; n=${pts.length}`); renderGraph(); return;
+      }
+      const pA=phaseIndex(parts[1]||'1'),pB=phaseIndex(parts[2]||'2'); if(pA<0||pB<0)throw new Error('Comparison phase not found.'); const a=activeScores(pA,si),b=activeScores(pB,si),dir=state.direction,alpha=Number(els.alphaInput.value)||.05;
+      if(!a.length||!b.length)throw new Error(`Both phases need active observations for ${ser.label}.`);
+      if(kind==='pnd'){
+        const criterion=dir==='decrease'?Math.min(...a):Math.max(...a),qual=b.filter(v=>dir==='decrease'?v<criterion:v>criterion).length,pct=qual/b.length*100;state.overlays.push({type:'criterion',x1:ser.phases[pA].startSession,x2:ser.maxSessions,y:criterion,color:overlayColor,seriesIndex:si});
+        let label=pct>=90?'Effective Treatment':pct>=70?'Questionable Treatment Effectiveness':pct>=50?'Unsuccessful Treatment':'No Difference Between Phases'; addResult(`PND — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`Criterion = ${fmt(criterion,3)}; ${qual}/${b.length} ${dir==='decrease'?'below':'above'} criterion.`,`PND = ${fmt(pct,1)}%. ${label}.`,`Direction used: ${dir==='decrease'?'lower':'higher'} scores indicate improvement.`],`Series ${si+1}`);renderGraph();return;
+      }
+      if(kind==='m-w'||kind==='mw'||kind==='mann-whitney'||kind==='mannwhitney'){
+        const r=mannWhitney(a,b),sig=r.p<alpha; const non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length; addResult(`Mann–Whitney U — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`U = ${fmt(r.U,3)}, n₁ = ${a.length}, n₂ = ${b.length}, p ≈ ${fmt(r.p,4)}, α = ${fmt(alpha,3)}.`,sig?'The phase distributions differ significantly at the selected alpha level.':'The test is not significant at the selected alpha level; this does not demonstrate equivalence.',`Completely non-overlapping treatment observations = ${non}/${b.length} (${fmt(non/b.length*100,1)}%).`],`Series ${si+1}`);return;
+      }
+      if(kind==='trendbinomial'||kind==='trend-binomial'||kind==='trend+0.3iqr'||kind==='binomial'){
+        const ptsA=activePoints(pA,si),tr=theilSen(ptsA),iqrStats=trendIQRMargin(ptsA,tr);
+        state.overlays.push({type:'trend',x1:ser.phases[pA].startSession,x2:ser.maxSessions,...tr,color:overlayColor,seriesIndex:si});
+        state.overlays.push({type:'trendMargin',x1:ser.phases[pA].startSession,x2:ser.maxSessions,...tr,margin:iqrStats.margin,color:overlayColor,seriesIndex:si});
+        const bPts=activePoints(pB,si),cls=classifyAgainstTrendMargin(bPts,tr,iqrStats.margin,dir),p=binomAtLeast(cls.successes,cls.n,.5),sig=p<alpha;
+        addResult(`Trend + 0.30 IQR / binomial — ${ser.label} — ${state.parsed.phaseNames[pA]} → ${state.parsed.phaseNames[pB]}`,[`Reference-phase Theil–Sen trend residual IQR = ${fmt(iqrStats.iqr,3)}; 0.30 × IQR = ${fmt(iqrStats.margin,3)}. Parallel bounds were projected at trend ± ${fmt(iqrStats.margin,3)}.`,`${state.parsed.phaseNames[pB]}: ${cls.above} observations above the upper bound, ${cls.below} below the lower bound, and ${cls.within} within the 0.30-IQR envelope.`,`${cls.successes}/${cls.n} observations (${fmt(cls.successes/cls.n*100,1)}%) crossed the ${dir==='decrease'?'lower':'upper'} boundary in the improvement direction.`,`One-sided binomial p ≈ ${fmt(p,4)} assuming p₀ = .50. ${sig?'Significant':'Not significant'} at α = ${fmt(alpha,3)}.`],`Series ${si+1}`);renderGraph();return;
+      }
+      if(kind==='t-u'||kind==='tu'||kind==='tau-u'||kind==='tauu'){
+        const r=tauUTest(a,b,activePoints(pA,si),dir,els.tauCorrectionSelect.value),sig=r.p<alpha,non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length;
+        addResult(`Tau-U — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`Raw phase contrast τ = ${fmt(r.rawTau,3)}; baseline trend τ = ${fmt(r.baselineTau,3)}.`,`${r.correct?'Baseline-trend correction applied.':'Baseline-trend correction not applied.'} Final Tau-U = ${fmt(r.tau,3)}.`,`Approximate two-sided p = ${fmt(r.p,4)}; ${sig?'significant':'not significant'} at α = ${fmt(alpha,3)}.`,`Direction: ${dir==='decrease'?'decrease':'increase'} = improvement. Separately, completely non-overlapping treatment observations = ${fmt(non/b.length*100,1)}%.`],`Series ${si+1}; nA=${a.length}, nB=${b.length}`);return;
+      }
+      throw new Error('Command not recognized.');
+    }catch(e){status(e.message,'error');}
+  }
+  function displayKind(k){return ({level:'Level',iqrlevel:'IQR Level',trend:'Trend',iqrtrend:'IQR Trend',whiskertrend:'Whisker Trend','whisker-level':'Whisker Level',whiskerlevel:'Whisker Level'})[k]||k;}
+  function normalizeCommand(raw){
+    let s=raw.trim(); const low=s.toLowerCase();
+    // multi-phase natural commands
+    if(/level lines? in (both|all) phases/.test(low)){return {multi:true,commands:Array.from({length:state.parsed.phaseCount},(_,i)=>`Level, ${i+1}`)}};
+    if(/trend lines? in (both|all) phases/.test(low)){return {multi:true,commands:Array.from({length:state.parsed.phaseCount},(_,i)=>`Trend, ${i+1}`)}};
+    let m=low.match(/ghost\s+(?:session\s+)?(\d+)/);if(m)return {command:`ghost, ${m[1]}`};
+    m=low.match(/restore\s+(?:session\s+)?(\d+)/);if(m)return {command:`restore, ${m[1]}`};
+    m=low.match(/(?:tau[- ]?u|t-u).*?(?:phase\s*)?(\d+).*?(?:phase\s*)?(\d+)/);if(m)return {command:`T-U, ${m[1]}, ${m[2]}`};
+    m=low.match(/(?:mann[- ]?whitney|m-w).*?(?:phase\s*)?(\d+).*?(?:phase\s*)?(\d+)/);if(m)return {command:`M-W, ${m[1]}, ${m[2]}`};
+    m=low.match(/pnd.*?(?:phase\s*)?(\d+).*?(?:phase\s*)?(\d+)/);if(m)return {command:`PND, ${m[1]}, ${m[2]}`};
+    m=low.match(/(?:trend\s*(?:\+|plus)?\s*(?:0?\.3|30%?)\s*iqr|0?\.3\s*iqr\s*trend).*?(?:phase\s*)?(\d+).*?(?:phase\s*)?(\d+)/);if(m)return {command:`TrendBinomial, ${m[1]}, ${m[2]}`};
+    m=low.match(/binomial.*?(?:phase\s*)?(\d+).*?(?:phase\s*)?(\d+)/);if(m)return {command:`TrendBinomial, ${m[1]}, ${m[2]}`};
+    m=low.match(/iqr\s*level.*?(?:phase\s*)?(\d+)/);if(m)return {command:`IQRLevel, ${m[1]}`};
+    m=low.match(/iqr\s*trend.*?(?:phase\s*)?(\d+)/);if(m)return {command:`IQRTrend, ${m[1]}`};
+    m=low.match(/(?:level line|level).*?(?:phase\s*)?(\d+)/);if(m)return {command:`Level, ${m[1]}`};
+    m=low.match(/(?:trend line|trend).*?(?:phase\s*)?(\d+)/);if(m)return {command:`Trend, ${m[1]}`};
+    return {command:s};
+  }
+
+  function transformGhostInData(session,makeGhost,seriesIdx){
+    if(!Number.isInteger(session)||session<1)throw new Error('Give a valid session number.');const ser=state.parsed?.series?.[seriesIdx];if(!ser)throw new Error('Series not found.');
+    const lines=els.dataInput.value.split(/\n/),lineIndex=ser.sourceLineIndex,line=lines[lineIndex];if(line===undefined)throw new Error('Source series line not found.');const colon=line.indexOf(':');if(colon<0)throw new Error('Source series line is invalid.');
+    const prefix=line.slice(0,colon+1),raw=line.slice(colon+1);let counter=0,found=false;const rebuilt=raw.split('|').map(chunk=>chunk.split(',').map(token=>{if(!token.trim())return token;counter++;if(counter!==session)return token;found=true;const lead=(token.match(/^\s*/)||[''])[0],trail=(token.match(/\s*$/)||[''])[0];let core=token.trim(),wrapped=core.match(/^\(\s*(.*?)\s*\)$/);core=wrapped?wrapped[1].trim():core;return lead+(makeGhost?`(${core})`:core)+trail;}).join(',')).join('|');
+    if(!found)throw new Error(`Session ${session} not found in ${ser.label}.`);lines[lineIndex]=prefix+rebuilt;els.dataInput.value=lines.join('\n');loadData();
+  }
+  function ghostSession(session,seriesIdx){const label=state.parsed.series[seriesIdx].label;transformGhostInData(session,true,seriesIdx);status(`${label}, Session ${session} is now parenthesized and ghosted in the data stream.`,'ok');}
+  function restoreSession(session,seriesIdx){const label=state.parsed.series[seriesIdx].label;transformGhostInData(session,false,seriesIdx);status(`${label}, Session ${session} has been restored in the data stream.`,'ok');}
+  function recomputeAfterStateChange(msg){state.overlays=[];state.results=[];renderResults();renderGraph();status(`${msg} Analyses cleared so they can be recomputed on the active data.`,'ok');}
+
+  function applyGraphNatural(cmd){
+    if(!state.parsed){status('Load valid data first.','error');return;} const s=cmd.trim(),low=s.toLowerCase(); if(!s)return;
+    let m=low.match(/y[- ]?axis\D*(-?\d+(?:\.\d+)?)\D+(?:to|through|-)\D*(-?\d+(?:\.\d+)?)/);if(m){els.yMinInput.value=m[1];els.yMaxInput.value=m[2];renderGraph();status('Y-axis range updated.','ok');return;}
+    m=s.match(/^title\s*:\s*(.+)$/i);if(m){els.titleInput.value=m[1].trim();renderGraph();return;}
+    m=low.match(/marker(?: size)?\s*(?:to|=)?\s*(\d+(?:\.\d+)?)/);if(m){els.markerSizeInput.value=clamp(Number(m[1]),2,12);renderGraph();return;}
+    if(/hide (?:the )?grid/.test(low)){els.gridCheck.checked=false;renderGraph();return;} if(/show (?:the )?grid/.test(low)){els.gridCheck.checked=true;renderGraph();return;}
+    if(/hide phase labels/.test(low)){els.phaseLabelsCheck.checked=false;renderGraph();return;} if(/show phase labels/.test(low)){els.phaseLabelsCheck.checked=true;renderGraph();return;}
+    const norm=normalizeCommand(s); if(norm.multi||/^(level|trend|trendbinomial|iqr|ghost|restore|pnd|m-w|t-u|tau|binomial)/i.test(norm.command)){runAnalysis(s);return;}
+    status('Graph command not recognized. Try an example shown below the command box.','error');
+  }
+
+  function loadData(){
+    try{syncPhaseNameInputs(); const priorSeriesLabel=els.analysisSeriesSelect?.selectedOptions[0]?.dataset?.label||''; state.parsed=parseData(els.dataInput.value); state.sourceText=els.dataInput.value; state.direction=els.directionSelect.value; state.ghosted=new Set(state.parsed.ghostedKeys||[]); state.overlays=[];state.results=[];renderResults(); updateAnalysisSeriesOptions(priorSeriesLabel);
+      // automatic y max expansion only if default range would clip
+      const vals=state.parsed.series.flatMap(s=>s.points.map(p=>p.score));const max=Math.max(...vals),min=Math.min(...vals);if(max>Number(els.yMaxInput.value))els.yMaxInput.value=Math.ceil(max*1.1);if(min<Number(els.yMinInput.value))els.yMinInput.value=Math.floor(min);
+      renderGraph();status('Data loaded. Would you like to adjust the graph or perform a visual or quantitative analysis?','ok');
+    }catch(e){status(e.message,'error');}
+  }
+  function reset(){
+    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.yLabelInput.value='Score';els.yMinInput.value=0;els.yMaxInput.value=100;els.markerSizeInput.value=5;els.lineWidthInput.value=2;els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';state.ghosted.clear();state.overlays=[];state.results=[];loadData();
+  }
+  function collectState(){
+    const modules=[...document.querySelectorAll('details.module')];
+    return {
+      format:'SCGraph2-state',
+      version:3,
+      savedAt:new Date().toISOString(),
+      data:{
+        source:els.dataInput.value,
+        phaseNames:els.phaseNamesData.value,
+        direction:els.directionSelect.value,
+        notes:els.notesInput.value
+      },
+      graph:{
+        title:els.titleInput.value,
+        xLabel:els.xLabelInput.value,
+        yLabel:els.yLabelInput.value,
+        yMin:els.yMinInput.value,
+        yMax:els.yMaxInput.value,
+        markerSize:els.markerSizeInput.value,
+        lineWidth:els.lineWidthInput.value,
+        phaseLabels:els.phaseLabelInput.value,
+        grid:els.gridCheck.checked,
+        legend:els.legendCheck.checked,
+        showPhaseLabels:els.phaseLabelsCheck.checked,
+        showGhosts:els.showGhostCheck.checked,
+        graphCommand:els.graphCommand.value
+      },
+      analysis:{
+        command:els.analysisCommand.value,
+        selectedSeriesIndex:selectedAnalysisSeries(),
+        selectedSeriesLabel:selectedAnalysisSeries()>=0&&state.parsed?state.parsed.series[selectedAnalysisSeries()].label:'',
+        alpha:els.alphaInput.value,
+        tauCorrection:els.tauCorrectionSelect.value,
+        overlays:JSON.parse(JSON.stringify(state.overlays||[])),
+        results:JSON.parse(JSON.stringify(state.results||[]))
+      },
+      interface:{modulesOpenByName:Object.fromEntries(modules.map(d=>[d.dataset.module||d.querySelector('summary')?.textContent.trim()||'',d.open])),modulesOpen:modules.map(d=>d.open)}
+    };
+  }
+  function normalizedJsonFilename(name){
+    let clean=String(name||'').trim().replace(/[\\/:*?"<>|]+/g,'_');
+    if(!clean)clean='SCGraph2-session.json';
+    if(!/\.json$/i.test(clean))clean+='.json';
+    return clean;
+  }
+  function openSaveStateDialog(){
+    try{
+      if(!state.parsed)throw new Error('Load valid data before saving the state.');
+      const dlg=$('saveStateDialog'),input=$('saveStateFilename');
+      if(!input.value.trim())input.value='SCGraph2-session.json';
+      if(typeof dlg.showModal==='function')dlg.showModal();else dlg.setAttribute('open','');
+      setTimeout(()=>{input.focus();input.select();},0);
+    }catch(e){status(e.message,'error');}
+  }
+  function saveStateJson(filename){
+    try{
+      if(!state.parsed)throw new Error('Load valid data before saving the state.');
+      const name=normalizedJsonFilename(filename);
+      const payload=collectState();
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      downloadBlob(blob,name);
+      const dlg=$('saveStateDialog');if(dlg.open){dlg.close?dlg.close():dlg.removeAttribute('open');}
+      $('saveStateFilename').value=name;
+      status(`SCGraph2 state saved as ${name}.`,'ok');
+    }catch(e){status(e.message,'error');}
+  }
+  function applySavedState(payload){
+    if(!payload||typeof payload!=='object')throw new Error('The selected file does not contain a valid SCGraph2 state.');
+    if(payload.format!=='SCGraph2-state')throw new Error('This JSON file is not an SCGraph2 saved-state file.');
+    if(!Number.isFinite(Number(payload.version))||Number(payload.version)<1)throw new Error('The SCGraph2 state version is missing or invalid.');
+    const d=payload.data||{},g=payload.graph||{},a=payload.analysis||{},ui=payload.interface||{};
+    if(typeof d.source!=='string'||!d.source.trim())throw new Error('The saved state does not contain valid source data.');
+    els.dataInput.value=d.source;
+    els.phaseNamesData.value=typeof d.phaseNames==='string'?d.phaseNames:'';
+    els.phaseLabelInput.value=typeof g.phaseLabels==='string'?g.phaseLabels:els.phaseNamesData.value;
+    els.directionSelect.value=d.direction==='decrease'?'decrease':'increase';
+    els.notesInput.value=typeof d.notes==='string'?d.notes:'';
+    els.titleInput.value=typeof g.title==='string'?g.title:'Performance Scores Over Sessions';
+    els.xLabelInput.value=typeof g.xLabel==='string'?g.xLabel:'Session';
+    els.yLabelInput.value=typeof g.yLabel==='string'?g.yLabel:'Score';
+    els.yMinInput.value=g.yMin!==undefined?g.yMin:0;
+    els.yMaxInput.value=g.yMax!==undefined?g.yMax:100;
+    els.markerSizeInput.value=g.markerSize!==undefined?g.markerSize:5;
+    els.lineWidthInput.value=g.lineWidth!==undefined?g.lineWidth:2;
+    els.gridCheck.checked=!!g.grid;
+    els.legendCheck.checked=g.legend!==false;
+    els.phaseLabelsCheck.checked=g.showPhaseLabels!==false;
+    els.showGhostCheck.checked=g.showGhosts!==false;
+    els.graphCommand.value=typeof g.graphCommand==='string'?g.graphCommand:'';
+    els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';
+    els.alphaInput.value=a.alpha!==undefined?a.alpha:.05;
+    els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';
+    // Reparse and validate the authoritative data stream first. loadData intentionally clears derived analyses.
+    loadData();
+    if(!state.parsed)throw new Error('The saved data could not be restored.');
+    let selected=-1;
+    if(typeof a.selectedSeriesLabel==='string'&&a.selectedSeriesLabel){selected=state.parsed.series.findIndex(s=>s.label===a.selectedSeriesLabel);}
+    if(selected<0&&Number.isInteger(Number(a.selectedSeriesIndex))){const n=Number(a.selectedSeriesIndex);if(n>=0&&n<state.parsed.series.length)selected=n;}
+    if(state.parsed.series.length===1)selected=0;
+    if(selected>=0)els.analysisSeriesSelect.value=String(selected);
+    else if(state.parsed.series.length>1)els.analysisSeriesSelect.value='';
+    const overlays=Array.isArray(a.overlays)?a.overlays:[];
+    state.overlays=overlays.filter(o=>o&&typeof o==='object'&&Number.isInteger(Number(o.seriesIndex))&&Number(o.seriesIndex)>=0&&Number(o.seriesIndex)<state.parsed.series.length);
+    state.results=Array.isArray(a.results)?a.results.filter(r=>r&&typeof r==='object'&&typeof r.title==='string'&&Array.isArray(r.lines)):[];
+    state.direction=els.directionSelect.value;
+    renderResults();renderGraph();
+    const moduleEls=[...document.querySelectorAll('details.module')];
+    if(ui.modulesOpenByName&&typeof ui.modulesOpenByName==='object'){
+      moduleEls.forEach(d=>{const key=d.dataset.module;if(key&&Object.prototype.hasOwnProperty.call(ui.modulesOpenByName,key))d.open=!!ui.modulesOpenByName[key];});
+    }else if(Array.isArray(ui.modulesOpen)){
+      // SCGraph2 state versions 1–2 stored accordion state by the former DOM order:
+      // Graph, Graph Controls, Data Input, Analysis. Restore by semantic module key.
+      const legacyKeys=['graph','controls','data','analysis'];
+      legacyKeys.forEach((key,i)=>{const d=moduleEls.find(el=>el.dataset.module===key);if(d&&i<ui.modulesOpen.length)d.open=!!ui.modulesOpen[i];});
+    }
+    status(`SCGraph2 state restored${payload.savedAt?` from ${new Date(payload.savedAt).toLocaleString()}`:''}.`,'ok');
+  }
+  function loadStateJsonFile(file){
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{try{const payload=JSON.parse(String(reader.result||''));applySavedState(payload);}catch(e){status(`Could not load state: ${e.message}`,'error');}};
+    reader.onerror=()=>status('Could not read the selected JSON file.','error');
+    reader.readAsText(file);
+  }
+  function exportSvg(){const svg=els.graphWrap.querySelector('svg');if(!svg)return;const blob=new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'});downloadBlob(blob,'SCGraph2.svg');}
+  function exportPng(){const svg=els.graphWrap.querySelector('svg');if(!svg)return;const vb=(svg.getAttribute('viewBox')||'0 0 1000 600').split(/\s+/).map(Number),ratio=(vb[3]||600)/(vb[2]||1000),xml=new XMLSerializer().serializeToString(svg),url=URL.createObjectURL(new Blob([xml],{type:'image/svg+xml'})),img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=2000;c.height=Math.max(1200,Math.round(2000*ratio));const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);c.toBlob(b=>downloadBlob(b,'SCGraph2.png'),'image/png');};img.src=url;}
+  function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
+
+  $('renderBtn').addEventListener('click',loadData);$('applyGraphBtn').addEventListener('click',()=>{state.direction=els.directionSelect.value;renderGraph();status('Graph controls applied.','ok');});
+  $('graphCommandBtn').addEventListener('click',()=>applyGraphNatural(els.graphCommand.value)); els.graphCommand.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyGraphNatural(els.graphCommand.value);}});
+  $('runAnalysisBtn').addEventListener('click',()=>runAnalysis(els.analysisCommand.value));els.analysisCommand.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runAnalysis(els.analysisCommand.value);}});
+  document.querySelectorAll('[data-analysis]').forEach(b=>b.addEventListener('click',()=>{els.analysisCommand.value=b.dataset.analysis;runAnalysis(b.dataset.analysis);}));
+  els.analysisSeriesSelect.addEventListener('change',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();const si=selectedAnalysisSeries();status(si>=0?`Analysis series set to ${state.parsed.series[si].label}.`:'Choose the series you want to analyze.','ok');});
+  $('clearOverlaysBtn').addEventListener('click',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();status('Analysis overlays cleared.','ok');});
+  $('restoreGhostsBtn').addEventListener('click',()=>{els.dataInput.value=els.dataInput.value.replace(/\(\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*\)/g,'$1');loadData();status('All parenthesized observations restored in the data stream.','ok');});
+  const helpDialog=$('helpDialog');
+  $('helpBtn').addEventListener('click',()=>{if(typeof helpDialog.showModal==='function')helpDialog.showModal();else helpDialog.setAttribute('open','');});
+  $('closeHelpBtn').addEventListener('click',()=>helpDialog.close?helpDialog.close():helpDialog.removeAttribute('open'));
+  helpDialog.addEventListener('click',e=>{if(e.target===helpDialog&&helpDialog.close)helpDialog.close();});
+  const saveStateDialog=$('saveStateDialog'),saveStateFilename=$('saveStateFilename');
+  $('saveStateBtn').addEventListener('click',openSaveStateDialog);
+  $('confirmSaveStateBtn').addEventListener('click',()=>saveStateJson(saveStateFilename.value));
+  $('cancelSaveStateBtn').addEventListener('click',()=>saveStateDialog.close?saveStateDialog.close():saveStateDialog.removeAttribute('open'));
+  $('closeSaveStateBtn').addEventListener('click',()=>saveStateDialog.close?saveStateDialog.close():saveStateDialog.removeAttribute('open'));
+  saveStateFilename.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();saveStateJson(saveStateFilename.value);}else if(e.key==='Escape'&&saveStateDialog.open){saveStateDialog.close();}});
+  saveStateDialog.addEventListener('click',e=>{if(e.target===saveStateDialog&&saveStateDialog.close)saveStateDialog.close();});
+  $('loadStateBtn').addEventListener('click',()=>{$('loadStateInput').value='';$('loadStateInput').click();});
+  $('loadStateInput').addEventListener('change',e=>loadStateJsonFile(e.target.files&&e.target.files[0]));
+  $('exportSvgBtn').addEventListener('click',exportSvg);$('exportPngBtn').addEventListener('click',exportPng);$('resetBtn').addEventListener('click',reset);
+  [els.titleInput,els.xLabelInput,els.yLabelInput,els.yMinInput,els.yMaxInput,els.markerSizeInput,els.lineWidthInput,els.phaseLabelInput,els.gridCheck,els.legendCheck,els.phaseLabelsCheck,els.showGhostCheck].forEach(el=>el.addEventListener('change',renderGraph));
+  els.directionSelect.addEventListener('change',()=>{state.direction=els.directionSelect.value;}); els.phaseNamesData.addEventListener('change',()=>{els.phaseLabelInput.value=els.phaseNamesData.value;renderGraph();});
+  window.addEventListener('resize',()=>{}); loadData();
+})();
+</script>
+</body>
+</html>
