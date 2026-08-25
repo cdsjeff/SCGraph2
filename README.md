@@ -21,3 +21,6 @@ SCGraph2 is self-contained and does not require a build step.
 ## Panel scrolling
 
 Each accordion module uses its own content-area scroll container when its contents exceed the available panel height.
+
+## Goal lines
+SCGraph2 supports phase-specific and multi-phase horizontal goal lines. Choose a series/tier, start phase, through phase, and Y-axis goal value in Graph Controls. Goal lines are preserved in saved JSON state files.

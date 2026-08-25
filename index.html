@@ -148,12 +148,23 @@
           <label><input type="checkbox" id="showGhostCheck" checked> Show ghosted points</label>
         </div>
         <div class="divider"></div>
+        <div class="subhead">Goal Lines</div>
+        <div class="field"><label for="goalSeriesSelect">Series / multiple-baseline tier</label><select id="goalSeriesSelect"></select></div>
+        <div class="grid3">
+          <div class="field"><label for="goalStartPhaseSelect">Start phase</label><select id="goalStartPhaseSelect"></select></div>
+          <div class="field"><label for="goalEndPhaseSelect">Through phase</label><select id="goalEndPhaseSelect"></select></div>
+          <div class="field"><label for="goalValueInput">Goal value (Y)</label><input id="goalValueInput" type="number" step="any" placeholder="e.g., 80"></div>
+        </div>
+        <div class="row"><button id="addGoalLineBtn" type="button">Add / update goal line</button><button id="clearGoalLinesBtn" type="button">Clear goal lines</button></div>
+        <div class="hint">A goal line is horizontal. Choose the series/tier, the first and last phase it spans, and its vertical-axis value. Use the same start/through phase to place a goal in one phase only.</div>
+        <div id="goalLineList" class="footer-note" style="margin-top:8px">No goal lines.</div>
+        <div class="divider"></div>
         <div class="command-box">
           <label for="graphCommand">Natural-language graph command</label>
           <div class="row grow"><input id="graphCommand" type="text" placeholder="e.g., place level lines in both phases"><button id="graphCommandBtn" class="primary">Apply</button></div>
-          <div class="hint">Try: “set y-axis 0 to 20”, “hide gridlines”, “title: Reading Fluency”, or “place trend lines in both phases”.</div>
+          <div class="hint">Try: “set y-axis 0 to 20”, “hide gridlines”, “title: Reading Fluency”, “goal line phase 2 at 80”, or “place trend lines in both phases”.</div>
         </div>
-        <div class="row" style="margin-top:10px"><button id="applyGraphBtn">Apply controls</button><button id="clearOverlaysBtn">Clear overlays</button></div>
+        <div class="row" style="margin-top:10px"><button id="applyGraphBtn">Apply controls</button><button id="clearOverlaysBtn">Clear analysis overlays</button></div>
       </div>
     </details>
 
@@ -239,6 +250,11 @@ Student C: 1,2,2,3,3,4,4|7,8,9</div>
       <li>Phase names can be entered in the Data Input or Graph Controls module.</li>
     </ul>
 
+    <h3>Goal lines</h3>
+    <p>A <strong>goal line</strong> is a horizontal criterion line placed at a user-defined Y value. In <strong>Graph Controls → Goal Lines</strong>, choose the series or multiple-baseline tier, the start phase, the last phase the line should span, and the goal value. Set start and through phase to the same phase for a phase-specific goal, or choose a later through phase to extend one goal across multiple phases. Goal lines are graph settings rather than analysis overlays, so clearing or recomputing analyses does not remove them. Goal lines are included in saved JSON state files.</p>
+    <div class="help-example">Goal, 1, 80<br>Goal, 1, 2, 80</div>
+    <p>The compact commands above place a goal at Y = 80 in Phase 1 only, or from Phase 1 through Phase 2, respectively, using the series/tier selected in Graph Controls.</p>
+
     <h3>Visual analysis</h3>
     <p>Use the Analysis module or type commands such as:</p>
     <div class="help-example">Level, 1
@@ -261,6 +277,7 @@ T-U, 1, 2</div>
 place trend lines in both phases
 set y-axis 0 to 20
 hide gridlines
+goal line phase 2 at 80
 title: Reading Fluency</div>
     <p>Graph changes modify only the requested display feature. Analysis overlays can be cleared without altering the data.</p>
 
@@ -296,10 +313,11 @@ title: Reading Fluency</div>
     titleInput:$('titleInput'), xLabelInput:$('xLabelInput'), yLabelInput:$('yLabelInput'), yMinInput:$('yMinInput'), yMaxInput:$('yMaxInput'),
     markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
     phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisSeriesSelect:$('analysisSeriesSelect'), alphaInput:$('alphaInput'),
+    goalSeriesSelect:$('goalSeriesSelect'), goalStartPhaseSelect:$('goalStartPhaseSelect'), goalEndPhaseSelect:$('goalEndPhaseSelect'), goalValueInput:$('goalValueInput'), goalLineList:$('goalLineList'),
     tauCorrectionSelect:$('tauCorrectionSelect'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill')
   };
 
-  const state = { parsed:null, ghosted:new Set(), overlays:[], results:[], sourceText:'', direction:'increase' };
+  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], results:[], sourceText:'', direction:'increase' };
   const seriesStyles = [
     {stroke:'#111827', marker:'circle'}, {stroke:'#4b5563', marker:'square'}, {stroke:'#7c2d12', marker:'triangle'}, {stroke:'#1f4e79', marker:'diamond'}
   ];
@@ -404,6 +422,68 @@ title: Reading Fluency</div>
     const match=state.parsed.series.findIndex(x=>x.label===prev); if(state.parsed.series.length===1)els.analysisSeriesSelect.value='0';else if(match>=0)els.analysisSeriesSelect.value=String(match);else els.analysisSeriesSelect.value=''; els.analysisSeriesSelect.disabled=state.parsed.series.length===1;
   }
 
+  function updateGoalControls(preserveSeriesLabel=''){
+    if(!state.parsed||!els.goalSeriesSelect)return;
+    const prev=preserveSeriesLabel || (els.goalSeriesSelect.selectedOptions[0]?.dataset?.label||'');
+    els.goalSeriesSelect.innerHTML='';
+    state.parsed.series.forEach((ser,i)=>{
+      const g=state.parsed.graphs[ser.graphIndex], tierText=g.tiers.length>1?` · Tier ${ser.tierIndex+1}`:'';
+      const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${ser.label} · Graph ${ser.graphIndex+1}${tierText}`;o.dataset.label=ser.label;els.goalSeriesSelect.appendChild(o);
+    });
+    let match=state.parsed.series.findIndex(x=>x.label===prev); if(match<0)match=0; els.goalSeriesSelect.value=String(match);
+    const fillPhaseSelect=(select)=>{select.innerHTML='';state.parsed.phaseNames.forEach((name,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${name||`Phase ${i+1}`}`;select.appendChild(o);});};
+    fillPhaseSelect(els.goalStartPhaseSelect);fillPhaseSelect(els.goalEndPhaseSelect);
+    els.goalStartPhaseSelect.value='0';els.goalEndPhaseSelect.value='0';
+    renderGoalLineList();
+  }
+  function normalizeGoalLinesAfterParse(previous=[]){
+    if(!state.parsed)return [];
+    return previous.map(g=>{
+      let si=-1;
+      if(typeof g.seriesLabel==='string'&&g.seriesLabel)si=state.parsed.series.findIndex(s=>s.label===g.seriesLabel);
+      if(si<0&&Number.isInteger(Number(g.seriesIndex))&&Number(g.seriesIndex)>=0&&Number(g.seriesIndex)<state.parsed.series.length)si=Number(g.seriesIndex);
+      if(si<0)return null;
+      const sp=Number(g.startPhase),ep=Number(g.endPhase),y=Number(g.y);
+      if(!Number.isInteger(sp)||!Number.isInteger(ep)||sp<0||ep<sp||ep>=state.parsed.phaseCount||!Number.isFinite(y))return null;
+      return {id:g.id||`goal-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,seriesIndex:si,seriesLabel:state.parsed.series[si].label,startPhase:sp,endPhase:ep,y};
+    }).filter(Boolean);
+  }
+  function goalSessionSpan(goal){
+    const ser=state.parsed.series[goal.seriesIndex],sp=ser.phases[goal.startPhase],ep=ser.phases[goal.endPhase];
+    const x1=sp.startSession<=1?1:sp.startSession-.5;
+    const x2=ep.endSession>=ser.maxSessions?ser.maxSessions:ep.endSession+.5;
+    return {x1,x2};
+  }
+  function addOrUpdateGoalLine(){
+    try{
+      if(!state.parsed)throw new Error('Load valid data first.');
+      const si=Number(els.goalSeriesSelect.value),sp=Number(els.goalStartPhaseSelect.value),ep=Number(els.goalEndPhaseSelect.value),y=Number(els.goalValueInput.value);
+      if(!Number.isInteger(si)||si<0||si>=state.parsed.series.length)throw new Error('Choose the series or tier for the goal line.');
+      if(!Number.isInteger(sp)||!Number.isInteger(ep)||sp<0||ep<sp||ep>=state.parsed.phaseCount)throw new Error('The through phase must be the same as or later than the start phase.');
+      if(!Number.isFinite(y))throw new Error('Enter a numerical goal value on the Y axis.');
+      const existing=state.goalLines.find(g=>g.seriesIndex===si&&g.startPhase===sp&&g.endPhase===ep);
+      if(existing){existing.y=y;existing.seriesLabel=state.parsed.series[si].label;}
+      else state.goalLines.push({id:`goal-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,seriesIndex:si,seriesLabel:state.parsed.series[si].label,startPhase:sp,endPhase:ep,y});
+      renderGoalLineList();renderGraph();
+      const names=state.parsed.phaseNames;status(`Goal line ${existing?'updated':'added'} for ${state.parsed.series[si].label}: ${names[sp]}${ep>sp?` through ${names[ep]}`:''} at Y = ${fmt(y,3)}.`,'ok');
+    }catch(e){status(e.message,'error');}
+  }
+  function renderGoalLineList(){
+    if(!els.goalLineList)return;
+    if(!state.goalLines.length){els.goalLineList.innerHTML='No goal lines.';return;}
+    els.goalLineList.innerHTML=state.goalLines.map(g=>{
+      const ser=state.parsed?.series?.[g.seriesIndex],names=state.parsed?.phaseNames||[];
+      if(!ser)return '';
+      const phaseText=g.startPhase===g.endPhase?(names[g.startPhase]||`Phase ${g.startPhase+1}`):`${names[g.startPhase]||`Phase ${g.startPhase+1}`} → ${names[g.endPhase]||`Phase ${g.endPhase+1}`}`;
+      return `<div style="display:flex;align-items:center;gap:8px;justify-content:space-between;margin:5px 0"><span><strong>${escapeHtml(ser.label)}</strong> · ${escapeHtml(phaseText)} · Y = ${escapeHtml(fmt(g.y,3))}</span><button type="button" class="small secondary" data-remove-goal="${escapeHtml(g.id)}">Remove</button></div>`;
+    }).join('');
+  }
+  function drawGoalLine(svg,g,goal){
+    const span=goalSessionSpan(goal),st=seriesStyles[goal.seriesIndex%seriesStyles.length],y=g.y(goal.y),x1=g.x(span.x1),x2=g.x(span.x2);
+    svg.appendChild(svgEl('line',{x1,y1:y,x2,y2:y,stroke:st.stroke,'stroke-width':1.8,'stroke-dasharray':'12 5'}));
+    svg.appendChild(svgEl('text',{x:x1+6,y:y-5,'font-size':11,'font-weight':600,fill:st.stroke},`Goal ${fmt(goal.y,2)}`));
+  }
+
   function svgEl(tag,attrs={},text=''){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag); Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v)); if(text!=='' ) e.textContent=text; return e; }
   function drawMarker(svg,p,style,r,ghost=false){
     const common={stroke:ghost?'#9ca3af':style.stroke,'stroke-width':2,fill:'#fff',opacity:ghost?.6:1}; let el;
@@ -439,6 +519,7 @@ title: Reading Fluency</div>
         refSer.boundaries.forEach(b=>svg.appendChild(svgEl('line',{x1:tg.x(b),y1:tg.top-8,x2:tg.x(b),y2:tg.top+tg.innerH,stroke:'#8b8f94','stroke-width':1.1})));
         if(els.phaseLabelsCheck.checked)refSer.phases.forEach((p,i)=>{const c=(p.startSession+p.endSession)/2;svg.appendChild(svgEl('text',{x:tg.x(c),y:tg.top-15,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#374151'},state.parsed.phaseNames[i]||`Phase ${i+1}`));});
         if(group.tiers.length>1){const labels=tier.seriesIndexes.map(si=>state.parsed.series[si].label).join(' / ');svg.appendChild(svgEl('text',{x:layout.left+8,y:tg.top+18,'font-size':12,'font-weight':700,fill:'#374151'},labels));}
+        state.goalLines.filter(o=>tier.seriesIndexes.includes(o.seriesIndex)).forEach(o=>drawGoalLine(svg,tg,o));
         state.overlays.filter(o=>tier.seriesIndexes.includes(o.seriesIndex)).forEach(o=>drawOverlay(svg,tg,o));
         tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyles[si%seriesStyles.length],lw=Number(els.lineWidthInput.value)||2,r=Number(els.markerSizeInput.value)||5;
           ser.phases.forEach(ph=>{const pts=ser.points.filter(p=>p.phaseIndex===ph.phaseIndex&&!state.ghosted.has(p.key));for(let i=0;i<pts.length-1;i++)if(pts[i+1].session===pts[i].session+1)svg.appendChild(svgEl('line',{x1:tg.x(pts[i].session),y1:tg.y(pts[i].score),x2:tg.x(pts[i+1].session),y2:tg.y(pts[i+1].score),stroke:st.stroke,'stroke-width':lw,fill:'none'}));});
@@ -648,25 +729,37 @@ title: Reading Fluency</div>
     m=low.match(/marker(?: size)?\s*(?:to|=)?\s*(\d+(?:\.\d+)?)/);if(m){els.markerSizeInput.value=clamp(Number(m[1]),2,12);renderGraph();return;}
     if(/hide (?:the )?grid/.test(low)){els.gridCheck.checked=false;renderGraph();return;} if(/show (?:the )?grid/.test(low)){els.gridCheck.checked=true;renderGraph();return;}
     if(/hide phase labels/.test(low)){els.phaseLabelsCheck.checked=false;renderGraph();return;} if(/show phase labels/.test(low)){els.phaseLabelsCheck.checked=true;renderGraph();return;}
+    // Goal line commands: "goal, 1, 80", "goal, 1, 2, 80", or natural language "goal line phases 1 to 2 at 80".
+    let goalMatch=s.match(/^goal\s*,\s*(\d+)\s*,\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*$/i);
+    let goalRange=s.match(/^goal\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))\s*$/i);
+    let naturalGoal=low.match(/goal\s*line.*?phases?\s*(\d+)(?:\s*(?:to|through|-)\s*(\d+))?.*?(?:at|=|y\s*=?)\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+))/i);
+    if(goalMatch||goalRange||naturalGoal){
+      const si=Number(els.goalSeriesSelect.value);if(!Number.isInteger(si)||si<0)throw new Error('Choose the series or tier for the goal line.');
+      let sp,ep,y;
+      if(goalRange){sp=Number(goalRange[1])-1;ep=Number(goalRange[2])-1;y=Number(goalRange[3]);}
+      else if(goalMatch){sp=Number(goalMatch[1])-1;ep=sp;y=Number(goalMatch[2]);}
+      else {sp=Number(naturalGoal[1])-1;ep=naturalGoal[2]?Number(naturalGoal[2])-1:sp;y=Number(naturalGoal[3]);}
+      els.goalStartPhaseSelect.value=String(sp);els.goalEndPhaseSelect.value=String(ep);els.goalValueInput.value=String(y);addOrUpdateGoalLine();return;
+    }
     const norm=normalizeCommand(s); if(norm.multi||/^(level|trend|trendbinomial|iqr|ghost|restore|pnd|m-w|t-u|tau|binomial)/i.test(norm.command)){runAnalysis(s);return;}
     status('Graph command not recognized. Try an example shown below the command box.','error');
   }
 
   function loadData(){
-    try{syncPhaseNameInputs(); const priorSeriesLabel=els.analysisSeriesSelect?.selectedOptions[0]?.dataset?.label||''; state.parsed=parseData(els.dataInput.value); state.sourceText=els.dataInput.value; state.direction=els.directionSelect.value; state.ghosted=new Set(state.parsed.ghostedKeys||[]); state.overlays=[];state.results=[];renderResults(); updateAnalysisSeriesOptions(priorSeriesLabel);
+    try{syncPhaseNameInputs(); const priorSeriesLabel=els.analysisSeriesSelect?.selectedOptions[0]?.dataset?.label||''; const priorGoalSeriesLabel=els.goalSeriesSelect?.selectedOptions[0]?.dataset?.label||''; const priorGoalLines=JSON.parse(JSON.stringify(state.goalLines||[])); state.parsed=parseData(els.dataInput.value); state.sourceText=els.dataInput.value; state.direction=els.directionSelect.value; state.ghosted=new Set(state.parsed.ghostedKeys||[]); state.goalLines=normalizeGoalLinesAfterParse(priorGoalLines); state.overlays=[];state.results=[];renderResults(); updateAnalysisSeriesOptions(priorSeriesLabel); updateGoalControls(priorGoalSeriesLabel);
       // automatic y max expansion only if default range would clip
       const vals=state.parsed.series.flatMap(s=>s.points.map(p=>p.score));const max=Math.max(...vals),min=Math.min(...vals);if(max>Number(els.yMaxInput.value))els.yMaxInput.value=Math.ceil(max*1.1);if(min<Number(els.yMinInput.value))els.yMinInput.value=Math.floor(min);
       renderGraph();status('Data loaded. Would you like to adjust the graph or perform a visual or quantitative analysis?','ok');
     }catch(e){status(e.message,'error');}
   }
   function reset(){
-    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.yLabelInput.value='Score';els.yMinInput.value=0;els.yMaxInput.value=100;els.markerSizeInput.value=5;els.lineWidthInput.value=2;els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';state.ghosted.clear();state.overlays=[];state.results=[];loadData();
+    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.yLabelInput.value='Score';els.yMinInput.value=0;els.yMaxInput.value=100;els.markerSizeInput.value=5;els.lineWidthInput.value=2;els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';state.ghosted.clear();state.overlays=[];state.goalLines=[];state.results=[];loadData();
   }
   function collectState(){
     const modules=[...document.querySelectorAll('details.module')];
     return {
       format:'SCGraph2-state',
-      version:3,
+      version:4,
       savedAt:new Date().toISOString(),
       data:{
         source:els.dataInput.value,
@@ -687,7 +780,8 @@ title: Reading Fluency</div>
         legend:els.legendCheck.checked,
         showPhaseLabels:els.phaseLabelsCheck.checked,
         showGhosts:els.showGhostCheck.checked,
-        graphCommand:els.graphCommand.value
+        graphCommand:els.graphCommand.value,
+        goalLines:JSON.parse(JSON.stringify(state.goalLines||[]))
       },
       analysis:{
         command:els.analysisCommand.value,
@@ -757,6 +851,8 @@ title: Reading Fluency</div>
     // Reparse and validate the authoritative data stream first. loadData intentionally clears derived analyses.
     loadData();
     if(!state.parsed)throw new Error('The saved data could not be restored.');
+    state.goalLines=normalizeGoalLinesAfterParse(Array.isArray(g.goalLines)?g.goalLines:[]);
+    renderGoalLineList();
     let selected=-1;
     if(typeof a.selectedSeriesLabel==='string'&&a.selectedSeriesLabel){selected=state.parsed.series.findIndex(s=>s.label===a.selectedSeriesLabel);}
     if(selected<0&&Number.isInteger(Number(a.selectedSeriesIndex))){const n=Number(a.selectedSeriesIndex);if(n>=0&&n<state.parsed.series.length)selected=n;}
@@ -795,7 +891,11 @@ title: Reading Fluency</div>
   $('runAnalysisBtn').addEventListener('click',()=>runAnalysis(els.analysisCommand.value));els.analysisCommand.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runAnalysis(els.analysisCommand.value);}});
   document.querySelectorAll('[data-analysis]').forEach(b=>b.addEventListener('click',()=>{els.analysisCommand.value=b.dataset.analysis;runAnalysis(b.dataset.analysis);}));
   els.analysisSeriesSelect.addEventListener('change',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();const si=selectedAnalysisSeries();status(si>=0?`Analysis series set to ${state.parsed.series[si].label}.`:'Choose the series you want to analyze.','ok');});
-  $('clearOverlaysBtn').addEventListener('click',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();status('Analysis overlays cleared.','ok');});
+  $('addGoalLineBtn').addEventListener('click',addOrUpdateGoalLine);
+  $('clearGoalLinesBtn').addEventListener('click',()=>{state.goalLines=[];renderGoalLineList();renderGraph();status('Goal lines cleared.','ok');});
+  els.goalStartPhaseSelect.addEventListener('change',()=>{if(Number(els.goalEndPhaseSelect.value)<Number(els.goalStartPhaseSelect.value))els.goalEndPhaseSelect.value=els.goalStartPhaseSelect.value;});
+  els.goalLineList.addEventListener('click',e=>{const b=e.target.closest('[data-remove-goal]');if(!b)return;state.goalLines=state.goalLines.filter(g=>g.id!==b.dataset.removeGoal);renderGoalLineList();renderGraph();status('Goal line removed.','ok');});
+  $('clearOverlaysBtn').addEventListener('click',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();status('Analysis overlays cleared. Goal lines were retained.','ok');});
   $('restoreGhostsBtn').addEventListener('click',()=>{els.dataInput.value=els.dataInput.value.replace(/\(\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*\)/g,'$1');loadData();status('All parenthesized observations restored in the data stream.','ok');});
   const helpDialog=$('helpDialog');
   $('helpBtn').addEventListener('click',()=>{if(typeof helpDialog.showModal==='function')helpDialog.showModal();else helpDialog.setAttribute('open','');});
@@ -811,8 +911,9 @@ title: Reading Fluency</div>
   $('loadStateBtn').addEventListener('click',()=>{$('loadStateInput').value='';$('loadStateInput').click();});
   $('loadStateInput').addEventListener('change',e=>loadStateJsonFile(e.target.files&&e.target.files[0]));
   $('exportSvgBtn').addEventListener('click',exportSvg);$('exportPngBtn').addEventListener('click',exportPng);$('resetBtn').addEventListener('click',reset);
-  [els.titleInput,els.xLabelInput,els.yLabelInput,els.yMinInput,els.yMaxInput,els.markerSizeInput,els.lineWidthInput,els.phaseLabelInput,els.gridCheck,els.legendCheck,els.phaseLabelsCheck,els.showGhostCheck].forEach(el=>el.addEventListener('change',renderGraph));
-  els.directionSelect.addEventListener('change',()=>{state.direction=els.directionSelect.value;}); els.phaseNamesData.addEventListener('change',()=>{els.phaseLabelInput.value=els.phaseNamesData.value;renderGraph();});
+  [els.titleInput,els.xLabelInput,els.yLabelInput,els.yMinInput,els.yMaxInput,els.markerSizeInput,els.lineWidthInput,els.gridCheck,els.legendCheck,els.phaseLabelsCheck,els.showGhostCheck].forEach(el=>el.addEventListener('change',renderGraph));
+  els.phaseLabelInput.addEventListener('change',()=>{if(state.parsed){const si=els.goalSeriesSelect.value,sp=els.goalStartPhaseSelect.value,ep=els.goalEndPhaseSelect.value;state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);updateGoalControls(state.parsed.series[Number(si)]?.label||'');els.goalStartPhaseSelect.value=sp;els.goalEndPhaseSelect.value=ep;renderGoalLineList();renderGraph();}});
+  els.directionSelect.addEventListener('change',()=>{state.direction=els.directionSelect.value;}); els.phaseNamesData.addEventListener('change',()=>{els.phaseLabelInput.value=els.phaseNamesData.value;if(state.parsed){const si=els.goalSeriesSelect.value,sp=els.goalStartPhaseSelect.value,ep=els.goalEndPhaseSelect.value;state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);updateGoalControls(state.parsed.series[Number(si)]?.label||'');els.goalStartPhaseSelect.value=sp;els.goalEndPhaseSelect.value=ep;renderGoalLineList();}renderGraph();});
   window.addEventListener('resize',()=>{}); loadData();
 })();
 </script>
