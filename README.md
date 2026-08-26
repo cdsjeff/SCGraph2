@@ -2,25 +2,17 @@
 
 SCGraph2 is a single-file HTML application for single-case graphing and analysis.
 
-## Run locally
-Open `index.html` or `SCGraph2.html` in a modern web browser.
+## Run
+Open `index.html` or `SCGraph2.html` in a browser. For GitHub Pages, publish `index.html` from the repository root.
 
-## GitHub Pages
-1. Upload the contents of this folder to a GitHub repository.
-2. In the repository, open **Settings → Pages**.
-3. Publish from the branch/folder containing `index.html`.
-4. GitHub Pages will use `index.html` as the site entry point.
+## Saving and exporting
 
-## Included files
-- `index.html` — GitHub Pages entry point.
-- `SCGraph2.html` — named copy of the application.
-- `README.md` — repository notes.
+Open SCGraph2 directly as a top-level page (for example, the GitHub Pages URL) when using Save Location, Save State, Export SVG, or Export PNG. Browsers block writable-folder pickers in cross-origin embedded previews, and sandboxed previews may also block ordinary downloads. In supported top-level Chrome/Edge pages, Save Location can remember a writable folder.
 
-SCGraph2 is self-contained and does not require a build step.
+## Data syntax
+- `|` creates phase boundaries.
+- `(value)` ghosts an observation while retaining its session position.
+- `+` creates vertically stacked multiple-baseline tiers on a shared session timeline.
+- `-` creates an independent graph panel. Up to three graph panels are supported.
 
-## Panel scrolling
-
-Each accordion module uses its own content-area scroll container when its contents exceed the available panel height.
-
-## Goal lines
-SCGraph2 supports phase-specific and multi-phase horizontal goal lines. Choose a series/tier, start phase, through phase, and Y-axis goal value in Graph Controls. Goal lines are preserved in saved JSON state files.
+Each independent graph can have its own graph label, Y-axis label, vertical scale, tick interval, autoscale method, and number of phases.

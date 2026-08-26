@@ -27,7 +27,9 @@
   .workspace{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(330px,.78fr);gap:12px;align-items:start}
   .primary-stack,.secondary-stack{display:flex;flex-direction:column;gap:12px;min-width:0}
   .primary-stack > details.module:first-child{min-height:0}
-  .secondary-stack{position:sticky;top:70px;overflow:visible;padding-bottom:2px}
+  .secondary-stack{position:sticky;top:70px;height:calc(100vh - 82px);height:calc(100dvh - 82px);overflow:visible;padding-bottom:2px;min-height:0}
+  .secondary-stack > details.module{flex:0 0 auto;min-height:0}
+  .secondary-stack > details.module[open]{flex:1 1 0;display:flex;flex-direction:column;min-height:0}
   details.module{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;min-width:0}
   /* IMPORTANT: constrain the scrollable body itself, not <details>. Native <details>
      uses special internal layout in Chromium/Safari; clipping the outer element can
@@ -39,10 +41,10 @@
   .module-body{padding:12px;min-height:0;overflow-y:auto;overflow-x:auto;max-height:56vh;max-height:56dvh;scrollbar-gutter:stable both-edges;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y pan-x}
   .graph-body{padding:8px 10px 10px;display:flex;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:auto;max-height:68vh;max-height:68dvh;scrollbar-gutter:stable both-edges}
   .primary-stack > details.module[data-module="data"][open] > .module-body{max-height:44vh;max-height:44dvh}
-  /* On a two-column desktop, the right-hand modules divide the usable viewport.
-     Their BODY gets the fixed height; this guarantees clientHeight < scrollHeight
-     when content is long, so wheel/trackpad/touch scrolling works reliably. */
-  .secondary-stack > details.module[open] > .module-body{height:calc((100vh - 166px)/2);height:calc((100dvh - 166px)/2);min-height:190px;max-height:480px}
+  /* The two right-hand accordions share the available column dynamically.
+     If both are open, flex:1 gives them equal overall height. If one is closed,
+     its summary remains compact and the other open panel expands into the rest. */
+  .secondary-stack > details.module[open] > .module-body{flex:1 1 auto;height:auto;min-height:0;max-height:none;overflow-y:auto}
   .module-body::-webkit-scrollbar{width:12px;height:12px}.module-body::-webkit-scrollbar-track{background:#f1f4f7}.module-body::-webkit-scrollbar-thumb{background:#a8b3bf;border:3px solid #f1f4f7;border-radius:999px}.module-body::-webkit-scrollbar-thumb:hover{background:#8795a3}
   #graphWrap{background:#fff;flex:0 0 auto;min-height:380px;border:1px solid #e2e6ea;display:flex;align-items:stretch;justify-content:stretch;overflow-x:auto;overflow-y:visible}
   #graphWrap svg{width:100%;height:auto;min-height:380px;display:block}
@@ -55,7 +57,12 @@
   .hint{font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:5px}.subhead{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#667085;font-weight:700;margin:12px 0 7px}
   .checks{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}.checks label{font-weight:500;display:flex;align-items:center;gap:6px;margin:0}
   #status{font-size:12px;color:var(--muted);padding:5px 2px 0}.error{color:var(--danger)!important;font-weight:700}.ok{color:var(--ok)!important}
+  .analysis-targets{margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid #e3e8ee}
+  .analysis-targets label{color:#263444}
+  .analysis-targets select{color:#202c3a;font-weight:600}
   .quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:10px}.quick-grid button{text-align:left;font-size:12px}
+  .quick-grid button.analysis-active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+  .quick-grid button.analysis-active:hover{background:#163d61}.quick-grid button.analysis-active::after{content:'  ✓';font-weight:800}
   #results{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto;padding-right:2px}
   .result{border:1px solid #dce2e8;border-left:4px solid var(--accent2);border-radius:9px;padding:9px 10px;background:#fff}.result h3{font-size:13px;margin:0 0 5px}.result p{font-size:12px;color:#45515f;line-height:1.4;margin:3px 0}.result .meta{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#334155}
   .pill{display:inline-flex;align-items:center;border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:3px 7px;font-size:11px;color:#475569;margin-right:5px}
@@ -67,7 +74,7 @@
   dialog.help-dialog{width:min(860px,92vw);max-height:86vh;border:1px solid var(--line);border-radius:14px;padding:0;box-shadow:0 24px 70px rgba(15,23,42,.28);color:var(--ink)}
   dialog.help-dialog::backdrop{background:rgba(15,23,42,.36)}
   .help-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:12px 16px;z-index:1}
-  .help-head h2{font-size:18px;margin:0}.help-body{padding:15px 18px 22px;overflow:auto;line-height:1.48;font-size:13px}
+  .help-head h2{font-size:18px;margin:0}.help-body{padding:15px 18px 22px;max-height:calc(86vh - 58px);overflow-y:auto;overscroll-behavior:contain;line-height:1.48;font-size:13px}
   .help-body h3{font-size:14px;margin:17px 0 6px;color:#243b53}.help-body h3:first-child{margin-top:0}
   .help-body p{margin:6px 0}.help-body ul{margin:6px 0 8px 20px;padding:0}.help-body li{margin:4px 0}
   .help-example{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#f6f8fa;border:1px solid #dfe5eb;border-radius:8px;padding:8px 10px;margin:7px 0;white-space:pre-wrap}
@@ -75,7 +82,7 @@
   dialog.save-dialog::backdrop{background:rgba(15,23,42,.36)}
   .save-body{padding:16px 18px 18px}.save-body p{font-size:12px;color:var(--muted);margin:0 0 12px}.save-body label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
   .save-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-  @media (max-width: 1050px){.workspace{grid-template-columns:1fr}.secondary-stack{position:static;overflow:visible}.primary-stack > details.module:first-child{min-height:0}details.module[open]{max-height:none;min-height:0}.module-body,.graph-body,.secondary-stack > details.module[open] > .module-body{height:auto;min-height:0;max-height:58vh;max-height:58dvh;overflow-y:auto}.primary-stack > details.module[data-module="data"][open] > .module-body{max-height:48vh;max-height:48dvh}.grid3{grid-template-columns:1fr 1fr}}
+  @media (max-width: 1050px){.workspace{grid-template-columns:1fr}.secondary-stack{position:static;height:auto;overflow:visible}.secondary-stack > details.module,.secondary-stack > details.module[open]{flex:0 0 auto;display:block}.primary-stack > details.module:first-child{min-height:0}details.module[open]{max-height:none;min-height:0}.module-body,.graph-body,.secondary-stack > details.module[open] > .module-body{height:auto;min-height:0;max-height:58vh;max-height:58dvh;overflow-y:auto}.primary-stack > details.module[data-module="data"][open] > .module-body{max-height:48vh;max-height:48dvh}.grid3{grid-template-columns:1fr 1fr}}
   @media (max-width: 620px){header{height:auto;min-height:58px;align-items:flex-start;padding:10px;gap:8px}.brand span{display:none}.grid2,.grid3,.checks{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.header-actions{justify-content:flex-end}}
 </style>
 </head>
@@ -83,7 +90,10 @@
 <header>
   <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis</span></div>
   <div class="header-actions">
+    <button id="startUpBtn" class="small">Start Up</button>
     <button id="helpBtn" class="small">Help</button>
+    <button id="saveLocationBtn" class="small" title="Choose or change the folder used for SCGraph2 saves and exports">Save Location</button>
+    <span id="saveModeIndicator" class="pill" style="display:none" title="File operations are restricted in this embedded preview">Open directly to save/export</span>
     <button id="saveStateBtn" class="small">Save State</button>
     <button id="loadStateBtn" class="small">Load State</button>
     <input id="loadStateInput" type="file" accept="application/json,.json" hidden>
@@ -127,18 +137,43 @@
 <details class="module" data-module="controls" open>
       <summary>Graph Controls</summary>
       <div class="module-body">
-        <div class="field"><label for="titleInput">Title</label><input id="titleInput" type="text" value="Performance Scores Over Sessions"></div>
+        <div class="subhead">Global Figure Settings</div>
+        <div class="field"><label for="titleInput">Figure title</label><input id="titleInput" type="text" value="Performance Scores Over Sessions"></div>
         <div class="grid2">
           <div class="field"><label for="xLabelInput">X-axis label</label><input id="xLabelInput" type="text" value="Session"></div>
+          <div class="field"><label for="phaseLabelInput">Phase labels</label><input id="phaseLabelInput" type="text" placeholder="Baseline, Intervention"></div>
+        </div>
+        <div class="divider"></div>
+        <div class="subhead">Selected Graph</div>
+        <div class="field"><label for="graphEditSelect">Graph to edit</label><select id="graphEditSelect"></select></div>
+        <div class="grid2">
+          <div class="field"><label for="graphLabelInput">Graph label</label><input id="graphLabelInput" type="text" placeholder="e.g., Naming"></div>
           <div class="field"><label for="yLabelInput">Y-axis label</label><input id="yLabelInput" type="text" value="Score"></div>
         </div>
         <div class="grid3">
           <div class="field"><label for="yMinInput">Y minimum</label><input id="yMinInput" type="number" step="any" value="0"></div>
           <div class="field"><label for="yMaxInput">Y maximum</label><input id="yMaxInput" type="number" step="any" value="100"></div>
-          <div class="field"><label for="markerSizeInput">Marker size</label><input id="markerSizeInput" type="number" min="2" max="12" step="1" value="5"></div>
+          <div class="field"><label for="yTickInput">Y tick interval</label><input id="yTickInput" type="number" min="0" step="any" placeholder="Auto"></div>
         </div>
+        <div class="checks">
+          <label><input type="checkbox" id="yAutoCheck"> Auto-scale selected graph Y axis</label>
+        </div>
+        <div class="grid3">
+          <div class="field"><label for="yAutoModeSelect">Auto-scale method</label><select id="yAutoModeSelect">
+            <option value="single-nonnegative">Single-case — unbounded ≥ 0</option>
+            <option value="known-bounds">Single-case — known bounds</option>
+            <option value="single-negative">Single-case — allow negative values</option>
+            <option value="legacy-heuristic">Original SCGraph heuristic</option>
+          </select></div>
+          <div class="field"><label for="knownMinInput">Known minimum</label><input id="knownMinInput" type="number" step="any" value="0"></div>
+          <div class="field"><label for="knownMaxInput">Known maximum</label><input id="knownMaxInput" type="number" step="any" value="100"></div>
+        </div>
+        <div class="hint">Single-case auto scaling uses full known measurement bounds when supplied; otherwise it uses readable 1–2–5 tick intervals and extends to the next major tick beyond the displayed values. The original SCGraph heuristic preserves the earlier percentage-padding behavior.</div>
+        <div id="scalePreview" class="footer-note" style="margin-top:6px">Manual Y-axis scaling.</div>
+        <div class="divider"></div>
+        <div class="subhead">Plot Appearance</div>
         <div class="grid2">
-          <div class="field"><label for="phaseLabelInput">Phase labels</label><input id="phaseLabelInput" type="text" placeholder="Baseline, Intervention"></div>
+          <div class="field"><label for="markerSizeInput">Marker size</label><input id="markerSizeInput" type="number" min="2" max="12" step="1" value="5"></div>
           <div class="field"><label for="lineWidthInput">Data line width</label><input id="lineWidthInput" type="number" min="1" max="6" step="0.25" value="2"></div>
         </div>
         <div class="checks">
@@ -171,6 +206,10 @@
 <details class="module" data-module="analysis" open>
       <summary>Analysis</summary>
       <div class="module-body">
+        <div class="grid2 analysis-targets">
+          <div class="field"><label for="analysisGraphSelect">Graph to analyze</label><select id="analysisGraphSelect"></select><div class="hint">Choose the graph first. With one graph, it is selected automatically.</div></div>
+          <div class="field"><label for="analysisSeriesSelect">Series to analyze</label><select id="analysisSeriesSelect"></select><div class="hint">Then choose the exact series or multiple-baseline tier within that graph.</div></div>
+        </div>
         <div class="quick-grid">
           <button data-analysis="Level, 1">Level — phase 1</button>
           <button data-analysis="Trend, 1">Trend — phase 1</button>
@@ -181,10 +220,7 @@
           <button data-analysis="TrendBinomial, 1, 2">Trend + 0.3 IQR — 1 vs 2</button>
           <button data-analysis="T-U, 1, 2">Tau-U — 1 vs 2</button>
         </div>
-        <div class="grid2">
-          <div class="field"><label for="analysisSeriesSelect">Series to analyze</label><select id="analysisSeriesSelect"></select><div class="hint">With multiple series or graphs, choose the exact series here or specify it in the command.</div></div>
-          <div class="field"><label>Series-specific command syntax</label><div class="help-example" style="margin:0">T-U, series=Accuracy, 1, 2</div><div class="hint">You can also use <span class="kbd">series=2</span> or a series label.</div></div>
-        </div>
+        <div class="field"><label>Series-specific command syntax</label><div class="help-example" style="margin:0">T-U, series=Accuracy, 1, 2</div><div class="hint">The selected Graph scopes <span class="kbd">series=2</span> and series-label commands to that graph.</div></div>
         <div class="field"><label for="analysisCommand">Analysis command or request</label>
           <div class="row grow"><input id="analysisCommand" type="text" value="T-U, 1, 2"><button id="runAnalysisBtn" class="primary">Run</button></div>
           <div class="hint">Compact commands and natural language both work: <span class="kbd">Level, 1</span>, <span class="kbd">T-U, series=Accuracy, 1, 2</span>, “perform Tau-U on series Accuracy, phases 1 and 2”, <span class="kbd">TrendBinomial, 1, 2</span>, or “place level lines in both phases for series 2”. Ghosting is stored directly in the data stream with parentheses.</div>
@@ -201,41 +237,85 @@
   </section>
 </main>
 
+<dialog id="startUpDialog" class="help-dialog" aria-labelledby="startUpTitle">
+  <div class="help-head">
+    <h2 id="startUpTitle">Starting SCGraph2</h2>
+    <button id="closeStartUpBtn" class="small">Close</button>
+  </div>
+  <div class="help-body">
+    <h3>1. Enter the data</h3>
+    <p>Enter one labeled series per line. Use <strong>|</strong> for phase changes and parentheses to ghost an observation without changing its session position.</p>
+    <div class="help-example">Accuracy: 2,4,(5),3|7,8,9</div>
+
+    <h3>2. Choose the graph layout in the data stream</h3>
+    <ul>
+      <li><strong>Adjacent series lines</strong> overlay series in the same graph.</li>
+      <li><strong>+</strong> on its own line creates vertically stacked multiple-baseline tiers on one shared Session timeline. Tiers may have different numbers of phases; SCGraph2 connects corresponding available phase-change lines by order (first-to-first, second-to-second, etc.). Extra phase lines remain unconnected.</li>
+      <li><strong>-</strong> on its own line starts a new independent graph panel; up to three graphs are supported. Independent graphs may have different numbers of phases.</li>
+    </ul>
+    <div class="help-example">Student A: 2,3,3|6,7,8
++
+Student B: 2,2,3,4,4|6,7,8
+-
+Accuracy: 40,45,50|70,78,85</div>
+
+    <h3>3. Load and format the graph</h3>
+    <p>Select <strong>Load &amp; Graph Data</strong>. In <strong>Graph Controls</strong>, choose the graph to edit. Each independent graph can have its own graph label, Y-axis label, vertical range, tick interval, and autoscale method.</p>
+    <p><strong>Autoscale choices</strong> include the single-case rules for nonnegative/unbounded measures, known measurement bounds, measures allowing negative values, and the original SCGraph heuristic. The current effective scale is shown in Graph Controls.</p>
+
+    <h3>4. Add goal lines when needed</h3>
+    <p>Under <strong>Graph Controls → Goal Lines</strong>, choose the series/tier, phase span, and Y value. Goal lines are retained independently of analysis overlays and are saved in the JSON state.</p>
+
+    <h3>5. Run an analysis</h3>
+    <p>At the <strong>top of the Analysis panel</strong>, choose <strong>Graph to analyze</strong> first and then <strong>Series to analyze</strong>. The two selectors appear above the analysis buttons so the current target remains visible before you turn analyses on or off. Visual analyses include Level, Trend, IQR variants, and Trend + 0.3 IQR. Quantitative analyses include PND, Mann–Whitney, Trend + 0.3 IQR binomial, and Tau-U.</p>
+
+    <h3>6. Choose a save location, then save or export</h3>
+    <p>Use <strong>Save Location</strong> to open the browser folder chooser and remember a folder when SCGraph2 is running as a top-level secure page in a supporting browser. Embedded previews cannot open persistent directory pickers; SCGraph2 therefore hides the folder-picker action in that context and <strong>Save State</strong>, <strong>Export SVG</strong>, and <strong>Export PNG</strong> automatically use normal browser downloads. <strong>Load State</strong> restores a saved JSON session from any location you select.</p>
+
+    <p><strong>Tip:</strong> Set the analysis target with the darker <strong>Graph to analyze</strong> and <strong>Series to analyze</strong> selectors at the top of the Analysis panel. Analysis buttons are independent toggles: click once to add that analysis and click again to remove only that analysis. Active buttons are highlighted. Data Input stays directly below the graph. On wide screens, Graph Controls and Analysis split the right column equally when both are open; closing one lets the other expand. Use <strong>Help</strong> for the full command and analysis reference.</p>
+  </div>
+</dialog>
+
 <dialog id="helpDialog" class="help-dialog" aria-labelledby="helpTitle">
   <div class="help-head">
     <h2 id="helpTitle">SCGraph2 Help</h2>
     <button id="closeHelpBtn" class="small">Close</button>
   </div>
   <div class="help-body">
+    <h3>Start Up</h3>
+    <p>For the condensed workflow, use the <strong>Start Up</strong> button in the header. The full reference below documents data syntax, multi-graph and multiple-baseline layouts, independent Y-axis controls and autoscaling, goal lines, analyses, JSON state files, and export.</p>
+
     <h3>Interface layout</h3>
-    <p>The <strong>Data Input</strong> module always appears immediately below the <strong>Graph</strong>. On wide screens, <strong>Graph Controls</strong> and <strong>Analysis</strong> appear in a right-hand column; on narrower screens they move below Data Input. Every module remains independently collapsible. The scrollable region is the module content area itself: place the pointer over the open panel and use the mouse wheel/trackpad, or drag its scrollbar, when the contents exceed the panel height.</p>
+    <p>The <strong>Data Input</strong> module always appears immediately below the <strong>Graph</strong>. On wide screens, <strong>Graph Controls</strong> and <strong>Analysis</strong> share the right-hand column dynamically: when both are open they divide the available vertical space equally; when one is closed, the other expands into the remaining space. On narrower screens they move below Data Input. Every module remains independently collapsible, and each open module body scrolls internally when its contents exceed the available panel height.</p>
 
     <h3>Data entry</h3>
     <p>Enter one series per line using <strong>Label: values</strong>. Commas separate observations and a vertical bar creates a phase boundary. Session numbers continue across phases.</p>
     <div class="help-example">Sniffing: 2,4,5,2|6,7,4,5</div>
-    <p>Plain adjacent series lines are plotted together in the same graph. All series use the same phase-name list and must have the same number of phases.</p>
+    <p>Plain adjacent series lines are plotted together in the same graph. Series within the <strong>same graph</strong> must use the same number of phases; independent graphs separated by <strong>-</strong> may use different phase counts. The global phase-name list is applied by phase number to each graph.</p>
 
     <h3>Multiple graphs and multiple-baseline layouts</h3>
-    <p>Use a separator on its own line between series. A <strong>minus sign (-)</strong> starts a new independent graph panel. SCGraph2 supports up to three graph panels.</p>
+    <p>Use a separator on its own line between series. A <strong>minus sign (-)</strong> starts a new independent graph panel. SCGraph2 supports up to three graph panels, and each independent graph may have its own number of phases.</p>
     <div class="help-example">Accuracy: 2,3,4|7,8,9
 -
 Rate: 10,11,12|15,17,18
 -
 Errors: 8,7,6|3,2,1</div>
-    <p>Use a <strong>plus sign (+)</strong> to create a multiple-baseline group. Each joined series receives its own vertically stacked tier, but the tiers use one common horizontal Session timeline. Their phase changes may occur at different sessions.</p>
+    <p>Use a <strong>plus sign (+)</strong> to create a multiple-baseline group. Each joined series receives its own vertically stacked tier, but the tiers use one common horizontal Session timeline. Their phase changes may occur at different sessions, and the tiers do not need to contain the same number of phases.</p>
     <div class="help-example">Student A: 2,3,3|6,7,8
 +
 Student B: 2,2,3,3,4|6,7,8
 +
 Student C: 1,2,2,3,3,4,4|7,8,9</div>
     <p>You can combine the syntax: <strong>-</strong> separates graph panels; <strong>+</strong> creates shared-timeline tiers inside a graph panel. Plain adjacent series inside the same tier are overlaid and therefore must use matching phase-boundary locations.</p>
-    <p>In a <strong>+</strong> multiple-baseline display, corresponding phase-change lines are connected across adjacent tiers. This visually links the same phase transition (for example, Baseline → Intervention) even when its onset is staggered across tiers. Independent graph panels separated by <strong>-</strong> are not connected.</p>
+    <p>In a <strong>+</strong> multiple-baseline display, corresponding phase-change lines are connected across adjacent tiers. SCGraph2 connects corresponding phase-change lines by order across adjacent tiers (first-to-first, second-to-second, and so on). If one tier contains fewer phase lines than another, only the shared available lines are connected; any additional phase lines remain unconnected. Independent graph panels separated by <strong>-</strong> are not connected.</p>
     <p>Each multiple-baseline tier has its own horizontal axis line and Session tick marks so the common timeline is visible at every tier. Session numbers are printed only on the bottom tier.</p>
+    <p>Each graph panel created with <strong>-</strong> has its own display settings. In <strong>Graph Controls → Graph to edit</strong>, choose Graph 1, Graph 2, or Graph 3, then set that graph’s <strong>Graph label</strong>, <strong>Y-axis label</strong>, <strong>Y minimum</strong>, <strong>Y maximum</strong>, and optional <strong>Y tick interval</strong>. These settings do not change the other graph panels. Auto-scale may also be enabled independently for each graph. A <strong>+</strong> multiple-baseline structure is treated as one graph panel, so its stacked tiers share that graph’s Y-axis settings while retaining their own series/tier labels.</p>
+    <p><strong>Auto-scale methods:</strong> <strong>Single-case — unbounded ≥ 0</strong> starts at 0 and extends the upper axis to the next readable 1–2–5 major tick beyond the highest displayed data or goal value. <strong>Single-case — known bounds</strong> uses the full measurement range you enter in Known minimum/maximum. <strong>Single-case — allow negative values</strong> extends one readable major tick beyond both the lowest and highest displayed values. <strong>Original SCGraph heuristic</strong> preserves the earlier rule: start at 0 for nonnegative data (or pad below a negative minimum by about 5%) and add about 8% headroom above the maximum. Ghosted observations remain part of display scaling, and the single-case modes also include goal-line values so goals remain visible.</p>
 
     <h3>Analyzing one series when several are graphed</h3>
-    <p>Analyses are always performed on one specified series at a time, regardless of which graph panel or multiple-baseline tier contains it. Use the <strong>Series to analyze</strong> menu, or include the series in the analysis command.</p>
+    <p>Analyses are always performed on one specified series at a time. The <strong>Graph to analyze</strong> and <strong>Series to analyze</strong> selectors are positioned at the <strong>top of the Analysis panel</strong>, above the analysis buttons. When multiple graph panels exist, choose the graph first and then the series/tier within that graph. A one-series graph auto-selects its series; a multiple-series or multiple-baseline graph asks you to choose the target series/tier.</p>
     <div class="help-example">Trend, series=2, 1<br>T-U, series=Accuracy, 1, 2</div>
-    <p>Series may be referenced by its number (1–4) or by its exact label. Natural-language requests such as <strong>“perform Tau-U on series Accuracy, phases 1 and 2”</strong> are also accepted. With only one series, SCGraph2 selects it automatically. With multiple series, if neither the selector nor the command identifies a series, SCGraph2 asks you to choose one rather than silently analyzing Series 1.</p>
+    <p>The selected Graph scopes series references, so <span class="kbd">series=2</span> means the second series/tier within the selected graph. A series may also be referenced by its exact label. Natural-language requests such as <strong>“perform Tau-U on series Accuracy, phases 1 and 2”</strong> use the currently selected graph as context.</p>
 
     <h3>Ghosting observations</h3>
     <p>Ghosting is encoded <strong>inside the data stream</strong>. Surround one numerical value with parentheses.</p>
@@ -256,6 +336,7 @@ Student C: 1,2,2,3,3,4,4|7,8,9</div>
     <p>The compact commands above place a goal at Y = 80 in Phase 1 only, or from Phase 1 through Phase 2, respectively, using the series/tier selected in Graph Controls.</p>
 
     <h3>Visual analysis</h3>
+    <p><strong>Analysis buttons toggle independently.</strong> Click a button once to add its result/overlay for the currently selected series; click the same highlighted button again to remove only that analysis. Other active analyses remain displayed.</p>
     <p>Use the Analysis module or type commands such as:</p>
     <div class="help-example">Level, 1
 IQRLevel, 1
@@ -281,12 +362,30 @@ goal line phase 2 at 80
 title: Reading Fluency</div>
     <p>Graph changes modify only the requested display feature. Analysis overlays can be cleared without altering the data.</p>
 
-    <h3>Save and load SCGraph2 state</h3>
-    <p><strong>Save State</strong> opens a filename dialog, then downloads a versioned <span class="kbd">.json</span> file containing the current SCGraph2 session: the complete data stream (including <strong>+</strong>, <strong>-</strong>, phase boundaries, and parenthesized ghost points), graph controls, phase labels, analysis settings, the selected analysis series, current overlays/results, commands, notes, and which accordion modules are open.</p>
-    <p><strong>Load State</strong> restores a previously saved SCGraph2 JSON session. The data are reparsed and verified before saved analyses and overlays are restored.</p>
+    <h3>Save location, save state, and load state</h3>
+    <p><strong>Save Location</strong> opens the browser folder chooser directly and can remember the chosen folder when SCGraph2 is opened as a <strong>top-level HTTPS page</strong> in a browser that supports the File System Access API (notably Chrome and Edge). Browser security prevents directory pickers inside cross-origin embedded previews/iframes and in some non-secure contexts. In those situations SCGraph2 hides the unavailable folder action and automatically uses the browser's normal download mechanism instead of failing. A remembered folder can be changed or forgotten at any time and may occasionally require reauthorization.</p>
+    <p><strong>Save State</strong> opens a filename dialog, then writes a versioned <span class="kbd">.json</span> file to the remembered save folder when one is available; otherwise it sends the file to the browser's download location. The file contains the complete SCGraph2 session: the data stream (including <strong>+</strong>, <strong>-</strong>, phase boundaries, and parenthesized ghost points), per-graph labels, Y-axis labels, manual scales, tick intervals, autoscale methods and known bounds, goal lines, phase labels, selected analysis graph/series, analysis settings, overlays/results, commands, notes, and accordion open/closed state.</p>
+    <p><strong>Load State</strong> restores a previously saved SCGraph2 JSON session. The data are reparsed and verified before graph-specific settings, goal lines, and saved analyses/overlays are restored. Older SCGraph2 state files are migrated when possible. Loading always uses the browser's file chooser, so a state file can be opened from any accessible location.</p>
 
     <h3>Export</h3>
-    <p>Use <strong>Export SVG</strong> for a scalable publication-quality figure or <strong>Export PNG</strong> for a high-resolution raster image. Processing occurs locally in the HTML file.</p>
+    <p><strong>Export SVG</strong> and <strong>Export PNG</strong> use the remembered Save Location when available and otherwise use the browser's standard download mechanism. PNG export is rendered directly from SCGraph2's graph primitives to a canvas; it does not depend on re-loading a serialized SVG image. Processing remains local in the HTML file; SCGraph2 does not upload the data or figure to a server.</p>
+  </div>
+</dialog>
+<dialog id="saveLocationDialog" class="save-dialog" aria-labelledby="saveLocationTitle">
+  <div class="help-head">
+    <h2 id="saveLocationTitle">SCGraph2 Save Location</h2>
+    <button id="closeSaveLocationBtn" class="small secondary" type="button">Close</button>
+  </div>
+  <div class="save-body">
+    <p id="saveLocationIntro">Choose the folder SCGraph2 should use for saved JSON sessions and exported SVG/PNG figures. A writable-folder picker is available only when SCGraph2 is running as a top-level secure page in a supporting browser.</p>
+    <p><strong>Current save method:</strong> <span id="saveLocationFolderName">Checking…</span></p>
+    <p id="saveLocationSupportNote">Checking browser support…</p>
+    <p id="saveLocationFallbackNote" style="display:none"><strong>Why no folder picker?</strong> Browser security does not allow a cross-origin embedded page to choose a writable folder. Open SCGraph2 directly in its own Chrome/Edge tab (for example, its GitHub Pages URL) to enable folder selection. Embedded previews may also block ordinary downloads. Open SCGraph2 directly in its own Chrome/Edge tab for reliable Save State and Export.</p>
+    <div class="save-actions">
+      <button id="forgetSaveLocationBtn" class="secondary" type="button">Forget Location</button>
+      <button id="openDirectSaveLocationBtn" class="secondary" type="button" style="display:none">Open SCGraph2 Directly</button>
+      <button id="chooseSaveLocationBtn" type="button">Choose Folder…</button>
+    </div>
   </div>
 </dialog>
 <dialog id="saveStateDialog" class="save-dialog" aria-labelledby="saveStateTitle">
@@ -296,6 +395,7 @@ title: Reading Fluency</div>
   </div>
   <div class="save-body">
     <p>Name the JSON file that will store the complete current SCGraph2 session.</p>
+    <p><strong>Save destination:</strong> <span id="saveStateFolderName">Browser downloads</span> <button id="changeSaveLocationFromStateBtn" class="small secondary" type="button" style="margin-left:6px">Choose / Change</button></p>
     <label for="saveStateFilename">File name</label>
     <input id="saveStateFilename" type="text" value="SCGraph2-session.json" autocomplete="off" spellcheck="false">
     <div class="save-actions">
@@ -310,14 +410,14 @@ title: Reading Fluency</div>
   const $ = id => document.getElementById(id);
   const els = {
     dataInput:$('dataInput'), phaseNamesData:$('phaseNamesData'), directionSelect:$('directionSelect'), notesInput:$('notesInput'),
-    titleInput:$('titleInput'), xLabelInput:$('xLabelInput'), yLabelInput:$('yLabelInput'), yMinInput:$('yMinInput'), yMaxInput:$('yMaxInput'),
+    titleInput:$('titleInput'), xLabelInput:$('xLabelInput'), graphEditSelect:$('graphEditSelect'), graphLabelInput:$('graphLabelInput'), yLabelInput:$('yLabelInput'), yMinInput:$('yMinInput'), yMaxInput:$('yMaxInput'), yTickInput:$('yTickInput'), yAutoCheck:$('yAutoCheck'), yAutoModeSelect:$('yAutoModeSelect'), knownMinInput:$('knownMinInput'), knownMaxInput:$('knownMaxInput'), scalePreview:$('scalePreview'),
     markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
-    phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisSeriesSelect:$('analysisSeriesSelect'), alphaInput:$('alphaInput'),
+    phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), alphaInput:$('alphaInput'),
     goalSeriesSelect:$('goalSeriesSelect'), goalStartPhaseSelect:$('goalStartPhaseSelect'), goalEndPhaseSelect:$('goalEndPhaseSelect'), goalValueInput:$('goalValueInput'), goalLineList:$('goalLineList'),
     tauCorrectionSelect:$('tauCorrectionSelect'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill')
   };
 
-  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], results:[], sourceText:'', direction:'increase' };
+  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], graphSettings:[], results:[], sourceText:'', direction:'increase' };
   const seriesStyles = [
     {stroke:'#111827', marker:'circle'}, {stroke:'#4b5563', marker:'square'}, {stroke:'#7c2d12', marker:'triangle'}, {stroke:'#1f4e79', marker:'diamond'}
   ];
@@ -330,7 +430,7 @@ title: Reading Fluency</div>
 
   function parseData(text){
     const rawLines=text.split(/\n/); const series=[]; const ghostedKeys=[]; const graphs=[];
-    let graphIndex=0, tierIndex=0, phaseCount=null, maxSessions=0, seriesInCurrentTier=0, seriesInCurrentGraph=0;
+    let graphIndex=0, tierIndex=0, maxSessions=0, seriesInCurrentTier=0, seriesInCurrentGraph=0;
     const ensureGraph=()=>{while(graphs.length<=graphIndex)graphs.push({graphIndex:graphs.length,tiers:[],seriesIndexes:[]});const g=graphs[graphIndex];while(g.tiers.length<=tierIndex)g.tiers.push({tierIndex:g.tiers.length,seriesIndexes:[]});return g;};
     ensureGraph();
     rawLines.forEach((rawLine,lineIndex)=>{
@@ -346,7 +446,7 @@ title: Reading Fluency</div>
       }
       const si=series.length, colon=line.indexOf(':'); if(colon<0) throw new Error(`Line ${lineIndex+1}: use “Label: values”, “+”, or “-”.`);
       const label=line.slice(0,colon).trim()||`Series ${si+1}`; const raw=line.slice(colon+1).trim();
-      const phaseChunks=raw.split('|'); if(phaseCount===null) phaseCount=phaseChunks.length; if(phaseChunks.length!==phaseCount) throw new Error('All series must use the same number of phases.');
+      const phaseChunks=raw.split('|');
       let session=1; const phases=[]; const points=[];
       phaseChunks.forEach((chunk,pi)=>{
         const tokens=chunk.split(',').map(v=>v.trim()).filter(v=>v!=='');
@@ -373,8 +473,9 @@ title: Reading Fluency</div>
       g.graphIndex=gi; g.tiers=g.tiers.filter(t=>t.seriesIndexes.length); g.tiers.forEach((t,ti)=>{t.tierIndex=ti;t.seriesIndexes.forEach(si=>{series[si].graphIndex=gi;series[si].tierIndex=ti;});
         if(t.seriesIndexes.length>1){const base=series[t.seriesIndexes[0]].boundaries;for(const si of t.seriesIndexes.slice(1)){const b=series[si].boundaries;if(b.length!==base.length||b.some((v,i)=>v!==base[i]))throw new Error(`Series plotted together in Graph ${gi+1} must have matching phase boundaries. Use “+” between them for staggered multiple-baseline tiers.`);}}
       });
-      g.mode=g.tiers.length>1?'multiple-baseline':'standard';g.maxSessions=Math.max(...g.seriesIndexes.map(si=>series[si].maxSessions));
+      g.mode=g.tiers.length>1?'multiple-baseline':'standard';g.maxSessions=Math.max(...g.seriesIndexes.map(si=>series[si].maxSessions));g.phaseCount=Math.max(...g.seriesIndexes.map(si=>series[si].phases.length));
     });
+    const phaseCount=Math.max(...compactGraphs.map(g=>g.phaseCount));
     const names=getPhaseNames(phaseCount);
     return {series,graphs:compactGraphs,phaseCount,maxSessions,phaseNames:names,ghostedKeys};
   }
@@ -386,40 +487,169 @@ title: Reading Fluency</div>
   function syncPhaseNameInputs(){
     const a=els.phaseNamesData.value.trim(), b=els.phaseLabelInput.value.trim(); if(a&&!b)els.phaseLabelInput.value=a; else if(b&&!a)els.phaseNamesData.value=b;
   }
-  function phaseIndex(ref){
-    if(!state.parsed) return -1; const s=String(ref).trim(); const num=Number(s); if(Number.isInteger(num)&&num>=1&&num<=state.parsed.phaseCount)return num-1;
-    return state.parsed.phaseNames.findIndex(n=>n.toLowerCase()===s.toLowerCase());
+  function phaseIndex(ref,seriesIdx=null){
+    if(!state.parsed) return -1;
+    const maxPhases=Number.isInteger(seriesIdx)&&state.parsed.series[seriesIdx]?state.parsed.series[seriesIdx].phases.length:state.parsed.phaseCount;
+    const s=String(ref).trim(),num=Number(s);
+    if(Number.isInteger(num)&&num>=1&&num<=maxPhases)return num-1;
+    const idx=state.parsed.phaseNames.findIndex(n=>n.toLowerCase()===s.toLowerCase());
+    return idx>=0&&idx<maxPhases?idx:-1;
   }
-  function seriesIndex(ref){
+  function graphIndex(ref){
+    if(!state.parsed)return -1;
+    if(ref===undefined||ref===null||String(ref).trim()==='')return -1;
+    const str=String(ref).trim(),num=Number(str);
+    if(Number.isInteger(num)&&num>=1&&num<=state.parsed.graphs.length)return num-1;
+    return state.graphSettings.findIndex((g,i)=>(g?.label||`Graph ${i+1}`).toLowerCase()===str.toLowerCase());
+  }
+  function seriesIndex(ref,graphIdx=null){
     if(!state.parsed) return -1;
     if(ref===undefined||ref===null||String(ref).trim()==='') return -1;
-    const s=String(ref).trim();
-    const num=Number(s);
-    if(Number.isInteger(num)&&num>=1&&num<=state.parsed.series.length) return num-1;
-    return state.parsed.series.findIndex(x=>x.label.toLowerCase()===s.toLowerCase());
+    const pool=Number.isInteger(graphIdx)&&graphIdx>=0&&graphIdx<state.parsed.graphs.length ? state.parsed.graphs[graphIdx].seriesIndexes : state.parsed.series.map((_,i)=>i);
+    const str=String(ref).trim(),num=Number(str);
+    if(Number.isInteger(num)&&num>=1&&num<=pool.length)return pool[num-1];
+    return pool.find(i=>state.parsed.series[i].label.toLowerCase()===str.toLowerCase()) ?? -1;
+  }
+  function selectedControlGraph(){
+    if(!state.parsed)return -1;
+    const v=els.graphEditSelect?.value;return v===''||v===undefined?0:Number(v);
+  }
+  function graphDisplayedValues(gi){
+    const group=state.parsed?.graphs?.[gi];if(!group)return [];
+    const vals=group.seriesIndexes.flatMap(si=>state.parsed.series[si].points.map(p=>p.score)).filter(Number.isFinite);
+    (state.goalLines||[]).forEach(goal=>{
+      if(group.seriesIndexes.includes(Number(goal.seriesIndex))&&Number.isFinite(Number(goal.y)))vals.push(Number(goal.y));
+    });
+    return vals;
+  }
+  function legacyGraphDataRange(gi){
+    const vals=graphDisplayedValues(gi);
+    if(!vals.length)return {min:0,max:100};
+    let min=Math.min(...vals),max=Math.max(...vals);
+    if(min>=0)min=0;else{const pad=Math.max((max-min)*.05,1);min-=pad;}
+    max+=Math.max((max-min)*.08,1);
+    if(max<=min)max=min+1;
+    return {min,max};
+  }
+  function niceStep(span,count=7){
+    const safeSpan=Number.isFinite(span)&&span>0?span:1,raw=safeSpan/Math.max(1,count),pow=Math.pow(10,Math.floor(Math.log10(raw))),n=raw/pow;
+    return (n<1.5?1:n<3?2:n<7?5:10)*pow;
+  }
+  function nextTickAbove(value,step){
+    const eps=Math.abs(step)*1e-10;return (Math.floor((value+eps)/step)+1)*step;
+  }
+  function nextTickBelow(value,step){
+    const eps=Math.abs(step)*1e-10;return (Math.ceil((value-eps)/step)-1)*step;
+  }
+  function singleCaseAutoRange(gi,cfg){
+    const vals=graphDisplayedValues(gi);
+    if(cfg.autoScaleMode==='known-bounds'){
+      const lo=Number(cfg.knownMin),hi=Number(cfg.knownMax);
+      if(Number.isFinite(lo)&&Number.isFinite(hi)&&hi>lo)return {min:lo,max:hi,tick:niceStep(hi-lo,5)};
+      return {min:0,max:100,tick:20};
+    }
+    if(!vals.length)return {min:0,max:100};
+    const observedMin=Math.min(...vals),observedMax=Math.max(...vals);
+    if(cfg.autoScaleMode==='single-negative'||observedMin<0){
+      const step=niceStep(Math.max(observedMax-observedMin,1),5);
+      let min=nextTickBelow(observedMin,step),max=nextTickAbove(observedMax,step);
+      if(max<=min)max=min+step;
+      return {min,max,tick:step};
+    }
+    const step=niceStep(Math.max(observedMax,1),5);
+    const max=nextTickAbove(Math.max(0,observedMax),step);
+    return {min:0,max:max>0?max:step,tick:step};
+  }
+  function normalizeGraphSetting(setting,gi){
+    const legacy=legacyGraphDataRange(gi),raw=setting||{};
+    let yMin=Number(raw.yMin),yMax=Number(raw.yMax),yTick=Number(raw.yTick),knownMin=Number(raw.knownMin),knownMax=Number(raw.knownMax);
+    if(!Number.isFinite(yMin))yMin=legacy.min;
+    if(!Number.isFinite(yMax))yMax=Math.max(100,legacy.max);
+    if(yMax<=yMin)yMax=yMin+1;
+    if(!Number.isFinite(yTick)||yTick<=0)yTick=null;
+    if(!Number.isFinite(knownMin))knownMin=0;
+    if(!Number.isFinite(knownMax)||knownMax<=knownMin)knownMax=Math.max(100,knownMin+1);
+    const validModes=['single-nonnegative','known-bounds','single-negative','legacy-heuristic'];
+    let autoScaleMode=validModes.includes(raw.autoScaleMode)?raw.autoScaleMode:(raw.autoScale?'legacy-heuristic':'single-nonnegative');
+    return {label:typeof raw.label==='string'?raw.label:`Graph ${gi+1}`,yLabel:typeof raw.yLabel==='string'?raw.yLabel:'Score',yMin,yMax,yTick,autoScale:!!raw.autoScale,autoScaleMode,knownMin,knownMax};
+  }
+  function syncGraphSettingsAfterParse(previous=[]){
+    state.graphSettings=state.parsed.graphs.map((_,gi)=>normalizeGraphSetting(previous[gi],gi));
+  }
+  function graphScale(gi){
+    const cfg=normalizeGraphSetting(state.graphSettings[gi],gi);state.graphSettings[gi]=cfg;
+    if(cfg.autoScale){
+      const r=cfg.autoScaleMode==='legacy-heuristic'?legacyGraphDataRange(gi):singleCaseAutoRange(gi,cfg);
+      return {...cfg,yMin:r.min,yMax:r.max,yTick:cfg.yTick??r.tick??null};
+    }
+    return cfg;
+  }
+  function updateScalePreview(){
+    if(!state.parsed||selectedControlGraph()<0)return;
+    const gi=selectedControlGraph(),cfg=graphScale(gi),ticks=graphTicks(cfg.yMin,cfg.yMax,cfg.yTick),tick=ticks.length>1?ticks[1]-ticks[0]:cfg.yTick;
+    if(!els.yAutoCheck.checked){els.scalePreview.textContent=`Manual range: ${fmt(cfg.yMin,3)} to ${fmt(cfg.yMax,3)}${Number.isFinite(tick)?`; tick ${fmt(tick,3)}`:''}.`;return;}
+    const labels={'single-nonnegative':'Single-case: unbounded ≥ 0','known-bounds':'Single-case: known bounds','single-negative':'Single-case: allow negative values','legacy-heuristic':'Original SCGraph heuristic'};
+    els.scalePreview.textContent=`${labels[cfg.autoScaleMode]||'Auto-scale'} → ${fmt(cfg.yMin,3)} to ${fmt(cfg.yMax,3)}${Number.isFinite(tick)?`; tick ${fmt(tick,3)}`:''}.`;
+  }
+  function updateScaleControlStates(){
+    const auto=!!els.yAutoCheck.checked,mode=els.yAutoModeSelect.value;
+    els.yAutoModeSelect.disabled=!auto;
+    els.yMinInput.disabled=auto;els.yMaxInput.disabled=auto;
+    const known=auto&&mode==='known-bounds';
+    els.knownMinInput.disabled=!known;els.knownMaxInput.disabled=!known;
+    updateScalePreview();
+  }
+  function loadSelectedGraphControls(){
+    if(!state.parsed||!state.graphSettings.length)return;
+    const gi=selectedControlGraph(),cfg=state.graphSettings[gi]||normalizeGraphSetting(null,gi);
+    els.graphLabelInput.value=cfg.label||'';els.yLabelInput.value=cfg.yLabel||'Score';els.yMinInput.value=cfg.yMin;els.yMaxInput.value=cfg.yMax;els.yTickInput.value=cfg.yTick??'';els.yAutoCheck.checked=!!cfg.autoScale;els.yAutoModeSelect.value=cfg.autoScaleMode||'single-nonnegative';els.knownMinInput.value=cfg.knownMin;els.knownMaxInput.value=cfg.knownMax;
+    updateScaleControlStates();
+  }
+  function saveSelectedGraphControls(render=true){
+    if(!state.parsed)return;const gi=selectedControlGraph();if(gi<0)return;
+    const prior=state.graphSettings[gi]||normalizeGraphSetting(null,gi),yMin=Number(els.yMinInput.value),yMax=Number(els.yMaxInput.value),tick=Number(els.yTickInput.value),knownMin=Number(els.knownMinInput.value),knownMax=Number(els.knownMaxInput.value);
+    const mode=els.yAutoModeSelect.value||'single-nonnegative';
+    if(els.yAutoCheck.checked&&mode==='known-bounds'&&(!Number.isFinite(knownMin)||!Number.isFinite(knownMax)||knownMax<=knownMin)){status('Known maximum must be greater than known minimum.','error');return;}
+    state.graphSettings[gi]=normalizeGraphSetting({...prior,label:els.graphLabelInput.value.trim()||`Graph ${gi+1}`,yLabel:els.yLabelInput.value.trim()||'Score',yMin:Number.isFinite(yMin)?yMin:prior.yMin,yMax:Number.isFinite(yMax)?yMax:prior.yMax,yTick:Number.isFinite(tick)&&tick>0?tick:null,autoScale:els.yAutoCheck.checked,autoScaleMode:mode,knownMin:Number.isFinite(knownMin)?knownMin:prior.knownMin,knownMax:Number.isFinite(knownMax)?knownMax:prior.knownMax},gi);
+    updateScaleControlStates();
+    const analysisGi=Math.max(0,selectedAnalysisGraph()),analysisLabel=els.analysisSeriesSelect?.selectedOptions[0]?.dataset?.label||'';updateGraphEditOptions(gi);updateAnalysisGraphOptions(analysisGi,analysisLabel);if(render)renderGraph();
+  }
+  function updateGraphEditOptions(preserve=0){
+    if(!state.parsed||!els.graphEditSelect)return;els.graphEditSelect.innerHTML='';
+    state.parsed.graphs.forEach((g,gi)=>{const cfg=state.graphSettings[gi]||normalizeGraphSetting(null,gi),o=document.createElement('option');o.value=String(gi);o.textContent=`Graph ${gi+1} — ${cfg.label||`Graph ${gi+1}`}`;els.graphEditSelect.appendChild(o);});
+    const gi=clamp(Number.isInteger(Number(preserve))?Number(preserve):0,0,state.parsed.graphs.length-1);els.graphEditSelect.value=String(gi);els.graphEditSelect.disabled=state.parsed.graphs.length===1;loadSelectedGraphControls();
+  }
+  function selectedAnalysisGraph(){
+    if(!state.parsed)return -1;if(state.parsed.graphs.length===1)return 0;const v=els.analysisGraphSelect?.value;return v===''?-1:Number(v);
   }
   function selectedAnalysisSeries(){
-    if(!state.parsed) return -1;
-    if(state.parsed.series.length===1) return 0;
-    const v=els.analysisSeriesSelect ? els.analysisSeriesSelect.value : '';
-    return v==='' ? -1 : Number(v);
+    if(!state.parsed)return -1;const v=els.analysisSeriesSelect?.value;return v===''||v===undefined?-1:Number(v);
   }
   function requireAnalysisSeries(explicitRef=null){
-    const idx=explicitRef!==null&&explicitRef!==undefined ? seriesIndex(explicitRef) : selectedAnalysisSeries();
-    if(idx<0){
-      if(state.parsed.series.length===1) return 0;
-      throw new Error('Choose a Series to analyze or specify one in the command, e.g. series=2 or series=Accuracy.');
+    const gi=selectedAnalysisGraph();
+    if(gi<0)throw new Error('Choose the Graph to analyze first.');
+    const idx=explicitRef!==null&&explicitRef!==undefined ? seriesIndex(explicitRef,gi) : selectedAnalysisSeries();
+    const pool=state.parsed.graphs[gi].seriesIndexes;
+    if(idx<0||!pool.includes(idx)){
+      if(pool.length===1)return pool[0];
+      throw new Error('Choose a Series within the selected graph or specify one in the command, e.g. series=2 or series=Accuracy.');
     }
     return idx;
   }
   function activePoints(phase,seriesIndex){return state.parsed.series[seriesIndex].points.filter(p=>p.phaseIndex===phase&&!state.ghosted.has(p.key));}
   function activeScores(phase,seriesIndex){return activePoints(phase,seriesIndex).map(p=>p.score);}
-  function updateAnalysisSeriesOptions(preserveLabel=''){
+  function updateAnalysisGraphOptions(preserve=0,preserveSeriesLabel=''){
+    if(!els.analysisGraphSelect||!state.parsed)return;els.analysisGraphSelect.innerHTML='';
+    state.parsed.graphs.forEach((g,gi)=>{const cfg=state.graphSettings[gi]||normalizeGraphSetting(null,gi),o=document.createElement('option');o.value=String(gi);o.textContent=`Graph ${gi+1} — ${cfg.label||`Graph ${gi+1}`}`;els.analysisGraphSelect.appendChild(o);});
+    const gi=state.parsed.graphs.length===1?0:clamp(Number.isInteger(Number(preserve))?Number(preserve):0,0,state.parsed.graphs.length-1);els.analysisGraphSelect.value=String(gi);els.analysisGraphSelect.disabled=state.parsed.graphs.length===1;updateAnalysisSeriesOptions(preserveSeriesLabel,gi);
+  }
+  function updateAnalysisSeriesOptions(preserveLabel='',graphIdx=null){
     if(!els.analysisSeriesSelect||!state.parsed)return;
-    const prev=preserveLabel || (els.analysisSeriesSelect.selectedOptions[0]?.dataset?.label||''); els.analysisSeriesSelect.innerHTML='';
-    if(state.parsed.series.length>1){const prompt=document.createElement('option');prompt.value='';prompt.textContent='Choose series…';els.analysisSeriesSelect.appendChild(prompt);}
-    state.parsed.series.forEach((ser,i)=>{const g=state.parsed.graphs[ser.graphIndex];const tierText=g.tiers.length>1?` · Tier ${ser.tierIndex+1}`:'';const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${ser.label} · Graph ${ser.graphIndex+1}${tierText}`;o.dataset.label=ser.label;els.analysisSeriesSelect.appendChild(o);});
-    const match=state.parsed.series.findIndex(x=>x.label===prev); if(state.parsed.series.length===1)els.analysisSeriesSelect.value='0';else if(match>=0)els.analysisSeriesSelect.value=String(match);else els.analysisSeriesSelect.value=''; els.analysisSeriesSelect.disabled=state.parsed.series.length===1;
+    const gi=Number.isInteger(graphIdx)?graphIdx:selectedAnalysisGraph();els.analysisSeriesSelect.innerHTML='';if(gi<0)return;
+    const pool=state.parsed.graphs[gi].seriesIndexes,prev=preserveLabel||'';
+    if(pool.length>1){const prompt=document.createElement('option');prompt.value='';prompt.textContent='Choose series…';els.analysisSeriesSelect.appendChild(prompt);}
+    pool.forEach((si,ordinal)=>{const ser=state.parsed.series[si],g=state.parsed.graphs[gi],tierText=g.tiers.length>1?` · Tier ${ser.tierIndex+1}`:'',o=document.createElement('option');o.value=String(si);o.textContent=`${ordinal+1}. ${ser.label}${tierText}`;o.dataset.label=ser.label;els.analysisSeriesSelect.appendChild(o);});
+    const match=pool.find(si=>state.parsed.series[si].label===prev);if(pool.length===1)els.analysisSeriesSelect.value=String(pool[0]);else if(match!==undefined)els.analysisSeriesSelect.value=String(match);else els.analysisSeriesSelect.value='';els.analysisSeriesSelect.disabled=pool.length===1;
   }
 
   function updateGoalControls(preserveSeriesLabel=''){
@@ -431,7 +661,8 @@ title: Reading Fluency</div>
       const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${ser.label} · Graph ${ser.graphIndex+1}${tierText}`;o.dataset.label=ser.label;els.goalSeriesSelect.appendChild(o);
     });
     let match=state.parsed.series.findIndex(x=>x.label===prev); if(match<0)match=0; els.goalSeriesSelect.value=String(match);
-    const fillPhaseSelect=(select)=>{select.innerHTML='';state.parsed.phaseNames.forEach((name,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${name||`Phase ${i+1}`}`;select.appendChild(o);});};
+    const phaseN=state.parsed.series[match]?.phases.length||state.parsed.phaseCount;
+    const fillPhaseSelect=(select)=>{select.innerHTML='';Array.from({length:phaseN},(_,i)=>state.parsed.phaseNames[i]||`Phase ${i+1}`).forEach((name,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${name}`;select.appendChild(o);});};
     fillPhaseSelect(els.goalStartPhaseSelect);fillPhaseSelect(els.goalEndPhaseSelect);
     els.goalStartPhaseSelect.value='0';els.goalEndPhaseSelect.value='0';
     renderGoalLineList();
@@ -444,7 +675,7 @@ title: Reading Fluency</div>
       if(si<0&&Number.isInteger(Number(g.seriesIndex))&&Number(g.seriesIndex)>=0&&Number(g.seriesIndex)<state.parsed.series.length)si=Number(g.seriesIndex);
       if(si<0)return null;
       const sp=Number(g.startPhase),ep=Number(g.endPhase),y=Number(g.y);
-      if(!Number.isInteger(sp)||!Number.isInteger(ep)||sp<0||ep<sp||ep>=state.parsed.phaseCount||!Number.isFinite(y))return null;
+      if(!Number.isInteger(sp)||!Number.isInteger(ep)||sp<0||ep<sp||ep>=state.parsed.series[si].phases.length||!Number.isFinite(y))return null;
       return {id:g.id||`goal-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,seriesIndex:si,seriesLabel:state.parsed.series[si].label,startPhase:sp,endPhase:ep,y};
     }).filter(Boolean);
   }
@@ -459,7 +690,7 @@ title: Reading Fluency</div>
       if(!state.parsed)throw new Error('Load valid data first.');
       const si=Number(els.goalSeriesSelect.value),sp=Number(els.goalStartPhaseSelect.value),ep=Number(els.goalEndPhaseSelect.value),y=Number(els.goalValueInput.value);
       if(!Number.isInteger(si)||si<0||si>=state.parsed.series.length)throw new Error('Choose the series or tier for the goal line.');
-      if(!Number.isInteger(sp)||!Number.isInteger(ep)||sp<0||ep<sp||ep>=state.parsed.phaseCount)throw new Error('The through phase must be the same as or later than the start phase.');
+      if(!Number.isInteger(sp)||!Number.isInteger(ep)||sp<0||ep<sp||ep>=state.parsed.series[si].phases.length)throw new Error('The through phase must be the same as or later than the start phase and must exist in the selected series.');
       if(!Number.isFinite(y))throw new Error('Enter a numerical goal value on the Y axis.');
       const existing=state.goalLines.find(g=>g.seriesIndex===si&&g.startPhase===sp&&g.endPhase===ep);
       if(existing){existing.y=y;existing.seriesLabel=state.parsed.series[si].label;}
@@ -493,29 +724,32 @@ title: Reading Fluency</div>
     else el=svgEl('circle',{cx:p.x,cy:p.y,r,...common}); svg.appendChild(el);
   }
   function niceTicks(min,max,count=10){ const span=max-min||1, raw=span/count, pow=Math.pow(10,Math.floor(Math.log10(raw))), n=raw/pow; const step=(n<1.5?1:n<3?2:n<7?5:10)*pow; const start=Math.ceil(min/step)*step; const out=[]; for(let v=start;v<=max+step*.001;v+=step) out.push(Number(v.toPrecision(12))); return out; }
+  function graphTicks(min,max,interval){
+    if(Number.isFinite(interval)&&interval>0&&(max-min)/interval<=100){const out=[],start=Math.ceil(min/interval)*interval;for(let v=start;v<=max+interval*.001;v+=interval)out.push(Number(v.toPrecision(12)));return out;}
+    return niceTicks(min,max,7);
+  }
   function graphMetrics(){
-    const W=1000,left=86,right=38,plotH=220,tierGap=34,groupGap=42,titleBand=58,xBand=58,phaseBand=34;
-    let ymin=Number(els.yMinInput.value),ymax=Number(els.yMaxInput.value);const all=state.parsed.series.flatMap(s=>s.points.map(p=>p.score));
-    if(!Number.isFinite(ymin))ymin=0;if(!Number.isFinite(ymax))ymax=Math.max(100,...all);if(ymax<=ymin)ymax=ymin+1;
+    const W=1000,left=96,right=38,plotH=220,tierGap=34,groupGap=42,titleBand=58,xBand=58,phaseBand=55;
     let cursor=titleBand;const groups=[];
     state.parsed.graphs.forEach((group,gi)=>{
-      const tierLayouts=[];const groupTop=cursor;
-      group.tiers.forEach((tier,ti)=>{const top=cursor+phaseBand,innerW=W-left-right,innerH=plotH,xmax=Math.max(15,group.maxSessions);const x=s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,y=v=>top+innerH-((v-ymin)/(ymax-ymin))*innerH;tierLayouts.push({tier,top,innerW,innerH,xmax,x,y,m:{left,right,top,bottom:0},W});cursor=top+plotH+(ti<group.tiers.length-1?tierGap:0);});
-      const first=tierLayouts[0],last=tierLayouts[tierLayouts.length-1],xAxisY=last.top+last.innerH;cursor=xAxisY+xBand;groups.push({group,groupTop,tierLayouts,xAxisY,x:first.x,xmax:first.xmax,innerW:first.innerW,bottom:cursor});if(gi<state.parsed.graphs.length-1)cursor+=groupGap;
+      const cfg=graphScale(gi),ymin=cfg.yMin,ymax=cfg.yMax,ticks=graphTicks(ymin,ymax,cfg.yTick),tierLayouts=[],groupTop=cursor;
+      group.tiers.forEach((tier,ti)=>{const top=cursor+phaseBand,innerW=W-left-right,innerH=plotH,xmax=Math.max(15,group.maxSessions);const x=s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,y=v=>top+innerH-((v-ymin)/(ymax-ymin))*innerH;tierLayouts.push({tier,top,innerW,innerH,xmax,x,y,ymin,ymax,ticks,cfg,m:{left,right,top,bottom:0},W});cursor=top+plotH+(ti<group.tiers.length-1?tierGap:0);});
+      const first=tierLayouts[0],last=tierLayouts[tierLayouts.length-1],xAxisY=last.top+last.innerH;cursor=xAxisY+xBand;groups.push({group,groupTop,tierLayouts,xAxisY,x:first.x,xmax:first.xmax,innerW:first.innerW,bottom:cursor,cfg,ymin,ymax,ticks});if(gi<state.parsed.graphs.length-1)cursor+=groupGap;
     });
-    return {W,H:cursor+18,left,right,ymin,ymax,groups};
+    return {W,H:cursor+18,left,right,groups};
   }
+
   function renderGraph(){
     if(!state.parsed)return;syncPhaseNameInputs();state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);
     const layout=graphMetrics(),svg=svgEl('svg',{viewBox:`0 0 ${layout.W} ${layout.H}`,role:'img','aria-label':'APA-style single-case graph'});svg.appendChild(svgEl('rect',{x:0,y:0,width:layout.W,height:layout.H,fill:'#fff'}));
     const title=els.titleInput.value.trim()||'Performance Scores Over Sessions';svg.appendChild(svgEl('text',{x:layout.W/2,y:29,'text-anchor':'middle','font-size':19,'font-weight':700,fill:'#111827'},title));
     layout.groups.forEach((gl,gi)=>{
-      const group=gl.group;if(state.parsed.graphs.length>1)svg.appendChild(svgEl('text',{x:layout.left,y:gl.groupTop+15,'font-size':12,'font-weight':700,fill:'#4b5563'},`Graph ${gi+1}`));
+      const group=gl.group,cfg=gl.cfg;svg.appendChild(svgEl('text',{x:layout.left,y:gl.groupTop+16,'font-size':13,'font-weight':700,fill:'#374151'},`G${gi+1} · ${cfg.label||`Graph ${gi+1}`}`));
       gl.tierLayouts.forEach(tg=>{
         const tier=tg.tier,refSer=state.parsed.series[tier.seriesIndexes[0]];
-        if(els.gridCheck.checked)niceTicks(layout.ymin,layout.ymax,7).forEach(v=>svg.appendChild(svgEl('line',{x1:layout.left,y1:tg.y(v),x2:layout.left+tg.innerW,y2:tg.y(v),stroke:'#e5e7eb','stroke-width':1})));
+        if(els.gridCheck.checked)gl.ticks.forEach(v=>svg.appendChild(svgEl('line',{x1:layout.left,y1:tg.y(v),x2:layout.left+tg.innerW,y2:tg.y(v),stroke:'#e5e7eb','stroke-width':1}))); 
         svg.appendChild(svgEl('line',{x1:layout.left,y1:tg.top,x2:layout.left,y2:tg.top+tg.innerH,stroke:'#111827','stroke-width':1.5}));
-        niceTicks(layout.ymin,layout.ymax,7).forEach(v=>{svg.appendChild(svgEl('line',{x1:layout.left-6,y1:tg.y(v),x2:layout.left,y2:tg.y(v),stroke:'#111827'}));svg.appendChild(svgEl('text',{x:layout.left-10,y:tg.y(v)+4,'text-anchor':'end','font-size':11,fill:'#111827'},fmt(v,2)));});
+        gl.ticks.forEach(v=>{svg.appendChild(svgEl('line',{x1:layout.left-6,y1:tg.y(v),x2:layout.left,y2:tg.y(v),stroke:'#111827'}));svg.appendChild(svgEl('text',{x:layout.left-10,y:tg.y(v)+4,'text-anchor':'end','font-size':11,fill:'#111827'},fmt(v,2)));});
         refSer.boundaries.forEach(b=>svg.appendChild(svgEl('line',{x1:tg.x(b),y1:tg.top-8,x2:tg.x(b),y2:tg.top+tg.innerH,stroke:'#8b8f94','stroke-width':1.1})));
         if(els.phaseLabelsCheck.checked)refSer.phases.forEach((p,i)=>{const c=(p.startSession+p.endSession)/2;svg.appendChild(svgEl('text',{x:tg.x(c),y:tg.top-15,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#374151'},state.parsed.phaseNames[i]||`Phase ${i+1}`));});
         if(group.tiers.length>1){const labels=tier.seriesIndexes.map(si=>state.parsed.series[si].label).join(' / ');svg.appendChild(svgEl('text',{x:layout.left+8,y:tg.top+18,'font-size':12,'font-weight':700,fill:'#374151'},labels));}
@@ -527,21 +761,7 @@ title: Reading Fluency</div>
         });
         if(els.legendCheck.checked&&tier.seriesIndexes.length>1){let ly=tg.top+18;tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyles[si%seriesStyles.length];svg.appendChild(svgEl('line',{x1:layout.W-202,y1:ly-4,x2:layout.W-178,y2:ly-4,stroke:st.stroke,'stroke-width':2}));drawMarker(svg,{x:layout.W-190,y:ly-4},st,4,false);svg.appendChild(svgEl('text',{x:layout.W-170,y:ly,'font-size':11,fill:'#374151'},ser.label));ly+=18;});}
       });
-      if(group.tiers.length>1){
-        for(let ti=0;ti<gl.tierLayouts.length-1;ti++){
-          const upper=gl.tierLayouts[ti],lower=gl.tierLayouts[ti+1];
-          const upperSer=state.parsed.series[upper.tier.seriesIndexes[0]],lowerSer=state.parsed.series[lower.tier.seriesIndexes[0]];
-          const n=Math.min(upperSer.boundaries.length,lowerSer.boundaries.length);
-          for(let bi=0;bi<n;bi++){
-            const ub=upperSer.boundaries[bi],lb=lowerSer.boundaries[bi];
-            svg.appendChild(svgEl('line',{
-              x1:upper.x(ub),y1:upper.top+upper.innerH,
-              x2:lower.x(lb),y2:lower.top-8,
-              stroke:'#8b8f94','stroke-width':1.1,fill:'none'
-            }));
-          }
-        }
-      }
+      if(group.tiers.length>1) drawMultipleBaselinePhaseConnectors(svg,gl);
       const last=gl.tierLayouts[gl.tierLayouts.length-1];
       const xStep=gl.xmax<=20?1:gl.xmax<=40?2:5;
       // Every multiple-baseline tier gets its own horizontal axis and tick marks.
@@ -556,11 +776,32 @@ title: Reading Fluency</div>
         }
       });
       svg.appendChild(svgEl('text',{x:layout.left+last.innerW/2,y:gl.xAxisY+47,'text-anchor':'middle','font-size':14,'font-weight':600},els.xLabelInput.value||'Session'));
-      const yCenter=(gl.tierLayouts[0].top+gl.tierLayouts[gl.tierLayouts.length-1].top+gl.tierLayouts[gl.tierLayouts.length-1].innerH)/2;svg.appendChild(svgEl('text',{x:20,y:yCenter,'text-anchor':'middle','font-size':14,'font-weight':600,transform:`rotate(-90 20 ${yCenter})`},els.yLabelInput.value||'Score'));
+      const yCenter=(gl.tierLayouts[0].top+gl.tierLayouts[gl.tierLayouts.length-1].top+gl.tierLayouts[gl.tierLayouts.length-1].innerH)/2;svg.appendChild(svgEl('text',{x:22,y:yCenter,'text-anchor':'middle','font-size':14,'font-weight':600,transform:`rotate(-90 22 ${yCenter})`},cfg.yLabel||'Score'));
       if(gi<layout.groups.length-1)svg.appendChild(svgEl('line',{x1:layout.left,y1:gl.bottom+18,x2:layout.W-layout.right,y2:gl.bottom+18,stroke:'#d1d5db','stroke-width':1}));
     });
-    els.graphWrap.innerHTML='';els.graphWrap.appendChild(svg);updatePills();
+    els.graphWrap.innerHTML='';els.graphWrap.appendChild(svg);updatePills();updateScalePreview();
   }
+  function drawMultipleBaselinePhaseConnectors(svg,gl){
+    // Connect only corresponding phase boundaries that exist in both adjacent tiers.
+    // Example: 3 boundaries above and 1 below => connect boundary 1 only;
+    // boundaries 2 and 3 above remain intentionally unconnected.
+    for(let ti=0;ti<gl.tierLayouts.length-1;ti++){
+      const upper=gl.tierLayouts[ti], lower=gl.tierLayouts[ti+1];
+      const upperSer=state.parsed.series[upper.tier.seriesIndexes[0]];
+      const lowerSer=state.parsed.series[lower.tier.seriesIndexes[0]];
+      const sharedBoundaryCount=Math.min(upperSer.boundaries.length,lowerSer.boundaries.length);
+      for(let bi=0;bi<sharedBoundaryCount;bi++){
+        const upperBoundary=upperSer.boundaries[bi];
+        const lowerBoundary=lowerSer.boundaries[bi];
+        svg.appendChild(svgEl('line',{
+          x1:upper.x(upperBoundary), y1:upper.top+upper.innerH,
+          x2:lower.x(lowerBoundary), y2:lower.top-8,
+          stroke:'#8b8f94','stroke-width':1.1,fill:'none'
+        }));
+      }
+    }
+  }
+
   function drawOverlay(svg,g,o){
     const col=o.color||'#6b4f8a'; const dash=o.dash||'7 5';
     if(o.type==='hline') svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.y),x2:g.x(o.x2),y2:g.y(o.y),stroke:col,'stroke-width':2,'stroke-dasharray':dash}));
@@ -581,7 +822,8 @@ title: Reading Fluency</div>
   }
   function updatePills(){
     const total=state.parsed.series.reduce((n,s)=>n+s.points.length,0), ghost=state.ghosted.size;
-    els.seriesPill.textContent=`${state.parsed.graphs.length} graph${state.parsed.graphs.length===1?'':'s'} · ${state.parsed.series.length} series`; els.phasePill.textContent=`${state.parsed.phaseCount} phases`; els.activePill.textContent=`${total-ghost} active observations`;
+    els.seriesPill.textContent=`${state.parsed.graphs.length} graph${state.parsed.graphs.length===1?'':'s'} · ${state.parsed.series.length} series`;
+    const phaseCounts=state.parsed.graphs.map(g=>g.phaseCount),unique=[...new Set(phaseCounts)];els.phasePill.textContent=unique.length===1?`${unique[0]} phases`:`phases by graph: ${phaseCounts.join(' / ')}`; els.activePill.textContent=`${total-ghost} active observations`;
   }
   function status(msg,kind=''){els.status.textContent=msg;els.status.className=kind;}
 
@@ -621,12 +863,36 @@ title: Reading Fluency</div>
     const nA=a.length,nB=b.length,se=Math.sqrt((nA+nB+1)/(3*nA*nB)),z=se?tau/se:0,p=2*(1-normalCDF(Math.abs(z))); return {rawTau:raw.tau,baselineTau:base.tau,correct,tau,se,z,p,...raw};
   }
 
-  function addResult(title,lines,meta=''){
-    state.results.unshift({title,lines,meta}); renderResults();
+  function analysisToggleKey(command,seriesIndex){
+    return `${seriesIndex}::${String(command||'').trim().replace(/\s+/g,' ').toLowerCase()}`;
+  }
+  function analysisIsActive(key){
+    return state.overlays.some(o=>o.analysisId===key)||state.results.some(r=>r.analysisId===key);
+  }
+  function updateAnalysisToggleButtons(){
+    document.querySelectorAll('[data-analysis]').forEach(b=>{
+      let active=false;
+      const si=selectedAnalysisSeries();
+      if(si>=0)active=analysisIsActive(analysisToggleKey(b.dataset.analysis,si));
+      b.classList.toggle('analysis-active',active);
+      b.setAttribute('aria-pressed',active?'true':'false');
+      b.title=active?'Click to remove this analysis':'Click to add this analysis';
+    });
+  }
+  function removeAnalysisById(key){
+    const beforeO=state.overlays.length,beforeR=state.results.length;
+    state.overlays=state.overlays.filter(o=>o.analysisId!==key);
+    state.results=state.results.filter(r=>r.analysisId!==key);
+    renderResults();renderGraph();updateAnalysisToggleButtons();
+    return (beforeO-state.overlays.length)+(beforeR-state.results.length);
+  }
+  function addResult(title,lines,meta='',analysisId=null){
+    state.results.unshift({title,lines,meta,...(analysisId?{analysisId}:{})}); renderResults();
   }
   function renderResults(){
-    if(!state.results.length){els.results.innerHTML='<div class="empty">Run an analysis to see results and interpretation.</div>';return;}
+    if(!state.results.length){els.results.innerHTML='<div class="empty">Run an analysis to see results and interpretation.</div>';updateAnalysisToggleButtons();return;}
     els.results.innerHTML=state.results.map(r=>`<div class="result"><h3>${escapeHtml(r.title)}</h3>${r.meta?`<p class="meta">${escapeHtml(r.meta)}</p>`:''}${r.lines.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`).join('');
+    updateAnalysisToggleButtons();
   }
   function phaseSpanFrom(phase,seriesIndex){const ser=state.parsed.series[seriesIndex],p=ser.phases[phase];return {x1:p.startSession,x2:ser.maxSessions};}
   function parseSeriesFromCommand(command){
@@ -641,53 +907,53 @@ title: Reading Fluency</div>
     }
     return {command:s,seriesRef:explicit};
   }
-  function runAnalysis(command, inheritedSeriesRef=null){
+  function runAnalysis(command, inheritedSeriesRef=null, analysisId=null){
     if(!state.parsed){status('Load valid data first.','error');return;} const raw=String(command||'').trim(); if(!raw)return;
     try{
       const extracted=parseSeriesFromCommand(raw);
       const natural=normalizeCommand(extracted.command);
       const seriesRef=extracted.seriesRef!==null?extracted.seriesRef:inheritedSeriesRef;
-      if(natural.multi){ natural.commands.forEach(c=>runAnalysis(c,seriesRef)); return; }
+      if(natural.multi){ natural.commands.forEach(c=>runAnalysis(c,seriesRef,null)); return; }
       const parts=natural.command.split(',').map(s=>s.trim()).filter(Boolean), kind=parts[0].toLowerCase();
       const si=requireAnalysisSeries(seriesRef), ser=state.parsed.series[si], overlayColor=seriesStyles[si%seriesStyles.length].stroke;
       if(kind==='ghost'){ghostSession(Number(parts[1]),si);return;}
       if(kind==='restore'){restoreSession(Number(parts[1]),si);return;}
       if(['level','iqrlevel','trend','iqrtrend','whiskertrend','whisker-level','whiskerlevel'].includes(kind)){
-        const ph=phaseIndex(parts[1]||'1');if(ph<0)throw new Error('Phase not found.'); const pts=activePoints(ph,si); if(!pts.length)throw new Error(`No active observations in ${ser.label}, ${state.parsed.phaseNames[ph]}.`); const span=phaseSpanFrom(ph,si);
+        const ph=phaseIndex(parts[1]||'1',si);if(ph<0)throw new Error('Phase not found.'); const pts=activePoints(ph,si); if(!pts.length)throw new Error(`No active observations in ${ser.label}, ${state.parsed.phaseNames[ph]}.`); const span=phaseSpanFrom(ph,si);
         if(kind==='level'||kind==='iqrlevel'||kind==='whisker-level'||kind==='whiskerlevel'){
-          const med=median(pts.map(p=>p.score)); state.overlays.push({type:'hline',...span,y:med,color:overlayColor,seriesIndex:si}); let lines=[`Median level = ${fmt(med,3)}.`];
-          if(kind!=='level'){const res=pts.map(p=>p.score-med),q1=quantile(res,.25),q3=quantile(res,.75);state.overlays.push({type:'band',...span,low:med+q1,high:med+q3,color:overlayColor,seriesIndex:si});lines.push(`Residual Q1 = ${fmt(q1,3)}; Q3 = ${fmt(q3,3)}.`);}
-          addResult(`${displayKind(kind)} — ${ser.label} — ${state.parsed.phaseNames[ph]}`,lines,`Series ${si+1}; n=${pts.length}`); renderGraph(); return;
+          const med=median(pts.map(p=>p.score)); state.overlays.push({type:'hline',...span,y:med,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})}); let lines=[`Median level = ${fmt(med,3)}.`];
+          if(kind!=='level'){const res=pts.map(p=>p.score-med),q1=quantile(res,.25),q3=quantile(res,.75);state.overlays.push({type:'band',...span,low:med+q1,high:med+q3,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});lines.push(`Residual Q1 = ${fmt(q1,3)}; Q3 = ${fmt(q3,3)}.`);}
+          addResult(`${displayKind(kind)} — ${ser.label} — ${state.parsed.phaseNames[ph]}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId); renderGraph(); return;
         }
         const tr=theilSen(pts), angle=Math.atan(tr.slope)*180/Math.PI, dir=tr.slope>0?'increasing':tr.slope<0?'decreasing':'flat';
-        state.overlays.push({type:'trend',...span,...tr,color:overlayColor,seriesIndex:si});
+        state.overlays.push({type:'trend',...span,...tr,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
         let lines=[`Theil–Sen slope = ${fmt(tr.slope,3)} per session (${dir}); angle = ${fmt(angle,1)}°.`];
         if(kind==='iqrtrend'||kind==='whiskertrend'){
           const iqrStats=trendIQRMargin(pts,tr);
-          state.overlays.push({type:'trendBand',...span,...tr,q1:iqrStats.q1,q3:iqrStats.q3,color:overlayColor,seriesIndex:si});
+          state.overlays.push({type:'trendBand',...span,...tr,q1:iqrStats.q1,q3:iqrStats.q3,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
           lines.push(`Residual Q1 = ${fmt(iqrStats.q1,3)}; Q3 = ${fmt(iqrStats.q3,3)}; residual IQR = ${fmt(iqrStats.iqr,3)}.`);
         }
-        addResult(`${displayKind(kind)} — ${ser.label} — ${state.parsed.phaseNames[ph]}`,lines,`Series ${si+1}; n=${pts.length}`); renderGraph(); return;
+        addResult(`${displayKind(kind)} — ${ser.label} — ${state.parsed.phaseNames[ph]}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId); renderGraph(); return;
       }
-      const pA=phaseIndex(parts[1]||'1'),pB=phaseIndex(parts[2]||'2'); if(pA<0||pB<0)throw new Error('Comparison phase not found.'); const a=activeScores(pA,si),b=activeScores(pB,si),dir=state.direction,alpha=Number(els.alphaInput.value)||.05;
+      const pA=phaseIndex(parts[1]||'1',si),pB=phaseIndex(parts[2]||'2',si); if(pA<0||pB<0)throw new Error('Comparison phase not found.'); const a=activeScores(pA,si),b=activeScores(pB,si),dir=state.direction,alpha=Number(els.alphaInput.value)||.05;
       if(!a.length||!b.length)throw new Error(`Both phases need active observations for ${ser.label}.`);
       if(kind==='pnd'){
-        const criterion=dir==='decrease'?Math.min(...a):Math.max(...a),qual=b.filter(v=>dir==='decrease'?v<criterion:v>criterion).length,pct=qual/b.length*100;state.overlays.push({type:'criterion',x1:ser.phases[pA].startSession,x2:ser.maxSessions,y:criterion,color:overlayColor,seriesIndex:si});
-        let label=pct>=90?'Effective Treatment':pct>=70?'Questionable Treatment Effectiveness':pct>=50?'Unsuccessful Treatment':'No Difference Between Phases'; addResult(`PND — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`Criterion = ${fmt(criterion,3)}; ${qual}/${b.length} ${dir==='decrease'?'below':'above'} criterion.`,`PND = ${fmt(pct,1)}%. ${label}.`,`Direction used: ${dir==='decrease'?'lower':'higher'} scores indicate improvement.`],`Series ${si+1}`);renderGraph();return;
+        const criterion=dir==='decrease'?Math.min(...a):Math.max(...a),qual=b.filter(v=>dir==='decrease'?v<criterion:v>criterion).length,pct=qual/b.length*100;state.overlays.push({type:'criterion',x1:ser.phases[pA].startSession,x2:ser.maxSessions,y:criterion,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
+        let label=pct>=90?'Effective Treatment':pct>=70?'Questionable Treatment Effectiveness':pct>=50?'Unsuccessful Treatment':'No Difference Between Phases'; addResult(`PND — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`Criterion = ${fmt(criterion,3)}; ${qual}/${b.length} ${dir==='decrease'?'below':'above'} criterion.`,`PND = ${fmt(pct,1)}%. ${label}.`,`Direction used: ${dir==='decrease'?'lower':'higher'} scores indicate improvement.`],`Series ${si+1}`,analysisId);renderGraph();return;
       }
       if(kind==='m-w'||kind==='mw'||kind==='mann-whitney'||kind==='mannwhitney'){
-        const r=mannWhitney(a,b),sig=r.p<alpha; const non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length; addResult(`Mann–Whitney U — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`U = ${fmt(r.U,3)}, n₁ = ${a.length}, n₂ = ${b.length}, p ≈ ${fmt(r.p,4)}, α = ${fmt(alpha,3)}.`,sig?'The phase distributions differ significantly at the selected alpha level.':'The test is not significant at the selected alpha level; this does not demonstrate equivalence.',`Completely non-overlapping treatment observations = ${non}/${b.length} (${fmt(non/b.length*100,1)}%).`],`Series ${si+1}`);return;
+        const r=mannWhitney(a,b),sig=r.p<alpha; const non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length; addResult(`Mann–Whitney U — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`U = ${fmt(r.U,3)}, n₁ = ${a.length}, n₂ = ${b.length}, p ≈ ${fmt(r.p,4)}, α = ${fmt(alpha,3)}.`,sig?'The phase distributions differ significantly at the selected alpha level.':'The test is not significant at the selected alpha level; this does not demonstrate equivalence.',`Completely non-overlapping treatment observations = ${non}/${b.length} (${fmt(non/b.length*100,1)}%).`],`Series ${si+1}`,analysisId);return;
       }
       if(kind==='trendbinomial'||kind==='trend-binomial'||kind==='trend+0.3iqr'||kind==='binomial'){
         const ptsA=activePoints(pA,si),tr=theilSen(ptsA),iqrStats=trendIQRMargin(ptsA,tr);
-        state.overlays.push({type:'trend',x1:ser.phases[pA].startSession,x2:ser.maxSessions,...tr,color:overlayColor,seriesIndex:si});
-        state.overlays.push({type:'trendMargin',x1:ser.phases[pA].startSession,x2:ser.maxSessions,...tr,margin:iqrStats.margin,color:overlayColor,seriesIndex:si});
+        state.overlays.push({type:'trend',x1:ser.phases[pA].startSession,x2:ser.maxSessions,...tr,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
+        state.overlays.push({type:'trendMargin',x1:ser.phases[pA].startSession,x2:ser.maxSessions,...tr,margin:iqrStats.margin,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
         const bPts=activePoints(pB,si),cls=classifyAgainstTrendMargin(bPts,tr,iqrStats.margin,dir),p=binomAtLeast(cls.successes,cls.n,.5),sig=p<alpha;
-        addResult(`Trend + 0.30 IQR / binomial — ${ser.label} — ${state.parsed.phaseNames[pA]} → ${state.parsed.phaseNames[pB]}`,[`Reference-phase Theil–Sen trend residual IQR = ${fmt(iqrStats.iqr,3)}; 0.30 × IQR = ${fmt(iqrStats.margin,3)}. Parallel bounds were projected at trend ± ${fmt(iqrStats.margin,3)}.`,`${state.parsed.phaseNames[pB]}: ${cls.above} observations above the upper bound, ${cls.below} below the lower bound, and ${cls.within} within the 0.30-IQR envelope.`,`${cls.successes}/${cls.n} observations (${fmt(cls.successes/cls.n*100,1)}%) crossed the ${dir==='decrease'?'lower':'upper'} boundary in the improvement direction.`,`One-sided binomial p ≈ ${fmt(p,4)} assuming p₀ = .50. ${sig?'Significant':'Not significant'} at α = ${fmt(alpha,3)}.`],`Series ${si+1}`);renderGraph();return;
+        addResult(`Trend + 0.30 IQR / binomial — ${ser.label} — ${state.parsed.phaseNames[pA]} → ${state.parsed.phaseNames[pB]}`,[`Reference-phase Theil–Sen trend residual IQR = ${fmt(iqrStats.iqr,3)}; 0.30 × IQR = ${fmt(iqrStats.margin,3)}. Parallel bounds were projected at trend ± ${fmt(iqrStats.margin,3)}.`,`${state.parsed.phaseNames[pB]}: ${cls.above} observations above the upper bound, ${cls.below} below the lower bound, and ${cls.within} within the 0.30-IQR envelope.`,`${cls.successes}/${cls.n} observations (${fmt(cls.successes/cls.n*100,1)}%) crossed the ${dir==='decrease'?'lower':'upper'} boundary in the improvement direction.`,`One-sided binomial p ≈ ${fmt(p,4)} assuming p₀ = .50. ${sig?'Significant':'Not significant'} at α = ${fmt(alpha,3)}.`],`Series ${si+1}`,analysisId);renderGraph();return;
       }
       if(kind==='t-u'||kind==='tu'||kind==='tau-u'||kind==='tauu'){
         const r=tauUTest(a,b,activePoints(pA,si),dir,els.tauCorrectionSelect.value),sig=r.p<alpha,non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length;
-        addResult(`Tau-U — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`Raw phase contrast τ = ${fmt(r.rawTau,3)}; baseline trend τ = ${fmt(r.baselineTau,3)}.`,`${r.correct?'Baseline-trend correction applied.':'Baseline-trend correction not applied.'} Final Tau-U = ${fmt(r.tau,3)}.`,`Approximate two-sided p = ${fmt(r.p,4)}; ${sig?'significant':'not significant'} at α = ${fmt(alpha,3)}.`,`Direction: ${dir==='decrease'?'decrease':'increase'} = improvement. Separately, completely non-overlapping treatment observations = ${fmt(non/b.length*100,1)}%.`],`Series ${si+1}; nA=${a.length}, nB=${b.length}`);return;
+        addResult(`Tau-U — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`Raw phase contrast τ = ${fmt(r.rawTau,3)}; baseline trend τ = ${fmt(r.baselineTau,3)}.`,`${r.correct?'Baseline-trend correction applied.':'Baseline-trend correction not applied.'} Final Tau-U = ${fmt(r.tau,3)}.`,`Approximate two-sided p = ${fmt(r.p,4)}; ${sig?'significant':'not significant'} at α = ${fmt(alpha,3)}.`,`Direction: ${dir==='decrease'?'decrease':'increase'} = improvement. Separately, completely non-overlapping treatment observations = ${fmt(non/b.length*100,1)}%.`],`Series ${si+1}; nA=${a.length}, nB=${b.length}`,analysisId);return;
       }
       throw new Error('Command not recognized.');
     }catch(e){status(e.message,'error');}
@@ -696,8 +962,8 @@ title: Reading Fluency</div>
   function normalizeCommand(raw){
     let s=raw.trim(); const low=s.toLowerCase();
     // multi-phase natural commands
-    if(/level lines? in (both|all) phases/.test(low)){return {multi:true,commands:Array.from({length:state.parsed.phaseCount},(_,i)=>`Level, ${i+1}`)}};
-    if(/trend lines? in (both|all) phases/.test(low)){return {multi:true,commands:Array.from({length:state.parsed.phaseCount},(_,i)=>`Trend, ${i+1}`)}};
+    if(/level lines? in (both|all) phases/.test(low)){const si=selectedAnalysisSeries();const n=si>=0?state.parsed.series[si].phases.length:state.parsed.phaseCount;return {multi:true,commands:Array.from({length:n},(_,i)=>`Level, ${i+1}`)}};
+    if(/trend lines? in (both|all) phases/.test(low)){const si=selectedAnalysisSeries();const n=si>=0?state.parsed.series[si].phases.length:state.parsed.phaseCount;return {multi:true,commands:Array.from({length:n},(_,i)=>`Trend, ${i+1}`)}};
     let m=low.match(/ghost\s+(?:session\s+)?(\d+)/);if(m)return {command:`ghost, ${m[1]}`};
     m=low.match(/restore\s+(?:session\s+)?(\d+)/);if(m)return {command:`restore, ${m[1]}`};
     m=low.match(/(?:tau[- ]?u|t-u).*?(?:phase\s*)?(\d+).*?(?:phase\s*)?(\d+)/);if(m)return {command:`T-U, ${m[1]}, ${m[2]}`};
@@ -724,8 +990,8 @@ title: Reading Fluency</div>
 
   function applyGraphNatural(cmd){
     if(!state.parsed){status('Load valid data first.','error');return;} const s=cmd.trim(),low=s.toLowerCase(); if(!s)return;
-    let m=low.match(/y[- ]?axis\D*(-?\d+(?:\.\d+)?)\D+(?:to|through|-)\D*(-?\d+(?:\.\d+)?)/);if(m){els.yMinInput.value=m[1];els.yMaxInput.value=m[2];renderGraph();status('Y-axis range updated.','ok');return;}
-    m=s.match(/^title\s*:\s*(.+)$/i);if(m){els.titleInput.value=m[1].trim();renderGraph();return;}
+    let m=low.match(/y[- ]?axis\D*(-?\d+(?:\.\d+)?)\D+(?:to|through|-)\D*(-?\d+(?:\.\d+)?)/);if(m){els.yAutoCheck.checked=false;els.yMinInput.disabled=false;els.yMaxInput.disabled=false;els.yMinInput.value=m[1];els.yMaxInput.value=m[2];saveSelectedGraphControls();status(`Graph ${selectedControlGraph()+1} Y-axis range updated.`,'ok');return;}
+    m=s.match(/^title\s*:\s*(.+)$/i);if(m){els.titleInput.value=m[1].trim();renderGraph();return;}m=s.match(/^graph\s*label\s*:\s*(.+)$/i);if(m){els.graphLabelInput.value=m[1].trim();saveSelectedGraphControls();return;}
     m=low.match(/marker(?: size)?\s*(?:to|=)?\s*(\d+(?:\.\d+)?)/);if(m){els.markerSizeInput.value=clamp(Number(m[1]),2,12);renderGraph();return;}
     if(/hide (?:the )?grid/.test(low)){els.gridCheck.checked=false;renderGraph();return;} if(/show (?:the )?grid/.test(low)){els.gridCheck.checked=true;renderGraph();return;}
     if(/hide phase labels/.test(low)){els.phaseLabelsCheck.checked=false;renderGraph();return;} if(/show phase labels/.test(low)){els.phaseLabelsCheck.checked=true;renderGraph();return;}
@@ -746,20 +1012,23 @@ title: Reading Fluency</div>
   }
 
   function loadData(){
-    try{syncPhaseNameInputs(); const priorSeriesLabel=els.analysisSeriesSelect?.selectedOptions[0]?.dataset?.label||''; const priorGoalSeriesLabel=els.goalSeriesSelect?.selectedOptions[0]?.dataset?.label||''; const priorGoalLines=JSON.parse(JSON.stringify(state.goalLines||[])); state.parsed=parseData(els.dataInput.value); state.sourceText=els.dataInput.value; state.direction=els.directionSelect.value; state.ghosted=new Set(state.parsed.ghostedKeys||[]); state.goalLines=normalizeGoalLinesAfterParse(priorGoalLines); state.overlays=[];state.results=[];renderResults(); updateAnalysisSeriesOptions(priorSeriesLabel); updateGoalControls(priorGoalSeriesLabel);
-      // automatic y max expansion only if default range would clip
-      const vals=state.parsed.series.flatMap(s=>s.points.map(p=>p.score));const max=Math.max(...vals),min=Math.min(...vals);if(max>Number(els.yMaxInput.value))els.yMaxInput.value=Math.ceil(max*1.1);if(min<Number(els.yMinInput.value))els.yMinInput.value=Math.floor(min);
+    try{
+      syncPhaseNameInputs();
+      const priorSeriesLabel=els.analysisSeriesSelect?.selectedOptions[0]?.dataset?.label||'',priorGoalSeriesLabel=els.goalSeriesSelect?.selectedOptions[0]?.dataset?.label||'',priorGoalLines=JSON.parse(JSON.stringify(state.goalLines||[])),priorGraphSettings=JSON.parse(JSON.stringify(state.graphSettings||[])),priorControlGraph=state.parsed?Math.max(0,selectedControlGraph()):0,priorAnalysisGraph=state.parsed?Math.max(0,selectedAnalysisGraph()):0;
+      state.parsed=parseData(els.dataInput.value);state.sourceText=els.dataInput.value;state.direction=els.directionSelect.value;state.ghosted=new Set(state.parsed.ghostedKeys||[]);syncGraphSettingsAfterParse(priorGraphSettings);state.goalLines=normalizeGoalLinesAfterParse(priorGoalLines);state.overlays=[];state.results=[];renderResults();
+      updateGraphEditOptions(Math.min(priorControlGraph,state.parsed.graphs.length-1));updateAnalysisGraphOptions(Math.min(priorAnalysisGraph,state.parsed.graphs.length-1));updateAnalysisSeriesOptions(priorSeriesLabel,selectedAnalysisGraph());updateGoalControls(priorGoalSeriesLabel);
       renderGraph();status('Data loaded. Would you like to adjust the graph or perform a visual or quantitative analysis?','ok');
     }catch(e){status(e.message,'error');}
   }
   function reset(){
-    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.yLabelInput.value='Score';els.yMinInput.value=0;els.yMaxInput.value=100;els.markerSizeInput.value=5;els.lineWidthInput.value=2;els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';state.ghosted.clear();state.overlays=[];state.goalLines=[];state.results=[];loadData();
+    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
   }
   function collectState(){
+    saveSelectedGraphControls(false);
     const modules=[...document.querySelectorAll('details.module')];
     return {
       format:'SCGraph2-state',
-      version:4,
+      version:7,
       savedAt:new Date().toISOString(),
       data:{
         source:els.dataInput.value,
@@ -773,6 +1042,8 @@ title: Reading Fluency</div>
         yLabel:els.yLabelInput.value,
         yMin:els.yMinInput.value,
         yMax:els.yMaxInput.value,
+        selectedGraphIndex:selectedControlGraph(),
+        graphSettings:JSON.parse(JSON.stringify(state.graphSettings||[])),
         markerSize:els.markerSizeInput.value,
         lineWidth:els.lineWidthInput.value,
         phaseLabels:els.phaseLabelInput.value,
@@ -785,6 +1056,8 @@ title: Reading Fluency</div>
       },
       analysis:{
         command:els.analysisCommand.value,
+        selectedGraphIndex:selectedAnalysisGraph(),
+        selectedGraphLabel:selectedAnalysisGraph()>=0?(state.graphSettings[selectedAnalysisGraph()]?.label||`Graph ${selectedAnalysisGraph()+1}`):'',
         selectedSeriesIndex:selectedAnalysisSeries(),
         selectedSeriesLabel:selectedAnalysisSeries()>=0&&state.parsed?state.parsed.series[selectedAnalysisSeries()].label:'',
         alpha:els.alphaInput.value,
@@ -810,16 +1083,176 @@ title: Reading Fluency</div>
       setTimeout(()=>{input.focus();input.select();},0);
     }catch(e){status(e.message,'error');}
   }
-  function saveStateJson(filename){
+  const SAVE_DB_NAME='SCGraph2-file-system';
+  const SAVE_DB_STORE='handles';
+  const SAVE_DIR_KEY='saveDirectory';
+  let saveDirectoryHandle=null;
+
+  function fileSystemApiPresent(){
+    return typeof window.showDirectoryPicker==='function' && typeof indexedDB!=='undefined';
+  }
+  function fileSystemAccessSupported(){
+    // Directory pickers are blocked by browser security in cross-origin iframes and
+    // are exposed only to secure contexts. Merely seeing showDirectoryPicker on
+    // window is therefore not sufficient to conclude that it can actually run.
+    let topLevel=false;
+    try{topLevel=(window.self===window.top);}catch{topLevel=false;}
+    return fileSystemApiPresent() && window.isSecureContext===true && topLevel;
+  }
+  function saveContextReason(){
+    let topLevel=false;
+    try{topLevel=(window.self===window.top);}catch{topLevel=false;}
+    if(!topLevel)return 'Embedded preview: browser security blocks choosing a persistent folder here.';
+    if(window.isSecureContext!==true)return 'This page is not running in a secure context; persistent folder access is unavailable.';
+    if(!fileSystemApiPresent())return 'This browser does not support persistent folder selection.';
+    return '';
+  }
+  function openSaveHandleDb(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open(SAVE_DB_NAME,1);
+      req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(SAVE_DB_STORE))req.result.createObjectStore(SAVE_DB_STORE);};
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error('Could not open SCGraph2 browser storage.'));
+    });
+  }
+  async function rememberSaveDirectory(handle){
+    if(!fileSystemAccessSupported())return;
+    const db=await openSaveHandleDb();
+    await new Promise((resolve,reject)=>{const tx=db.transaction(SAVE_DB_STORE,'readwrite');tx.objectStore(SAVE_DB_STORE).put(handle,SAVE_DIR_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+    db.close();
+  }
+  async function readRememberedSaveDirectory(){
+    if(!fileSystemAccessSupported())return null;
+    try{
+      const db=await openSaveHandleDb();
+      const handle=await new Promise((resolve,reject)=>{const tx=db.transaction(SAVE_DB_STORE,'readonly');const req=tx.objectStore(SAVE_DB_STORE).get(SAVE_DIR_KEY);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});
+      db.close(); return handle;
+    }catch{return null;}
+  }
+  async function forgetRememberedSaveDirectory(){
+    saveDirectoryHandle=null;
+    if(fileSystemAccessSupported()){
+      try{const db=await openSaveHandleDb();await new Promise((resolve,reject)=>{const tx=db.transaction(SAVE_DB_STORE,'readwrite');tx.objectStore(SAVE_DB_STORE).delete(SAVE_DIR_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}catch{}
+    }
+    updateSaveLocationUi();
+  }
+  function updateSaveLocationUi(){
+    const supported=fileSystemAccessSupported();
+    const name=saveDirectoryHandle?.name||'Not selected';
+    const loc=$('saveLocationFolderName'),stateName=$('saveStateFolderName'),btn=$('saveLocationBtn'),modeIndicator=$('saveModeIndicator'),note=$('saveLocationSupportNote'),choose=$('chooseSaveLocationBtn'),change=$('changeSaveLocationFromStateBtn'),openDirect=$('openDirectSaveLocationBtn'),fallback=$('saveLocationFallbackNote');
+    let topLevel=false; try{topLevel=(window.self===window.top);}catch{topLevel=false;}
+    if(loc)loc.textContent=supported?(saveDirectoryHandle?.name||'No folder selected'):'Browser downloads';
+    if(stateName)stateName.textContent=(supported&&saveDirectoryHandle)?saveDirectoryHandle.name:'Browser downloads';
+    if(btn){
+      btn.style.display=supported?'':'none';
+      btn.title=(supported&&saveDirectoryHandle)?`Save folder: ${name}`:'Choose or change the folder used for SCGraph2 saves and exports';
+    }
+    if(modeIndicator){
+      modeIndicator.style.display=supported?'none':'';
+      modeIndicator.textContent='Open directly to save/export';
+      modeIndicator.title=`${saveContextReason()} Embedded previews may also block ordinary downloads. Open SCGraph2 as a top-level page to use file operations reliably.`;
+    }
+    // Never leave a disabled-looking control that silently ignores a click. If the
+    // browser cannot legally open a directory picker, hide that action entirely.
+    if(choose){
+      choose.disabled=false;
+      choose.style.display=supported?'':'none';
+      choose.title='Choose a folder and remember it locally';
+    }
+    if(change){
+      change.disabled=false;
+      change.style.display=supported?'':'none';
+      change.title='Choose or change the remembered save folder';
+    }
+    if(openDirect){
+      openDirect.style.display=(!supported&&!topLevel)?'':'none';
+      openDirect.title='Open this SCGraph2 page in a top-level browser tab so the browser can permit folder selection.';
+    }
+    if(fallback)fallback.style.display=supported?'none':'';
+    if(note)note.textContent=supported
+      ? (saveDirectoryHandle?'This folder is remembered locally. If write permission has expired, SCGraph2 will request it again; if permission is denied, the file falls back to a browser download.':'Folder access is available in this page. Click Save Location or Choose Folder… to select and remember a writable folder.')
+      : `${saveContextReason()} SCGraph2 cannot override this browser security restriction. Embedded previews may also block downloads; open SCGraph2 directly for reliable Save State and Export.`;
+  }
+  async function restoreRememberedSaveDirectory(){
+    saveDirectoryHandle=await readRememberedSaveDirectory();
+    updateSaveLocationUi();
+  }
+  async function chooseSaveDirectory(){
+    if(!fileSystemAccessSupported()){
+      updateSaveLocationUi();
+      status(`${saveContextReason()} Save/Export will use normal browser downloads.`, 'error');
+      return null;
+    }
+    try{
+      const handle=await window.showDirectoryPicker({id:'scgraph2-save-location',mode:'readwrite'});
+      saveDirectoryHandle=handle;
+      await rememberSaveDirectory(handle);
+      updateSaveLocationUi();
+      status(`Save location set to ${handle.name}.`,'ok');
+      return handle;
+    }catch(e){
+      if(e&&e.name==='AbortError')return null;
+      status(`Could not set save location: ${e.message||e}`,'error');
+      return null;
+    }
+  }
+  async function directoryWritePermission(handle,request=false){
+    if(!handle)return false;
+    try{
+      const opts={mode:'readwrite'};
+      // Reauthorization must be requested directly from the user-initiated Save/Export click.
+      // Querying first and awaiting it can consume the browser's transient user activation.
+      if(request&&typeof handle.requestPermission==='function'){
+        const p=await handle.requestPermission(opts);
+        return p==='granted';
+      }
+      if(typeof handle.queryPermission!=='function')return true;
+      return (await handle.queryPermission(opts))==='granted';
+    }catch{return false;}
+  }
+  async function ensureSaveDirectory(){
+    if(!fileSystemAccessSupported()||!saveDirectoryHandle)return null;
+    if(await directoryWritePermission(saveDirectoryHandle,true))return saveDirectoryHandle;
+    status(`Write permission for ${saveDirectoryHandle.name} was not granted; this file will be downloaded by the browser instead.`,'error');
+    return null;
+  }
+  async function writeBlobToDirectory(blob,name){
+    const dir=await ensureSaveDirectory();
+    if(!dir)return false;
+    try{
+      const fh=await dir.getFileHandle(name,{create:true});
+      const writable=await fh.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      status(`${name} saved to ${dir.name}.`,'ok');
+      return true;
+    }catch(e){
+      status(`Could not save ${name} to ${dir.name}: ${e.message||e}`,'error');
+      return false;
+    }
+  }
+  async function saveBlob(blob,name){
+    // A remembered folder is an enhancement, never a prerequisite for saving.
+    // Embedded previews, unsupported browsers, expired permissions, or a missing
+    // folder handle all fall back to an ordinary browser download.
+    if(fileSystemAccessSupported()&&saveDirectoryHandle){
+      const ok=await writeBlobToDirectory(blob,name);
+      if(ok)return true;
+    }
+    const requested=downloadBlob(blob,name);
+    status(`${name} sent to the browser's download location${fileSystemAccessSupported()&&!saveDirectoryHandle?' (no remembered folder selected)':''}.`,'ok');
+    return requested;
+  }
+  async function saveStateJson(filename){
     try{
       if(!state.parsed)throw new Error('Load valid data before saving the state.');
       const name=normalizedJsonFilename(filename);
       const payload=collectState();
       const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-      downloadBlob(blob,name);
+      const saved=await saveBlob(blob,name);
+      if(!saved)return;
       const dlg=$('saveStateDialog');if(dlg.open){dlg.close?dlg.close():dlg.removeAttribute('open');}
       $('saveStateFilename').value=name;
-      status(`SCGraph2 state saved as ${name}.`,'ok');
     }catch(e){status(e.message,'error');}
   }
   function applySavedState(payload){
@@ -836,43 +1269,6 @@ title: Reading Fluency</div>
     els.titleInput.value=typeof g.title==='string'?g.title:'Performance Scores Over Sessions';
     els.xLabelInput.value=typeof g.xLabel==='string'?g.xLabel:'Session';
     els.yLabelInput.value=typeof g.yLabel==='string'?g.yLabel:'Score';
-    els.yMinInput.value=g.yMin!==undefined?g.yMin:0;
-    els.yMaxInput.value=g.yMax!==undefined?g.yMax:100;
-    els.markerSizeInput.value=g.markerSize!==undefined?g.markerSize:5;
-    els.lineWidthInput.value=g.lineWidth!==undefined?g.lineWidth:2;
-    els.gridCheck.checked=!!g.grid;
-    els.legendCheck.checked=g.legend!==false;
-    els.phaseLabelsCheck.checked=g.showPhaseLabels!==false;
-    els.showGhostCheck.checked=g.showGhosts!==false;
-    els.graphCommand.value=typeof g.graphCommand==='string'?g.graphCommand:'';
-    els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';
-    els.alphaInput.value=a.alpha!==undefined?a.alpha:.05;
-    els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';
-    // Reparse and validate the authoritative data stream first. loadData intentionally clears derived analyses.
-    loadData();
-    if(!state.parsed)throw new Error('The saved data could not be restored.');
-    state.goalLines=normalizeGoalLinesAfterParse(Array.isArray(g.goalLines)?g.goalLines:[]);
-    renderGoalLineList();
-    let selected=-1;
-    if(typeof a.selectedSeriesLabel==='string'&&a.selectedSeriesLabel){selected=state.parsed.series.findIndex(s=>s.label===a.selectedSeriesLabel);}
-    if(selected<0&&Number.isInteger(Number(a.selectedSeriesIndex))){const n=Number(a.selectedSeriesIndex);if(n>=0&&n<state.parsed.series.length)selected=n;}
-    if(state.parsed.series.length===1)selected=0;
-    if(selected>=0)els.analysisSeriesSelect.value=String(selected);
-    else if(state.parsed.series.length>1)els.analysisSeriesSelect.value='';
-    const overlays=Array.isArray(a.overlays)?a.overlays:[];
-    state.overlays=overlays.filter(o=>o&&typeof o==='object'&&Number.isInteger(Number(o.seriesIndex))&&Number(o.seriesIndex)>=0&&Number(o.seriesIndex)<state.parsed.series.length);
-    state.results=Array.isArray(a.results)?a.results.filter(r=>r&&typeof r==='object'&&typeof r.title==='string'&&Array.isArray(r.lines)):[];
-    state.direction=els.directionSelect.value;
-    renderResults();renderGraph();
-    const moduleEls=[...document.querySelectorAll('details.module')];
-    if(ui.modulesOpenByName&&typeof ui.modulesOpenByName==='object'){
-      moduleEls.forEach(d=>{const key=d.dataset.module;if(key&&Object.prototype.hasOwnProperty.call(ui.modulesOpenByName,key))d.open=!!ui.modulesOpenByName[key];});
-    }else if(Array.isArray(ui.modulesOpen)){
-      // SCGraph2 state versions 1–2 stored accordion state by the former DOM order:
-      // Graph, Graph Controls, Data Input, Analysis. Restore by semantic module key.
-      const legacyKeys=['graph','controls','data','analysis'];
-      legacyKeys.forEach((key,i)=>{const d=moduleEls.find(el=>el.dataset.module===key);if(d&&i<ui.modulesOpen.length)d.open=!!ui.modulesOpen[i];});
-    }
     status(`SCGraph2 state restored${payload.savedAt?` from ${new Date(payload.savedAt).toLocaleString()}`:''}.`,'ok');
   }
   function loadStateJsonFile(file){
@@ -882,27 +1278,173 @@ title: Reading Fluency</div>
     reader.onerror=()=>status('Could not read the selected JSON file.','error');
     reader.readAsText(file);
   }
-  function exportSvg(){const svg=els.graphWrap.querySelector('svg');if(!svg)return;const blob=new Blob([new XMLSerializer().serializeToString(svg)],{type:'image/svg+xml'});downloadBlob(blob,'SCGraph2.svg');}
-  function exportPng(){const svg=els.graphWrap.querySelector('svg');if(!svg)return;const vb=(svg.getAttribute('viewBox')||'0 0 1000 600').split(/\s+/).map(Number),ratio=(vb[3]||600)/(vb[2]||1000),xml=new XMLSerializer().serializeToString(svg),url=URL.createObjectURL(new Blob([xml],{type:'image/svg+xml'})),img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=2000;c.height=Math.max(1200,Math.round(2000*ratio));const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);c.toBlob(b=>downloadBlob(b,'SCGraph2.png'),'image/png');};img.src=url;}
-  function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
+  function standaloneSvgText(svg){
+    const clone=svg.cloneNode(true);
+    const vb=(clone.getAttribute('viewBox')||'0 0 1000 600').trim().split(/\s+/).map(Number);
+    const w=Number.isFinite(vb[2])&&vb[2]>0?vb[2]:1000;
+    const h=Number.isFinite(vb[3])&&vb[3]>0?vb[3]:600;
+    clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+    clone.setAttribute('width',String(w));
+    clone.setAttribute('height',String(h));
+    clone.setAttribute('style','font-family: Arial, Helvetica, sans-serif; background: #ffffff;');
+    return `<?xml version="1.0" encoding="UTF-8"?>\n${new XMLSerializer().serializeToString(clone)}`;
+  }
+  async function exportSvg(){
+    const svg=els.graphWrap.querySelector('svg');if(!svg){status('No graph is available to export.','error');return;}
+    try{
+      const blob=new Blob([standaloneSvgText(svg)],{type:'image/svg+xml;charset=utf-8'});
+      await saveBlob(blob,'SCGraph2.svg');
+    }catch(e){status(`Could not export SVG: ${e.message||e}`,'error');}
+  }
+  function svgNum(el,name,fallback=0){const n=Number(el.getAttribute(name));return Number.isFinite(n)?n:fallback;}
+  function canvasStroke(ctx,el){
+    const stroke=el.getAttribute('stroke');
+    if(!stroke||stroke==='none')return false;
+    ctx.strokeStyle=stroke;
+    ctx.lineWidth=Math.max(.1,svgNum(el,'stroke-width',1));
+    const dash=(el.getAttribute('stroke-dasharray')||'').trim();
+    ctx.setLineDash(dash?dash.split(/[ ,]+/).map(Number).filter(Number.isFinite):[]);
+    let alpha=1;
+    if(el.hasAttribute('stroke-opacity')){const op=Number(el.getAttribute('stroke-opacity'));if(Number.isFinite(op))alpha=op;}
+    else if(el.hasAttribute('opacity')){const op=Number(el.getAttribute('opacity'));if(Number.isFinite(op))alpha=op;}
+    ctx.globalAlpha=alpha;
+    return true;
+  }
+  function canvasFill(ctx,el,defaultFill=null){
+    const fill=el.getAttribute('fill')||defaultFill;
+    if(!fill||fill==='none')return false;
+    ctx.fillStyle=fill;
+    let alpha=1;
+    if(el.hasAttribute('fill-opacity')){const op=Number(el.getAttribute('fill-opacity'));if(Number.isFinite(op))alpha=op;}
+    else if(el.hasAttribute('opacity')){const op=Number(el.getAttribute('opacity'));if(Number.isFinite(op))alpha=op;}
+    ctx.globalAlpha=alpha;
+    return true;
+  }
+  function drawSvgPrimitiveToCanvas(ctx,el){
+    const tag=el.localName;
+    if(tag==='g'){Array.from(el.children).forEach(ch=>drawSvgPrimitiveToCanvas(ctx,ch));return;}
+    ctx.save();
+    const transform=el.getAttribute('transform')||'';
+    const rot=transform.match(/rotate\(\s*([-+\d.]+)(?:[ ,]+([-+\d.]+)[ ,]+([-+\d.]+))?\s*\)/i);
+    if(rot){const a=Number(rot[1])*Math.PI/180,cx=Number(rot[2]||0),cy=Number(rot[3]||0);ctx.translate(cx,cy);ctx.rotate(a);ctx.translate(-cx,-cy);}
+    if(tag==='rect'){
+      const x=svgNum(el,'x'),y=svgNum(el,'y'),w=svgNum(el,'width'),h=svgNum(el,'height');
+      if(canvasFill(ctx,el,'#000'))ctx.fillRect(x,y,w,h);
+      ctx.globalAlpha=1;if(canvasStroke(ctx,el))ctx.strokeRect(x,y,w,h);
+    }else if(tag==='line'){
+      if(canvasStroke(ctx,el)){ctx.beginPath();ctx.moveTo(svgNum(el,'x1'),svgNum(el,'y1'));ctx.lineTo(svgNum(el,'x2'),svgNum(el,'y2'));ctx.stroke();}
+    }else if(tag==='circle'){
+      const x=svgNum(el,'cx'),y=svgNum(el,'cy'),r=svgNum(el,'r');ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+      if(canvasFill(ctx,el,'#000'))ctx.fill();ctx.globalAlpha=1;if(canvasStroke(ctx,el))ctx.stroke();
+    }else if(tag==='polygon'){
+      const pts=(el.getAttribute('points')||'').trim().split(/\s+/).map(pair=>pair.split(',').map(Number)).filter(p=>p.length===2&&p.every(Number.isFinite));
+      if(pts.length){ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(const p of pts.slice(1))ctx.lineTo(p[0],p[1]);ctx.closePath();if(canvasFill(ctx,el,'#000'))ctx.fill();ctx.globalAlpha=1;if(canvasStroke(ctx,el))ctx.stroke();}
+    }else if(tag==='text'){
+      const size=Math.max(1,svgNum(el,'font-size',16));
+      const weight=el.getAttribute('font-weight')||'400';
+      const style=el.getAttribute('font-style')||'normal';
+      const family=el.getAttribute('font-family')||'Arial, Helvetica, sans-serif';
+      ctx.font=`${style} ${weight} ${size}px ${family}`;
+      ctx.textBaseline='alphabetic';
+      const anchor=el.getAttribute('text-anchor');ctx.textAlign=anchor==='middle'?'center':anchor==='end'?'right':'left';
+      if(canvasFill(ctx,el,'#111827'))ctx.fillText(el.textContent||'',svgNum(el,'x'),svgNum(el,'y'));
+    }
+    ctx.restore();
+  }
+  function pngBlobFromSvg(svg){
+    return new Promise((resolve,reject)=>{
+      try{
+        const vb=(svg.getAttribute('viewBox')||'0 0 1000 600').trim().split(/\s+/).map(Number);
+        const vx=Number.isFinite(vb[0])?vb[0]:0,vy=Number.isFinite(vb[1])?vb[1]:0,vw=Number.isFinite(vb[2])&&vb[2]>0?vb[2]:1000,vh=Number.isFinite(vb[3])&&vb[3]>0?vb[3]:600;
+        const targetW=2400,maxDim=10000;
+        let scale=targetW/vw;
+        if(vh*scale>maxDim)scale=maxDim/vh;
+        const c=document.createElement('canvas');c.width=Math.max(1,Math.round(vw*scale));c.height=Math.max(1,Math.round(vh*scale));
+        const ctx=c.getContext('2d');if(!ctx)throw new Error('This browser could not create a 2D canvas.');
+        ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+        ctx.setTransform(scale,0,0,scale,-vx*scale,-vy*scale);
+        Array.from(svg.children).forEach(el=>drawSvgPrimitiveToCanvas(ctx,el));
+        ctx.setTransform(1,0,0,1,0,0);
+        c.toBlob(blob=>blob?resolve(blob):reject(new Error('The browser could not encode the canvas as PNG.')),'image/png');
+      }catch(e){reject(e);}
+    });
+  }
+  async function exportPng(){
+    const svg=els.graphWrap.querySelector('svg');if(!svg){status('No graph is available to export.','error');return;}
+    try{const blob=await pngBlobFromSvg(svg);await saveBlob(blob,'SCGraph2.png');}catch(e){status(`Could not export PNG: ${e.message||e}`,'error');}
+  }
+  function downloadBlob(blob,name){
+    try{
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();
+      setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},4000);
+      return true;
+    }catch(e){status(`Could not start browser download for ${name}: ${e.message||e}`,'error');return false;}
+  }
 
-  $('renderBtn').addEventListener('click',loadData);$('applyGraphBtn').addEventListener('click',()=>{state.direction=els.directionSelect.value;renderGraph();status('Graph controls applied.','ok');});
+
+  $('renderBtn').addEventListener('click',loadData);$('applyGraphBtn').addEventListener('click',()=>{state.direction=els.directionSelect.value;saveSelectedGraphControls();status(`Graph ${selectedControlGraph()+1} controls applied.`,'ok');});
   $('graphCommandBtn').addEventListener('click',()=>applyGraphNatural(els.graphCommand.value)); els.graphCommand.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyGraphNatural(els.graphCommand.value);}});
   $('runAnalysisBtn').addEventListener('click',()=>runAnalysis(els.analysisCommand.value));els.analysisCommand.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();runAnalysis(els.analysisCommand.value);}});
-  document.querySelectorAll('[data-analysis]').forEach(b=>b.addEventListener('click',()=>{els.analysisCommand.value=b.dataset.analysis;runAnalysis(b.dataset.analysis);}));
-  els.analysisSeriesSelect.addEventListener('change',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();const si=selectedAnalysisSeries();status(si>=0?`Analysis series set to ${state.parsed.series[si].label}.`:'Choose the series you want to analyze.','ok');});
+  document.querySelectorAll('[data-analysis]').forEach(b=>{b.setAttribute('aria-pressed','false');b.addEventListener('click',()=>{
+    try{
+      const si=requireAnalysisSeries(null),key=analysisToggleKey(b.dataset.analysis,si);
+      els.analysisCommand.value=b.dataset.analysis;
+      if(analysisIsActive(key)){removeAnalysisById(key);status(`${b.textContent.trim().replace(/\s*✓$/,'')} removed for ${state.parsed.series[si].label}.`,'ok');return;}
+      runAnalysis(b.dataset.analysis,null,key);updateAnalysisToggleButtons();
+    }catch(e){status(e.message,'error');}
+  });});
+  els.analysisGraphSelect.addEventListener('change',()=>{const gi=selectedAnalysisGraph();updateAnalysisSeriesOptions('',gi);updateAnalysisToggleButtons();status(gi>=0?`Analysis graph set to ${state.graphSettings[gi]?.label||`Graph ${gi+1}`}.`:'Choose the graph you want to analyze.','ok');});
+  els.analysisSeriesSelect.addEventListener('change',()=>{const si=selectedAnalysisSeries();updateAnalysisToggleButtons();status(si>=0?`Analysis series set to ${state.parsed.series[si].label}.`:'Choose the series you want to analyze.','ok');});
   $('addGoalLineBtn').addEventListener('click',addOrUpdateGoalLine);
   $('clearGoalLinesBtn').addEventListener('click',()=>{state.goalLines=[];renderGoalLineList();renderGraph();status('Goal lines cleared.','ok');});
+  els.goalSeriesSelect.addEventListener('change',()=>{const si=Number(els.goalSeriesSelect.value);if(state.parsed&&Number.isInteger(si)&&state.parsed.series[si])updateGoalControls(state.parsed.series[si].label);});
   els.goalStartPhaseSelect.addEventListener('change',()=>{if(Number(els.goalEndPhaseSelect.value)<Number(els.goalStartPhaseSelect.value))els.goalEndPhaseSelect.value=els.goalStartPhaseSelect.value;});
   els.goalLineList.addEventListener('click',e=>{const b=e.target.closest('[data-remove-goal]');if(!b)return;state.goalLines=state.goalLines.filter(g=>g.id!==b.dataset.removeGoal);renderGoalLineList();renderGraph();status('Goal line removed.','ok');});
-  $('clearOverlaysBtn').addEventListener('click',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();status('Analysis overlays cleared. Goal lines were retained.','ok');});
+  $('clearOverlaysBtn').addEventListener('click',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();updateAnalysisToggleButtons();status('Analysis overlays cleared. Goal lines were retained.','ok');});
   $('restoreGhostsBtn').addEventListener('click',()=>{els.dataInput.value=els.dataInput.value.replace(/\(\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*\)/g,'$1');loadData();status('All parenthesized observations restored in the data stream.','ok');});
+  const startUpDialog=$('startUpDialog');
+  $('startUpBtn').addEventListener('click',()=>{if(typeof startUpDialog.showModal==='function')startUpDialog.showModal();else startUpDialog.setAttribute('open','');});
+  $('closeStartUpBtn').addEventListener('click',()=>startUpDialog.close?startUpDialog.close():startUpDialog.removeAttribute('open'));
+  startUpDialog.addEventListener('click',e=>{if(e.target===startUpDialog&&startUpDialog.close)startUpDialog.close();});
+
   const helpDialog=$('helpDialog');
   $('helpBtn').addEventListener('click',()=>{if(typeof helpDialog.showModal==='function')helpDialog.showModal();else helpDialog.setAttribute('open','');});
   $('closeHelpBtn').addEventListener('click',()=>helpDialog.close?helpDialog.close():helpDialog.removeAttribute('open'));
   helpDialog.addEventListener('click',e=>{if(e.target===helpDialog&&helpDialog.close)helpDialog.close();});
+  const saveLocationDialog=$('saveLocationDialog');
+  async function activateSaveLocation(){
+    updateSaveLocationUi();
+    if(fileSystemAccessSupported()){
+      await chooseSaveDirectory();
+      return;
+    }
+    status(`${saveContextReason()} Folder selection is unavailable here, and an embedded preview may also block downloads. Open SCGraph2 directly in its own Chrome/Edge tab to use Save Location, Save State, and Export reliably.`,'error');
+    if(typeof saveLocationDialog.showModal==='function')saveLocationDialog.showModal();else saveLocationDialog.setAttribute('open','');
+  }
+  $('saveLocationBtn').addEventListener('click',activateSaveLocation);
+  $('closeSaveLocationBtn').addEventListener('click',()=>saveLocationDialog.close?saveLocationDialog.close():saveLocationDialog.removeAttribute('open'));
+  $('chooseSaveLocationBtn').addEventListener('click',async()=>{
+    if(!fileSystemAccessSupported()){
+      updateSaveLocationUi();
+      status(`${saveContextReason()} A writable-folder picker cannot be opened from this page. Open SCGraph2 directly in its own Chrome/Edge tab; Save/Export use browser downloads here.`,'error');
+      return;
+    }
+    const h=await chooseSaveDirectory();
+    if(h&&saveLocationDialog.open){saveLocationDialog.close?saveLocationDialog.close():saveLocationDialog.removeAttribute('open');}
+  });
+  $('openDirectSaveLocationBtn').addEventListener('click',()=>{
+    try{
+      const opened=window.open(window.location.href,'_blank','noopener');
+      if(!opened)status('The browser blocked the new tab. Open the SCGraph2 GitHub Pages URL directly in a new tab, then choose Save Location.','error');
+    }catch(e){status('Open the SCGraph2 GitHub Pages URL directly in a new tab, then choose Save Location.','error');}
+  });
+  $('forgetSaveLocationBtn').addEventListener('click',async()=>{await forgetRememberedSaveDirectory();status('Remembered save location cleared.','ok');});
+  saveLocationDialog.addEventListener('click',e=>{if(e.target===saveLocationDialog&&saveLocationDialog.close)saveLocationDialog.close();});
+
   const saveStateDialog=$('saveStateDialog'),saveStateFilename=$('saveStateFilename');
   $('saveStateBtn').addEventListener('click',openSaveStateDialog);
+  $('changeSaveLocationFromStateBtn').addEventListener('click',async()=>{await chooseSaveDirectory();updateSaveLocationUi();});
   $('confirmSaveStateBtn').addEventListener('click',()=>saveStateJson(saveStateFilename.value));
   $('cancelSaveStateBtn').addEventListener('click',()=>saveStateDialog.close?saveStateDialog.close():saveStateDialog.removeAttribute('open'));
   $('closeSaveStateBtn').addEventListener('click',()=>saveStateDialog.close?saveStateDialog.close():saveStateDialog.removeAttribute('open'));
@@ -911,10 +1453,16 @@ title: Reading Fluency</div>
   $('loadStateBtn').addEventListener('click',()=>{$('loadStateInput').value='';$('loadStateInput').click();});
   $('loadStateInput').addEventListener('change',e=>loadStateJsonFile(e.target.files&&e.target.files[0]));
   $('exportSvgBtn').addEventListener('click',exportSvg);$('exportPngBtn').addEventListener('click',exportPng);$('resetBtn').addEventListener('click',reset);
-  [els.titleInput,els.xLabelInput,els.yLabelInput,els.yMinInput,els.yMaxInput,els.markerSizeInput,els.lineWidthInput,els.gridCheck,els.legendCheck,els.phaseLabelsCheck,els.showGhostCheck].forEach(el=>el.addEventListener('change',renderGraph));
+  [els.titleInput,els.xLabelInput,els.markerSizeInput,els.lineWidthInput,els.gridCheck,els.legendCheck,els.phaseLabelsCheck,els.showGhostCheck].forEach(el=>el.addEventListener('change',renderGraph));
+  els.graphEditSelect.addEventListener('change',loadSelectedGraphControls);
+  [els.graphLabelInput,els.yLabelInput,els.yMinInput,els.yMaxInput,els.yTickInput,els.knownMinInput,els.knownMaxInput].forEach(el=>el.addEventListener('change',()=>saveSelectedGraphControls()));
+  els.yAutoCheck.addEventListener('change',()=>{updateScaleControlStates();saveSelectedGraphControls();});
+  els.yAutoModeSelect.addEventListener('change',()=>{updateScaleControlStates();saveSelectedGraphControls();});
   els.phaseLabelInput.addEventListener('change',()=>{if(state.parsed){const si=els.goalSeriesSelect.value,sp=els.goalStartPhaseSelect.value,ep=els.goalEndPhaseSelect.value;state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);updateGoalControls(state.parsed.series[Number(si)]?.label||'');els.goalStartPhaseSelect.value=sp;els.goalEndPhaseSelect.value=ep;renderGoalLineList();renderGraph();}});
   els.directionSelect.addEventListener('change',()=>{state.direction=els.directionSelect.value;}); els.phaseNamesData.addEventListener('change',()=>{els.phaseLabelInput.value=els.phaseNamesData.value;if(state.parsed){const si=els.goalSeriesSelect.value,sp=els.goalStartPhaseSelect.value,ep=els.goalEndPhaseSelect.value;state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);updateGoalControls(state.parsed.series[Number(si)]?.label||'');els.goalStartPhaseSelect.value=sp;els.goalEndPhaseSelect.value=ep;renderGoalLineList();}renderGraph();});
-  window.addEventListener('resize',()=>{}); loadData();
+  window.addEventListener('resize',()=>{});
+  restoreRememberedSaveDirectory();
+  loadData();
 })();
 </script>
 </body>
