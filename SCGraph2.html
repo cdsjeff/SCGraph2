@@ -25,26 +25,144 @@
   button.danger{color:var(--danger)} button.small{padding:5px 8px;font-size:12px}
   main{padding:12px 14px 18px;max-width:1700px;margin:0 auto}
   .workspace{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(330px,.78fr);gap:12px;align-items:start}
-  .primary-stack,.secondary-stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .primary-stack{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .secondary-stack{display:grid;grid-template-rows:auto auto;gap:0;min-width:0}
   .primary-stack > details.module:first-child{min-height:0}
-  .secondary-stack{position:sticky;top:70px;height:calc(100vh - 82px);height:calc(100dvh - 82px);overflow:visible;padding-bottom:2px;min-height:0}
-  .secondary-stack > details.module{flex:0 0 auto;min-height:0}
-  .secondary-stack > details.module[open]{flex:1 1 0;display:flex;flex-direction:column;min-height:0}
+
+  /* Graph Controls + Analysis form one attached sticky right-hand stack.
+     Native <details> is unreliable with nested flex sizing, so this uses explicit
+     bounded grid tracks. The body of every open panel gets a real minmax(0,1fr)
+     track and therefore a definite scroll viewport. */
+  .secondary-stack{
+    position:sticky;
+    top:70px;
+    height:calc(100vh - 82px);
+    height:calc(100dvh - 82px);
+    overflow:hidden;
+    min-height:0;
+    align-self:start;
+  }
+  /* Both open: exact 50/50 split. */
+  .secondary-stack:has(> details.module:first-child[open]):has(> details.module:last-child[open]){
+    grid-template-rows:minmax(0,1fr) minmax(0,1fr);
+  }
+  /* Only Graph Controls open. */
+  .secondary-stack:has(> details.module:first-child[open]):not(:has(> details.module:last-child[open])){
+    grid-template-rows:minmax(0,1fr) auto;
+  }
+  /* Only Analysis open. */
+  .secondary-stack:not(:has(> details.module:first-child[open])):has(> details.module:last-child[open]){
+    grid-template-rows:auto minmax(0,1fr);
+  }
+
+  .secondary-stack.both-open{grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+  .secondary-stack.first-only{grid-template-rows:minmax(0,1fr) auto}
+  .secondary-stack.second-only{grid-template-rows:auto minmax(0,1fr)}
+  .secondary-stack > details.module{
+    min-height:0;
+    min-width:0;
+    box-shadow:none;
+    border-radius:0;
+  }
+  .secondary-stack > details.module:first-child{
+    border-radius:var(--radius) var(--radius) 0 0;
+  }
+  .secondary-stack > details.module:last-child{
+    border-radius:0 0 var(--radius) var(--radius);
+    margin-top:-1px;
+  }
+  .secondary-stack > details.module[open]{
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    min-height:0;
+    height:100%;
+    overflow:hidden;
+  }
+  .secondary-stack > details.module[open] > .module-body{
+    min-height:0;
+    height:100%;
+    max-height:none;
+    overflow-y:auto;
+    overflow-x:auto;
+    overscroll-behavior:contain;
+  }
   details.module{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;min-width:0}
   /* IMPORTANT: constrain the scrollable body itself, not <details>. Native <details>
      uses special internal layout in Chromium/Safari; clipping the outer element can
      hide content without making .module-body a scroll container. */
-  details.module[open]{display:block;min-height:0;max-height:none}
+  details.module[open]{min-height:0;max-height:none}
   summary{list-style:none;cursor:pointer;padding:11px 14px;font-weight:700;background:#fbfcfd;border-bottom:1px solid transparent;display:flex;align-items:center;justify-content:space-between;user-select:none;flex:0 0 auto}
   details[open] > summary{border-bottom-color:var(--line)} summary::-webkit-details-marker{display:none}
   summary::after{content:'▸';font-size:15px;color:var(--muted);transform:rotate(0deg);transition:.15s}details[open] summary::after{transform:rotate(90deg)}
   .module-body{padding:12px;min-height:0;overflow-y:auto;overflow-x:auto;max-height:56vh;max-height:56dvh;scrollbar-gutter:stable both-edges;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y pan-x}
   .graph-body{padding:8px 10px 10px;display:flex;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:auto;max-height:68vh;max-height:68dvh;scrollbar-gutter:stable both-edges}
   .primary-stack > details.module[data-module="data"][open] > .module-body{max-height:44vh;max-height:44dvh}
-  /* The two right-hand accordions share the available column dynamically.
-     If both are open, flex:1 gives them equal overall height. If one is closed,
-     its summary remains compact and the other open panel expands into the rest. */
-  .secondary-stack > details.module[open] > .module-body{flex:1 1 auto;height:auto;min-height:0;max-height:none;overflow-y:auto}
+
+  /* Unified accordion scrolling:
+     every open pane is a fixed header + minmax(0,1fr) scroll viewport. */
+  details.module[open]{
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    min-height:0;
+    overflow:hidden;
+  }
+  details.module[open] > .module-body{
+    min-height:0;
+    height:100%;
+    max-height:none;
+    overflow-y:auto;
+    overflow-x:auto;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable both-edges;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* Left-column panes receive bounded heights so their bodies can actually scroll. */
+  .primary-stack > details.module[data-module="graph"][open]{
+    height:min(68dvh,720px);
+  }
+  .primary-stack > details.module[data-module="data"][open]{
+    height:min(44dvh,460px);
+  }
+  .primary-stack > details.module[data-module="report"][open]:not(.report-overlay){
+    height:min(72dvh,760px);
+  }
+
+  /* Data Input: one continuous, viewport-aware internal scroll region.
+     Every field and the action buttons belong to the same scroll flow. */
+  .primary-stack > details.module[data-module="data"][open]{
+    height:clamp(190px,44dvh,460px); /* JS refines this to visible viewport space */
+  }
+  .primary-stack > details.module[data-module="data"][open] > .data-pane-body{
+    display:block;
+    height:100%;
+    min-height:0;
+    max-height:none;
+    padding:0;
+    overflow:hidden;
+  }
+  .data-scroll-content{
+    height:100%;
+    min-height:0;
+    overflow-y:auto;
+    overflow-x:auto;
+    padding:12px 12px 24px;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable both-edges;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y pan-x;
+  }
+  .data-action-footer{
+    display:flex;
+    gap:7px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-top:12px;
+    padding:10px 0 2px;
+    background:#fff;
+    border-top:1px solid var(--line);
+  }
+
   .module-body::-webkit-scrollbar{width:12px;height:12px}.module-body::-webkit-scrollbar-track{background:#f1f4f7}.module-body::-webkit-scrollbar-thumb{background:#a8b3bf;border:3px solid #f1f4f7;border-radius:999px}.module-body::-webkit-scrollbar-thumb:hover{background:#8795a3}
   #graphWrap{background:#fff;flex:0 0 auto;min-height:380px;border:1px solid #e2e6ea;display:flex;align-items:stretch;justify-content:stretch;overflow-x:auto;overflow-y:visible}
   #graphWrap svg{width:100%;height:auto;min-height:380px;display:block}
@@ -82,8 +200,134 @@
   dialog.save-dialog::backdrop{background:rgba(15,23,42,.36)}
   .save-body{padding:16px 18px 18px}.save-body p{font-size:12px;color:var(--muted);margin:0 0 12px}.save-body label{display:block;font-size:12px;font-weight:700;margin-bottom:5px}
   .save-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
-  @media (max-width: 1050px){.workspace{grid-template-columns:1fr}.secondary-stack{position:static;height:auto;overflow:visible}.secondary-stack > details.module,.secondary-stack > details.module[open]{flex:0 0 auto;display:block}.primary-stack > details.module:first-child{min-height:0}details.module[open]{max-height:none;min-height:0}.module-body,.graph-body,.secondary-stack > details.module[open] > .module-body{height:auto;min-height:0;max-height:58vh;max-height:58dvh;overflow-y:auto}.primary-stack > details.module[data-module="data"][open] > .module-body{max-height:48vh;max-height:48dvh}.grid3{grid-template-columns:1fr 1fr}}
+  /* Report workspace — same width as Data Input and attached directly beneath it. */
+  .primary-stack > details.module[data-module="data"]{
+    border-radius:var(--radius) var(--radius) 0 0;
+  }
+  .primary-stack > .report-module{
+    width:100%;
+    margin-top:-12px;
+    border-radius:0 0 var(--radius) var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .report-module{margin-top:0}
+  .report-module[open] > .module-body{overflow:auto;padding:0;background:#edf1f4}
+  .report-toolbar{position:sticky;top:0;z-index:3;background:#fff;border-bottom:1px solid var(--line);padding:9px 10px;display:flex;flex-direction:column;gap:7px}
+  .report-tools-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .report-tools-row .tool-group{display:flex;align-items:center;gap:5px;padding-right:8px;margin-right:2px;border-right:1px solid #dfe4ea;flex-wrap:wrap}
+  .report-tools-row .tool-group:last-child{border-right:0;padding-right:0}
+  .report-toolbar button{min-width:34px;padding:6px 8px}
+  .report-toolbar select{width:auto;min-width:112px;padding:6px 8px}
+  .report-toolbar .report-wide-select{min-width:170px;max-width:260px}
+  .report-paper-wrap{padding:18px;display:flex;justify-content:center}
+  .report-editor{width:min(8.5in,100%);min-height:10in;background:#fff;border:1px solid #cfd6de;box-shadow:0 5px 18px rgba(15,23,42,.10);padding:.68in .72in;color:#111827;line-height:1.48;font-family:Arial,Helvetica,sans-serif;font-size:12pt;outline:none}
+  .report-editor:focus{border-color:#8da9c2;box-shadow:0 0 0 3px rgba(31,78,121,.10),0 5px 18px rgba(15,23,42,.10)}
+  .report-editor:empty::before{content:'Begin the report here, or choose Insert Template.';color:#9aa4af;pointer-events:none}
+  .report-editor h1{font-size:20pt;margin:0 0 14px;line-height:1.2}
+  .report-editor h2{font-size:15pt;margin:18px 0 8px;line-height:1.25}
+  .report-editor p{margin:0 0 9px}
+  .report-editor ul,.report-editor ol{margin:4px 0 10px 24px}
+  .report-editor img{max-width:100%;height:auto;display:block;margin:10px auto}
+  .report-editor figure{margin:14px 0 18px;break-inside:avoid}
+  .report-editor figure svg{display:block;width:100%;height:auto;border:0}
+  .report-editor figcaption{font-size:10.5pt;color:#4b5563;margin-top:5px;text-align:left}
+  .report-editor table{width:100%;border-collapse:collapse;margin:12px 0 16px;font-size:10.5pt;break-inside:auto}
+  .report-editor th,.report-editor td{border:1px solid #aeb7c2;padding:5px 6px;text-align:left;vertical-align:top}
+  .report-editor th{background:#f1f4f6;font-weight:700}
+  .report-editor tr{break-inside:avoid}
+  .report-editor hr{border:0;border-top:1px solid #9ca3af;margin:16px 0}
+  .report-status{font-size:11px;color:#667085;margin-left:auto;padding:4px 2px}
+  .report-module.previewing .report-edit-tools{display:none}
+  .report-module.previewing .report-paper-wrap{padding-top:12px}
+  .report-module.previewing .report-editor{outline:none}
+
+  /* In-page Report overlay: uses the same Report accordion, editor, toolbar, and
+     header. Width/left/top/height are calculated from the existing left column. */
+  .primary-stack{position:relative}
+  .primary-stack > .report-module.report-overlay{
+    position:fixed!important;
+    z-index:9;
+    margin:0!important;
+    border-radius:var(--radius)!important;
+    box-shadow:0 18px 46px rgba(15,23,42,.22)!important;
+    overflow:hidden!important;
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+    min-height:0!important;
+    background:var(--panel);
+  }
+  .primary-stack > .report-module.report-overlay[open] > summary{
+    min-height:0;
+  }
+  .primary-stack > .report-module.report-overlay[open] > .module-body{
+    min-height:0!important;
+    height:100%!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overflow-x:auto!important;
+    overscroll-behavior:contain;
+  }
+  @media print{
+    @page{size:letter;margin:.65in}
+    body.report-printing{background:#fff}
+    body.report-printing header,
+    body.report-printing dialog,
+    body.report-printing .secondary-stack,
+    body.report-printing .primary-stack > details.module:not(.report-module),
+    body.report-printing .report-module > summary,
+    body.report-printing .report-toolbar{display:none!important}
+    body.report-printing main{max-width:none;margin:0;padding:0}
+    body.report-printing .workspace{display:block!important}
+    body.report-printing .primary-stack{display:block!important}
+    body.report-printing .report-module{display:block!important;width:100%!important;border:0!important;box-shadow:none!important;margin:0!important;background:#fff!important}
+    body.report-printing .report-module > .module-body{display:block!important;overflow:visible!important;max-height:none!important;padding:0!important;background:#fff!important}
+    body.report-printing .report-paper-wrap{padding:0!important;display:block!important}
+    body.report-printing .report-editor{width:100%!important;min-height:0!important;border:0!important;box-shadow:none!important;padding:0!important;outline:0!important;font-size:11pt!important}
+    body.report-printing .report-editor figure{break-inside:avoid}
+    body.report-printing .report-editor table{font-size:9.5pt}
+  }
+  @media (max-width: 1050px){
+    .workspace{grid-template-columns:1fr}
+    .secondary-stack{
+      position:static;
+      height:auto;
+      overflow:visible;
+      gap:12px;
+      display:flex;
+      flex-direction:column;
+    }
+    .secondary-stack > details.module,
+    .secondary-stack > details.module:first-child,
+    .secondary-stack > details.module:last-child{
+      border-radius:var(--radius);
+      margin-top:0;
+      box-shadow:var(--shadow);
+    }
+    .secondary-stack > details.module[open]{
+      display:grid;
+      grid-template-rows:auto minmax(0,1fr);
+      height:min(58dvh,560px);
+      min-height:0;
+      overflow:hidden;
+    }
+    .primary-stack > details.module:first-child{min-height:0}
+    details.module[open] > .module-body,
+    .graph-body,
+    .secondary-stack > details.module[open] > .module-body{
+      min-height:0;
+      height:100%;
+      max-height:none;
+      overflow-y:auto;
+      overflow-x:auto;
+    }
+    .primary-stack > details.module[data-module="data"][open]{height:clamp(190px,50dvh,460px)}
+    .primary-stack > details.module[data-module="data"][open] > .data-pane-body{height:100%;max-height:none;overflow:hidden}
+    .data-scroll-content{height:100%;min-height:0;overflow-y:auto}
+    .grid3{grid-template-columns:1fr 1fr}
+  }
   @media (max-width: 620px){header{height:auto;min-height:58px;align-items:flex-start;padding:10px;gap:8px}.brand span{display:none}.grid2,.grid3,.checks{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.header-actions{justify-content:flex-end}}
+
+
 </style>
 </head>
 <body>
@@ -92,6 +336,7 @@
   <div class="header-actions">
     <button id="startUpBtn" class="small">Start Up</button>
     <button id="helpBtn" class="small">Help</button>
+    <button id="reportBtn" class="small">Show Report</button>
     <button id="saveLocationBtn" class="small" title="Choose or change the folder used for SCGraph2 saves and exports">Save Location</button>
     <span id="saveModeIndicator" class="pill" style="display:none" title="File operations are restricted in this embedded preview">Open directly to save/export</span>
     <button id="saveStateBtn" class="small">Save State</button>
@@ -118,19 +363,73 @@
 
 <details class="module" data-module="data" open>
       <summary>Data Input</summary>
-      <div class="module-body">
-        <div class="field"><label for="dataInput">Single-case data</label><textarea id="dataInput" class="mono">Sniffing: 2,4,5,2|6,7,4,5</textarea>
-          <div class="hint">Format: <span class="kbd">Series Label: 1,2,3|4,5,6</span>. Use <span class="kbd">|</span> for a phase boundary. Plain adjacent series are plotted together. Put <span class="kbd">+</span> alone on a line between series to create stacked multiple-baseline tiers sharing one Session axis; put <span class="kbd">-</span> alone on a line to start a separate graph (up to 3 graph panels). Ghost a value with parentheses, e.g. <span class="kbd">1,2,(3)|4,5,6</span>.</div>
+      <div class="module-body data-pane-body">
+        <div class="data-scroll-content">
+          <div class="field"><label for="dataInput">Single-case data</label><textarea id="dataInput" class="mono">Sniffing: 2,4,5,2|6,7,4,5</textarea>
+            <div class="hint">Format: <span class="kbd">Series Label: 1,2,3|4,5,6</span>. Use <span class="kbd">|</span> for a phase boundary. Plain adjacent series are plotted together. Put <span class="kbd">+</span> alone on a line between series to create stacked multiple-baseline tiers sharing one Session axis; put <span class="kbd">-</span> alone on a line to start a separate graph (up to 3 graph panels). Ghost a value with parentheses, e.g. <span class="kbd">1,2,(3)|4,5,6</span>.</div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label for="phaseNamesData">Phase names (all series)</label><input id="phaseNamesData" type="text" placeholder="Baseline, Intervention"></div>
+            <div class="field"><label for="directionSelect">Improvement direction</label><select id="directionSelect"><option value="increase">Higher scores = improvement</option><option value="decrease">Lower scores = improvement</option></select></div>
+          </div>
+          <div class="field"><label for="notesInput">Notes / context</label><textarea id="notesInput" style="min-height:70px" placeholder="Optional context for interpretation"></textarea></div>
+          <div class="footer-note">Data are processed locally in this HTML file. SCGraph2 does not send the dataset anywhere.</div>
+          <div class="data-action-footer">
+            <button id="renderBtn" class="primary">Load & Graph Data</button>
+            <button id="restoreGhostsBtn">Un-ghost all points</button>
+          </div>
         </div>
-        <div class="grid2">
-          <div class="field"><label for="phaseNamesData">Phase names (all series)</label><input id="phaseNamesData" type="text" placeholder="Baseline, Intervention"></div>
-          <div class="field"><label for="directionSelect">Improvement direction</label><select id="directionSelect"><option value="increase">Higher scores = improvement</option><option value="decrease">Lower scores = improvement</option></select></div>
-        </div>
-        <div class="field"><label for="notesInput">Notes / context</label><textarea id="notesInput" style="min-height:70px" placeholder="Optional context for interpretation"></textarea></div>
-        <div class="row"><button id="renderBtn" class="primary">Load & Graph Data</button><button id="restoreGhostsBtn">Un-ghost all points</button></div>
-        <div class="footer-note">Data are processed locally in this HTML file. SCGraph2 does not send the dataset anywhere.</div>
       </div>
     </details>
+  <details class="module report-module" data-module="report" id="reportModule">
+    <summary>Report — Student Report Workspace <span id="reportSummaryStatus" class="pill" style="margin-left:auto;margin-right:10px">0 words</span></summary>
+    <div class="module-body">
+      <div class="report-toolbar">
+        <div class="report-tools-row report-edit-tools">
+          <div class="tool-group">
+            <select id="reportFormatSelect" aria-label="Paragraph style">
+              <option value="p">Normal</option>
+              <option value="h1">Heading 1</option>
+              <option value="h2">Heading 2</option>
+            </select>
+            <button type="button" data-report-command="bold" title="Bold"><strong>B</strong></button>
+            <button type="button" data-report-command="italic" title="Italic"><em>I</em></button>
+            <button type="button" data-report-command="insertUnorderedList" title="Bulleted list">• List</button>
+            <button type="button" data-report-command="insertOrderedList" title="Numbered list">1. List</button>
+            <button type="button" data-report-command="undo" title="Undo">↶</button>
+            <button type="button" data-report-command="redo" title="Redo">↷</button>
+          </div>
+          <div class="tool-group">
+            <button id="insertReportTemplateBtn" type="button">Insert Template</button>
+            <button id="insertReportNotesBtn" type="button">Insert Notes</button>
+            <button id="insertReportDividerBtn" type="button">Divider</button>
+          </div>
+        </div>
+        <div class="report-tools-row report-edit-tools">
+          <div class="tool-group">
+            <select id="reportGraphSelect" class="report-wide-select" aria-label="Graph to insert"><option value="all">All graphs</option></select>
+            <button id="insertReportGraphBtn" type="button">Insert Graph</button>
+          </div>
+          <div class="tool-group">
+            <select id="reportTableGraphSelect" class="report-wide-select" aria-label="Graph for data table"></select>
+            <select id="reportTableSeriesSelect" class="report-wide-select" aria-label="Series for data table"></select>
+            <button id="insertReportTableBtn" type="button">Insert Data Table</button>
+          </div>
+          <div class="tool-group">
+            <button id="insertReportResultsBtn" type="button">Insert Analysis Results</button>
+          </div>
+        </div>
+        <div class="report-tools-row report-actions">
+          <button id="reportPreviewBtn" type="button">Preview</button>
+          <button id="reportPdfBtn" class="primary" type="button">Save as PDF</button>
+          <span class="report-status" id="reportStatus">0 words · 0 graphs · 0 tables</span>
+        </div>
+      </div>
+      <div class="report-paper-wrap">
+        <article id="reportEditor" class="report-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="SCGraph2 report editor" spellcheck="true"></article>
+      </div>
+    </div>
+  </details>
     </div>
 
     <div class="secondary-stack">
@@ -156,7 +455,7 @@
           <div class="field"><label for="yTickInput">Y tick interval</label><input id="yTickInput" type="number" min="0" step="any" placeholder="Auto"></div>
         </div>
         <div class="checks">
-          <label><input type="checkbox" id="yAutoCheck"> Auto-scale selected graph Y axis</label>
+          <label><input type="checkbox" id="yAutoCheck" checked> Auto-scale selected graph Y axis</label>
         </div>
         <div class="grid3">
           <div class="field"><label for="yAutoModeSelect">Auto-scale method</label><select id="yAutoModeSelect">
@@ -227,7 +526,22 @@
         </div>
         <div class="grid2">
           <div class="field"><label for="alphaInput">Alpha</label><input id="alphaInput" type="number" min="0.001" max="0.5" step="0.001" value="0.05"></div>
-          <div class="field"><label for="tauCorrectionSelect">Tau-U baseline correction</label><select id="tauCorrectionSelect"><option value="auto">Auto when baseline trend is substantial</option><option value="yes">Always correct</option><option value="no">Do not correct</option></select></div>
+          <div class="field"><label for="tauCorrectionSelect">Tau-U baseline correction</label><select id="tauCorrectionSelect"><option value="auto">Auto when baseline improvement τ ≥ .20</option><option value="yes">Always correct</option><option value="no">Do not correct</option></select></div>
+        </div>
+        <div class="field" style="margin:2px 0 8px">
+          <label for="tauVizSelect">Tau-U visualization</label>
+          <select id="tauVizSelect">
+            <option value="both" selected>Both — raw outer rings + corrected inner rings</option>
+            <option value="raw">Raw Tau contributions</option>
+            <option value="corrected">Baseline-corrected Tau-U contributions</option>
+            <option value="off">Off</option>
+          </select>
+        </div>
+        <div class="checks" style="margin:0 0 8px">
+          <label><input type="checkbox" id="tauLegendCheck" checked> Show detailed Tau-U legend</label>
+        </div>
+        <div class="hint" style="margin-top:-3px;margin-bottom:8px">
+          The visualization is session-dependent. A solid outer ring shows each intervention point's raw A→B contribution. The colored intervention point shows cumulative Tau-U through that session. When baseline correction is active, a dashed gray ring shows the correction S_A/(nA×j) still acting at intervention session j. Its radius, line width, and opacity are normalized to B1 = 100%, so the ring visibly shrinks and fades as B observations accumulate. Dashed baseline rings show local evidence of preexisting trend.
         </div>
         <div class="subhead">Results</div>
         <div id="results"><div class="empty">Run an analysis to see results and interpretation.</div></div>
@@ -235,6 +549,8 @@
     </details>
     </div>
   </section>
+
+
 </main>
 
 <dialog id="startUpDialog" class="help-dialog" aria-labelledby="startUpTitle">
@@ -261,16 +577,19 @@ Accuracy: 40,45,50|70,78,85</div>
 
     <h3>3. Load and format the graph</h3>
     <p>Select <strong>Load &amp; Graph Data</strong>. In <strong>Graph Controls</strong>, choose the graph to edit. Each independent graph can have its own graph label, Y-axis label, vertical range, tick interval, and autoscale method.</p>
-    <p><strong>Autoscale choices</strong> include the single-case rules for nonnegative/unbounded measures, known measurement bounds, measures allowing negative values, and the original SCGraph heuristic. The current effective scale is shown in Graph Controls.</p>
+    <p><strong>Auto-scale is on by default</strong> for new graphs. Autoscale choices include the single-case rules for nonnegative/unbounded measures, known measurement bounds, measures allowing negative values, and the original SCGraph heuristic. Turn Auto-scale off for a manual Y range. The current effective scale is shown in Graph Controls.</p>
 
     <h3>4. Add goal lines when needed</h3>
     <p>Under <strong>Graph Controls → Goal Lines</strong>, choose the series/tier, phase span, and Y value. Goal lines are retained independently of analysis overlays and are saved in the JSON state.</p>
 
     <h3>5. Run an analysis</h3>
-    <p>At the <strong>top of the Analysis panel</strong>, choose <strong>Graph to analyze</strong> first and then <strong>Series to analyze</strong>. The two selectors appear above the analysis buttons so the current target remains visible before you turn analyses on or off. Visual analyses include Level, Trend, IQR variants, and Trend + 0.3 IQR. Quantitative analyses include PND, Mann–Whitney, Trend + 0.3 IQR binomial, and Tau-U.</p>
+    <p>At the <strong>top of the Analysis panel</strong>, choose <strong>Graph to analyze</strong> first and then <strong>Series to analyze</strong>. The two selectors appear above the analysis buttons so the current target remains visible before you turn analyses on or off. Visual analyses include Level, Trend, IQR variants, and Trend + 0.3 IQR. Quantitative analyses include PND, Mann–Whitney, Trend + 0.3 IQR binomial, and Tau-U. Tau-U uses the Parker-style S-statistic correction (S_AB − S_A)/(nA×nB). Its data-anchored teaching visualization is session-dependent: intervention points are colored by the cumulative effect, solid outer rings show each point's raw A→B contribution, and—only when baseline correction is actually applied—dashed gray B rings show the remaining baseline correction S_A/(nA×j). The detailed Tau-U legend reports baseline τ and S_A, whether correction was applied, the Auto criterion when relevant, and explicitly explains why waning gray rings are absent when no correction occurs. Its explanatory rows are vertically separated so the lower direction key remains readable.</p>
 
     <h3>6. Choose a save location, then save or export</h3>
     <p>Use <strong>Save Location</strong> to open the browser folder chooser and remember a folder when SCGraph2 is running as a top-level secure page in a supporting browser. Embedded previews cannot open persistent directory pickers; SCGraph2 therefore hides the folder-picker action in that context and <strong>Save State</strong>, <strong>Export SVG</strong>, and <strong>Export PNG</strong> automatically use normal browser downloads. <strong>Load State</strong> restores a saved JSON session from any location you select.</p>
+
+    <h3>7. Build a student report</h3>
+    <p>Use <strong>Show Report</strong> in the header to lift the existing Report accordion into an overlay directly over the left panel; the button changes to <strong>Hide Report</strong> while the overlay is visible. The overlay is the same Report editor and toolbar—not a second copy—so edits, formatting, inserted graphs, tables, analysis results, and autosave are identical in both views. Report content is automatically saved locally as you work and is also included in SCGraph2 JSON state files. Use <strong>Save as PDF</strong> to open the browser print dialog and choose <strong>Save as PDF</strong>.</p>
 
     <p><strong>Tip:</strong> Set the analysis target with the darker <strong>Graph to analyze</strong> and <strong>Series to analyze</strong> selectors at the top of the Analysis panel. Analysis buttons are independent toggles: click once to add that analysis and click again to remove only that analysis. Active buttons are highlighted. Data Input stays directly below the graph. On wide screens, Graph Controls and Analysis split the right column equally when both are open; closing one lets the other expand. Use <strong>Help</strong> for the full command and analysis reference.</p>
   </div>
@@ -286,12 +605,12 @@ Accuracy: 40,45,50|70,78,85</div>
     <p>For the condensed workflow, use the <strong>Start Up</strong> button in the header. The full reference below documents data syntax, multi-graph and multiple-baseline layouts, independent Y-axis controls and autoscaling, goal lines, analyses, JSON state files, and export.</p>
 
     <h3>Interface layout</h3>
-    <p>The <strong>Data Input</strong> module always appears immediately below the <strong>Graph</strong>. On wide screens, <strong>Graph Controls</strong> and <strong>Analysis</strong> share the right-hand column dynamically: when both are open they divide the available vertical space equally; when one is closed, the other expands into the remaining space. On narrower screens they move below Data Input. Every module remains independently collapsible, and each open module body scrolls internally when its contents exceed the available panel height.</p>
+    <p>The <strong>Data Input</strong> module always appears immediately below the <strong>Graph</strong>. On wide screens, <strong>Graph Controls</strong> and <strong>Analysis</strong> share the right-hand column dynamically: when both are open they divide the available vertical space equally; when one is closed, the other expands into the remaining space. On narrower screens they move below Data Input. The <strong>Report</strong> workspace is attached beneath Data Input in the left column, and the header <strong>Show Report</strong> button lifts that same accordion into an overlay over the left panel at exactly the same width. Every module remains independently collapsible, and each open module body scrolls internally when its contents exceed the available panel height.</p>
 
     <h3>Data entry</h3>
     <p>Enter one series per line using <strong>Label: values</strong>. Commas separate observations and a vertical bar creates a phase boundary. Session numbers continue across phases.</p>
     <div class="help-example">Sniffing: 2,4,5,2|6,7,4,5</div>
-    <p>Plain adjacent series lines are plotted together in the same graph. Series within the <strong>same graph</strong> must use the same number of phases; independent graphs separated by <strong>-</strong> may use different phase counts. The global phase-name list is applied by phase number to each graph.</p>
+    <p>Plain adjacent series lines are overlaid within the same tier and therefore must use matching phase boundaries. Multiple-baseline tiers joined with <strong>+</strong> and independent graphs separated by <strong>-</strong> may use different phase counts. The global phase-name list is applied by phase number to each graph.</p>
 
     <h3>Multiple graphs and multiple-baseline layouts</h3>
     <p>Use a separator on its own line between series. A <strong>minus sign (-)</strong> starts a new independent graph panel. SCGraph2 supports up to three graph panels, and each independent graph may have its own number of phases.</p>
@@ -362,6 +681,11 @@ goal line phase 2 at 80
 title: Reading Fluency</div>
     <p>Graph changes modify only the requested display feature. Analysis overlays can be cleared without altering the data.</p>
 
+    <h3>Student report workspace</h3>
+    <p>The <strong>Report</strong> accordion beneath Data Input is a lightweight report editor. It supports headings, bold, italic, bulleted and numbered lists, undo/redo, direct typing, and locally embedded pasted images. Use <strong>Insert Template</strong> for a basic single-case report structure.</p>
+    <p><strong>Insert Graph</strong> inserts a static SVG snapshot of either the complete current figure or one selected graph panel. <strong>Insert Data Table</strong> creates an editable table from a selected graph and series (or all series in that graph). <strong>Insert Analysis Results</strong> inserts the active results for the current Analysis graph/series without replacing the student's own interpretation. <strong>Insert Notes</strong> copies the Data Input notes/context into the report.</p>
+    <p><strong>Show Report</strong> lifts the existing Report accordion into an in-page overlay over the left panel and changes to <strong>Hide Report</strong>. Because the overlay is the original accordion itself, all report content and tools remain the same automatically. <strong>Preview</strong> temporarily makes the report read-only. <strong>Save as PDF</strong> opens the browser's print dialog with a print-specific layout that hides SCGraph2 controls and prints only the report; choose the browser destination <strong>Save as PDF</strong>. Report edits are autosaved locally in the browser and the entire report is also stored in the SCGraph2 JSON session state.</p>
+
     <h3>Save location, save state, and load state</h3>
     <p><strong>Save Location</strong> opens the browser folder chooser directly and can remember the chosen folder when SCGraph2 is opened as a <strong>top-level HTTPS page</strong> in a browser that supports the File System Access API (notably Chrome and Edge). Browser security prevents directory pickers inside cross-origin embedded previews/iframes and in some non-secure contexts. In those situations SCGraph2 hides the unavailable folder action and automatically uses the browser's normal download mechanism instead of failing. A remembered folder can be changed or forgotten at any time and may occasionally require reauthorization.</p>
     <p><strong>Save State</strong> opens a filename dialog, then writes a versioned <span class="kbd">.json</span> file to the remembered save folder when one is available; otherwise it sends the file to the browser's download location. The file contains the complete SCGraph2 session: the data stream (including <strong>+</strong>, <strong>-</strong>, phase boundaries, and parenthesized ghost points), per-graph labels, Y-axis labels, manual scales, tick intervals, autoscale methods and known bounds, goal lines, phase labels, selected analysis graph/series, analysis settings, overlays/results, commands, notes, and accordion open/closed state.</p>
@@ -414,7 +738,8 @@ title: Reading Fluency</div>
     markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
     phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), alphaInput:$('alphaInput'),
     goalSeriesSelect:$('goalSeriesSelect'), goalStartPhaseSelect:$('goalStartPhaseSelect'), goalEndPhaseSelect:$('goalEndPhaseSelect'), goalValueInput:$('goalValueInput'), goalLineList:$('goalLineList'),
-    tauCorrectionSelect:$('tauCorrectionSelect'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill')
+    tauCorrectionSelect:$('tauCorrectionSelect'), tauVizSelect:$('tauVizSelect'), tauLegendCheck:$('tauLegendCheck'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill'),
+    reportModule:$('reportModule'), reportEditor:$('reportEditor'), reportFormatSelect:$('reportFormatSelect'), reportGraphSelect:$('reportGraphSelect'), reportTableGraphSelect:$('reportTableGraphSelect'), reportTableSeriesSelect:$('reportTableSeriesSelect'), reportStatus:$('reportStatus'), reportSummaryStatus:$('reportSummaryStatus')
   };
 
   const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], graphSettings:[], results:[], sourceText:'', direction:'increase' };
@@ -571,7 +896,7 @@ title: Reading Fluency</div>
     if(!Number.isFinite(knownMax)||knownMax<=knownMin)knownMax=Math.max(100,knownMin+1);
     const validModes=['single-nonnegative','known-bounds','single-negative','legacy-heuristic'];
     let autoScaleMode=validModes.includes(raw.autoScaleMode)?raw.autoScaleMode:(raw.autoScale?'legacy-heuristic':'single-nonnegative');
-    return {label:typeof raw.label==='string'?raw.label:`Graph ${gi+1}`,yLabel:typeof raw.yLabel==='string'?raw.yLabel:'Score',yMin,yMax,yTick,autoScale:!!raw.autoScale,autoScaleMode,knownMin,knownMax};
+    return {label:typeof raw.label==='string'?raw.label:`Graph ${gi+1}`,yLabel:typeof raw.yLabel==='string'?raw.yLabel:'Score',yMin,yMax,yTick,autoScale:raw.autoScale===undefined?true:!!raw.autoScale,autoScaleMode,knownMin,knownMax};
   }
   function syncGraphSettingsAfterParse(previous=[]){
     state.graphSettings=state.parsed.graphs.map((_,gi)=>normalizeGraphSetting(previous[gi],gi));
@@ -754,11 +1079,15 @@ title: Reading Fluency</div>
         if(els.phaseLabelsCheck.checked)refSer.phases.forEach((p,i)=>{const c=(p.startSession+p.endSession)/2;svg.appendChild(svgEl('text',{x:tg.x(c),y:tg.top-15,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#374151'},state.parsed.phaseNames[i]||`Phase ${i+1}`));});
         if(group.tiers.length>1){const labels=tier.seriesIndexes.map(si=>state.parsed.series[si].label).join(' / ');svg.appendChild(svgEl('text',{x:layout.left+8,y:tg.top+18,'font-size':12,'font-weight':700,fill:'#374151'},labels));}
         state.goalLines.filter(o=>tier.seriesIndexes.includes(o.seriesIndex)).forEach(o=>drawGoalLine(svg,tg,o));
-        state.overlays.filter(o=>tier.seriesIndexes.includes(o.seriesIndex)).forEach(o=>drawOverlay(svg,tg,o));
+        const tierOverlays=state.overlays.filter(o=>tier.seriesIndexes.includes(o.seriesIndex));
+        tierOverlays.filter(o=>o.type!=='tauPointViz').forEach(o=>drawOverlay(svg,tg,o));
         tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyles[si%seriesStyles.length],lw=Number(els.lineWidthInput.value)||2,r=Number(els.markerSizeInput.value)||5;
           ser.phases.forEach(ph=>{const pts=ser.points.filter(p=>p.phaseIndex===ph.phaseIndex&&!state.ghosted.has(p.key));for(let i=0;i<pts.length-1;i++)if(pts[i+1].session===pts[i].session+1)svg.appendChild(svgEl('line',{x1:tg.x(pts[i].session),y1:tg.y(pts[i].score),x2:tg.x(pts[i+1].session),y2:tg.y(pts[i+1].score),stroke:st.stroke,'stroke-width':lw,fill:'none'}));});
           ser.points.forEach(p=>{const ghost=state.ghosted.has(p.key);if(ghost&&!els.showGhostCheck.checked)return;drawMarker(svg,{x:tg.x(p.session),y:tg.y(p.score)},st,r,ghost);});
         });
+        // Tau-U is deliberately drawn last so its teaching visualization can never
+        // be hidden underneath the ordinary observation markers.
+        tierOverlays.filter(o=>o.type==='tauPointViz').forEach(o=>drawOverlay(svg,tg,o));
         if(els.legendCheck.checked&&tier.seriesIndexes.length>1){let ly=tg.top+18;tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyles[si%seriesStyles.length];svg.appendChild(svgEl('line',{x1:layout.W-202,y1:ly-4,x2:layout.W-178,y2:ly-4,stroke:st.stroke,'stroke-width':2}));drawMarker(svg,{x:layout.W-190,y:ly-4},st,4,false);svg.appendChild(svgEl('text',{x:layout.W-170,y:ly,'font-size':11,fill:'#374151'},ser.label));ly+=18;});}
       });
       if(group.tiers.length>1) drawMultipleBaselinePhaseConnectors(svg,gl);
@@ -816,6 +1145,170 @@ title: Reading Fluency</div>
     if(o.type==='trendBand'){
       const xs=[o.x1,o.x2]; ['q1','q3'].forEach(k=>svg.appendChild(svgEl('line',{x1:g.x(xs[0]),y1:g.y(o.slope*xs[0]+o.intercept+o[k]),x2:g.x(xs[1]),y2:g.y(o.slope*xs[1]+o.intercept+o[k]),stroke:col,'stroke-width':1.4,'stroke-dasharray':'6 4'})));
     }
+    if(o.type==='tauPointViz'){
+      const mode=els.tauVizSelect?.value||'both';
+      if(mode!=='off'){
+        const positive='#2563eb',negative='#d97706',neutral='#9ca3af',influence='#6b7280';
+        const colorFor=v=>Math.abs(v)<.075?neutral:(v>0?positive:negative);
+        const mag=v=>Math.min(1,Math.abs(v));
+        const ring=(session,score,value,radius,dashed=false,extraOpacity=1,strokeOverride=null,label='Tau contribution')=>{
+          const x=g.x(session),y=g.y(score),m=mag(value),stroke=strokeOverride||colorFor(value);
+          const c=svgEl('circle',{
+            cx:x,cy:y,r:radius,fill:'none',stroke,
+            'stroke-width':(1.6+3.8*m).toFixed(2),
+            'stroke-opacity':(.32+.64*m)*extraOpacity,
+            'data-tau-viz':'ring',
+            ...(dashed?{'stroke-dasharray':'4 2'}:{})
+          });
+          c.appendChild(svgEl('title',{},`${label} ${fmt(value,3)}`));svg.appendChild(c);
+        };
+        const halo=(session,score,value,radius=8.8,label='Cumulative Tau-U')=>{
+          const x=g.x(session),y=g.y(score),m=mag(value),fill=colorFor(value);
+          const h=svgEl('circle',{
+            cx:x,cy:y,r:radius,
+            fill,'fill-opacity':(.18+.72*m).toFixed(3),
+            stroke:fill,'stroke-width':(1.1+2.6*m).toFixed(2),
+            'stroke-opacity':(.70+.28*m).toFixed(3),
+            'data-tau-viz':'halo'
+          });
+          h.appendChild(svgEl('title',{},`${label} ${fmt(value,3)}`));svg.appendChild(h);
+          // Small center preserves exact observation location without hiding the fill.
+          svg.appendChild(svgEl('circle',{cx:x,cy:y,r:1.45,fill:'#111827','data-tau-viz':'center'}));
+        };
+        const influenceRing=(session,score,correction,relative)=>{
+          const x=g.x(session),y=g.y(score),r=Math.max(0,Math.min(1,relative));
+          // Relative scaling is intentional: B1 is always 100% of the visible
+          // baseline influence, and later sessions shrink/fade as C_j/C_1.
+          const radius=7.5+12.5*Math.pow(r,.70);
+          const width=.8+4.8*Math.pow(r,.80);
+          const opacity=.12+.78*Math.pow(r,.75);
+          const c=svgEl('circle',{
+            cx:x,cy:y,r:radius,fill:'none',stroke:influence,
+            'stroke-width':width.toFixed(2),'stroke-opacity':opacity.toFixed(3),
+            'stroke-dasharray':'5 3','data-tau-viz':'baseline-influence',
+            'data-influence-relative':r.toFixed(4)
+          });
+          c.appendChild(svgEl('title',{},`Baseline influence remaining ${fmt(r*100,1)}% of B1; correction ${fmt(correction,3)}`));
+          svg.appendChild(c);
+        };
+
+        // Baseline points show the trend that can trigger the correction.
+        if(mode==='corrected'||mode==='both'){
+          (o.pointsA||[]).forEach((p,i)=>ring(p.session,p.score,(o.baselineLocal||[])[i]||0,8.5,true,.68,null,'Local baseline trend'));
+          if(o.trendLine&&Number.isFinite(o.trendLine.slope)){
+            const x1=o.phaseAStart,x2=(o.correct?o.phaseBEnd:o.phaseAEnd);
+            svg.appendChild(svgEl('line',{
+              x1:g.x(x1),y1:g.y(o.trendLine.slope*x1+o.trendLine.intercept),
+              x2:g.x(x2),y2:g.y(o.trendLine.slope*x2+o.trendLine.intercept),
+              stroke:'#6b7280','stroke-width':1.7,'stroke-dasharray':'7 5','stroke-opacity':.72,
+              'data-tau-viz':'baseline-trend-guide'
+            }));
+          }
+        }
+
+        // Intervention visualization:
+        //   outer solid ring = this B point's raw A-vs-B contribution
+        //   colored point = cumulative Tau-U through this intervention session
+        //   outer dashed gray ring = amount of baseline correction still acting here
+        const firstCorrectionAbs=Math.abs((o.correctionBySession||[])[0]||0);
+        (o.pointsB||[]).forEach((p,i)=>{
+          const rawLocal=(o.rawLocalB||[])[i]||0;
+          const cumRaw=(o.rawCumulative||[])[i]||0;
+          const correction=(o.correctionBySession||[])[i]||0;
+          const cumTauU=(o.tauUCumulative||[])[i]??cumRaw;
+          const relativeInfluence=(o.correct&&firstCorrectionAbs>1e-12)?Math.abs(correction)/firstCorrectionAbs:0;
+
+          if(mode==='raw'){
+            ring(p.session,p.score,rawLocal,12.2,false,.72,null,'Raw point contribution');
+            halo(p.session,p.score,cumRaw,8.6,'Cumulative raw Tau');
+          }else if(mode==='corrected'){
+            if(o.correct&&Math.abs(correction)>1e-12)influenceRing(p.session,p.score,correction,relativeInfluence);
+            halo(p.session,p.score,cumTauU,9.2,'Cumulative corrected Tau-U');
+          }else{
+            // Both: thin solid outer ring = raw local contribution; colored fill =
+            // cumulative corrected Tau-U; gray dashed ring = relative baseline influence.
+            ring(p.session,p.score,rawLocal,12.8,false,.58,null,'Raw point contribution');
+            if(o.correct&&Math.abs(correction)>1e-12)influenceRing(p.session,p.score,correction,relativeInfluence);
+            halo(p.session,p.score,cumTauU,9.2,'Cumulative corrected Tau-U');
+          }
+        });
+
+        if(els.tauLegendCheck?.checked!==false){
+          // Detailed teaching legend at bottom-right. Its wording changes according
+          // to whether baseline correction was actually applied and which view is active.
+          const plotLeft=(g.m?.left??96),plotRight=plotLeft+g.innerW,plotBottom=g.top+g.innerH;
+          const boxW=Math.min(455,Math.max(390,g.innerW*.43));
+          // The detailed legend needs enough vertical space for three statistical
+          // status lines, three symbol explanations, and the direction key.
+          // Use one consistent height so corrected and uncorrected layouts never
+          // collapse into the bottom key.
+          const boxH=178;
+          const boxX=Math.max(plotLeft+8,plotRight-boxW-8),boxY=Math.max(g.top+8,plotBottom-boxH-10);
+          svg.appendChild(svgEl('rect',{x:boxX,y:boxY,width:boxW,height:boxH,rx:6,fill:'#fff','fill-opacity':.96,stroke:'#c7ced6','stroke-width':1}));
+          svg.appendChild(svgEl('text',{x:boxX+11,y:boxY+17,'font-size':11,'font-weight':700,fill:'#374151'},'How to read the Tau-U visualization'));
+
+          // Statistical status: this is the first thing students need to understand.
+          const statusY=boxY+34;
+          if(o.correct){
+            svg.appendChild(svgEl('text',{x:boxX+11,y:statusY,'font-size':9.5,'font-weight':650,fill:'#111827'},
+              `Baseline trend τ = ${fmt(o.baselineTau,2)} (S_A = ${fmt(o.sA,0)}) → correction APPLIED`));
+            svg.appendChild(svgEl('text',{x:boxX+11,y:statusY+15,'font-size':9.2,fill:'#4b5563'},
+              `Final: raw τ ${fmt(o.rawTau,2)} − ${fmt(o.correction,2)} = Tau-U ${fmt(o.finalTau,2)}`));
+            const cFirst=(o.correctionBySession||[])[0]??0,cLast=(o.correctionBySession||[]).at(-1)??0;
+            svg.appendChild(svgEl('text',{x:boxX+11,y:statusY+30,'font-size':9.1,fill:'#4b5563'},
+              `Baseline influence wanes across B: ${fmt(cFirst,2)} at B1 → ${fmt(cLast,2)} at B${o.nB}`));
+          }else{
+            const autoNote=els.tauCorrectionSelect?.value==='auto'
+              ? `Auto criterion: improving baseline τ ≥ .20; observed τ = ${fmt(o.baselineTau,2)}`
+              : `Baseline correction setting: ${els.tauCorrectionSelect?.value==='no'?'Do not correct':'No applicable improving trend'}`;
+            svg.appendChild(svgEl('text',{x:boxX+11,y:statusY,'font-size':9.5,'font-weight':650,fill:'#111827'},
+              `Baseline trend τ = ${fmt(o.baselineTau,2)} (S_A = ${fmt(o.sA,0)}) → NO correction`));
+            svg.appendChild(svgEl('text',{x:boxX+11,y:statusY+15,'font-size':9.1,fill:'#4b5563'},autoNote));
+            svg.appendChild(svgEl('text',{x:boxX+11,y:statusY+30,'font-size':9.1,'font-weight':600,fill:'#7c2d12'},
+              'No diminishing gray B rings are expected because nothing is being subtracted.'));
+          }
+
+          // Symbol explanations. Use fixed rows with generous spacing so the
+          // explanatory text cannot collide with the direction key.
+          const y0=boxY+92;
+          // raw ring
+          svg.appendChild(svgEl('circle',{cx:boxX+18,cy:y0,r:6,fill:'none',stroke:positive,'stroke-width':2.3}));
+          svg.appendChild(svgEl('text',{x:boxX+31,y:y0+3,'font-size':9,fill:'#374151'},
+            'Solid outer B ring = this observation’s raw comparison with Phase A'));
+
+          // colored fill
+          const fillY=y0+20;
+          svg.appendChild(svgEl('circle',{cx:boxX+18,cy:fillY,r:6,fill:positive,'fill-opacity':.55,stroke:positive,'stroke-width':1.4}));
+          svg.appendChild(svgEl('circle',{cx:boxX+18,cy:fillY,r:1.4,fill:'#111827'}));
+          const fillText=mode==='raw'
+            ? 'Colored B point = cumulative raw Tau through this B session'
+            : (o.correct
+              ? 'Colored B point = cumulative corrected Tau-U through this B session'
+              : 'Colored B point = cumulative raw Tau (same as Tau-U when no correction is applied)');
+          svg.appendChild(svgEl('text',{x:boxX+31,y:fillY+3,'font-size':9,fill:'#374151'},fillText));
+
+          // influence ring / absence
+          const infY=fillY+20;
+          svg.appendChild(svgEl('circle',{cx:boxX+18,cy:infY,r:7,fill:'none',stroke:influence,'stroke-width':2.2,'stroke-dasharray':'4 2','stroke-opacity':o.correct?.85:.28}));
+          svg.appendChild(svgEl('text',{x:boxX+31,y:infY+3,'font-size':9,fill:'#374151'},
+            o.correct
+              ? 'Dashed gray B ring = baseline influence remaining; it shrinks/fades over sessions'
+              : 'Dashed gray B ring = shown only when baseline correction is actually applied'));
+
+          // Direction key gets its own final row with a clear gap below the
+          // baseline-influence explanation.
+          const keyY=infY+27;
+          [
+            {x:boxX+18,c:positive,t:'blue = improvement'},
+            {x:boxX+143,c:neutral,t:'gray = neutral'},
+            {x:boxX+247,c:negative,t:'orange = opposite'}
+          ].forEach(it=>{
+            svg.appendChild(svgEl('circle',{cx:it.x,cy:keyY-1,r:4.4,fill:'none',stroke:it.c,'stroke-width':3}));
+            svg.appendChild(svgEl('text',{x:it.x+9,y:keyY+2,'font-size':8.7,fill:'#4b5563'},it.t));
+          });
+        }
+      }
+    }
     if(o.type==='criterion'){
       svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.y),x2:g.x(o.x2),y2:g.y(o.y),stroke:o.color||'#8a6d1d','stroke-width':1.7,'stroke-dasharray':'5 4'}));
     }
@@ -826,6 +1319,251 @@ title: Reading Fluency</div>
     const phaseCounts=state.parsed.graphs.map(g=>g.phaseCount),unique=[...new Set(phaseCounts)];els.phasePill.textContent=unique.length===1?`${unique[0]} phases`:`phases by graph: ${phaseCounts.join(' / ')}`; els.activePill.textContent=`${total-ghost} active observations`;
   }
   function status(msg,kind=''){els.status.textContent=msg;els.status.className=kind;}
+
+  /* ---------------- Report workspace ---------------- */
+  let reportPreviewMode=false;
+  let reportPopup=null;
+  let lastReportEditor=els.reportEditor;
+  const savedReportRanges=new WeakMap();
+  let reportAutosaveTimer=null;
+  const REPORT_AUTOSAVE_DB='SCGraph2-report-autosave';
+  const REPORT_AUTOSAVE_STORE='report';
+  const REPORT_AUTOSAVE_KEY='current';
+  const REPORT_AUTOSAVE_FALLBACK_KEY='SCGraph2-report-autosave-html';
+
+  let reportOverlayActive=false;
+  let suppressReportOverlayToggle=false;
+
+  function positionReportOverlay(){
+    if(!reportOverlayActive||!els.reportModule)return;
+    const stack=els.reportModule.closest('.primary-stack');
+    if(!stack)return;
+    const r=stack.getBoundingClientRect();
+    const header=document.querySelector('header');
+    const headerBottom=header?header.getBoundingClientRect().bottom:58;
+    const top=Math.max(headerBottom+12,r.top);
+    const bottomPad=12;
+    const height=Math.max(260,window.innerHeight-top-bottomPad);
+    els.reportModule.style.left=`${r.left}px`;
+    els.reportModule.style.width=`${r.width}px`;
+    els.reportModule.style.top=`${top}px`;
+    els.reportModule.style.height=`${height}px`;
+  }
+  function updateReportOverlayButton(){
+    const b=$('reportBtn');
+    if(b)b.textContent=reportOverlayActive?'Hide Report':'Show Report';
+  }
+  function showReportOverlay(){
+    if(!els.reportModule)return;
+    reportOverlayActive=true;
+    suppressReportOverlayToggle=true;
+    els.reportModule.open=true;
+    suppressReportOverlayToggle=false;
+    els.reportModule.classList.add('report-overlay');
+    lastReportEditor=els.reportEditor;
+    positionReportOverlay();
+    updateReportOverlayButton();
+    setTimeout(()=>{positionReportOverlay();els.reportEditor?.focus();},0);
+    status('Report shown over the left panel.','ok');
+  }
+  function hideReportOverlay(){
+    if(!els.reportModule)return;
+    reportOverlayActive=false;
+    els.reportModule.classList.remove('report-overlay');
+    ['left','width','top','height'].forEach(p=>els.reportModule.style[p]='');
+    suppressReportOverlayToggle=true;
+    els.reportModule.open=false;
+    suppressReportOverlayToggle=false;
+    lastReportEditor=els.reportEditor;
+    updateReportOverlayButton();
+    queueReportAutosave();
+    status('Report hidden.','ok');
+  }
+  function toggleReportOverlay(){
+    if(reportOverlayActive)hideReportOverlay();else showReportOverlay();
+  }
+
+  function popupReportIsOpen(){
+    try{return !!(reportPopup&&!reportPopup.closed&&reportPopup.document);}catch{return false;}
+  }
+  function popupReportEditor(){
+    if(!popupReportIsOpen())return null;
+    try{return reportPopup.document.getElementById('popupReportEditor');}catch{return null;}
+  }
+  function activeReportEditor(){
+    const popupEditor=popupReportEditor();
+    if(lastReportEditor===popupEditor&&popupEditor)return popupEditor;
+    if(lastReportEditor===els.reportEditor)return els.reportEditor;
+    return popupEditor||els.reportEditor;
+  }
+  function reportWindow(editor){return editor?.ownerDocument?.defaultView||window;}
+  function reportDocument(editor){return editor?.ownerDocument||document;}
+  function reportSelectionInsideEditor(editor=activeReportEditor()){
+    if(!editor)return false;const win=reportWindow(editor),sel=win.getSelection();if(!sel||!sel.rangeCount)return false;
+    const node=sel.getRangeAt(0).commonAncestorContainer;
+    return node===editor||editor.contains(node.nodeType===1?node:node.parentNode);
+  }
+  function saveReportSelection(editor=activeReportEditor()){
+    if(!editor||!reportSelectionInsideEditor(editor))return;
+    const sel=reportWindow(editor).getSelection();savedReportRanges.set(editor,sel.getRangeAt(0).cloneRange());lastReportEditor=editor;
+  }
+  function restoreReportSelection(editor=activeReportEditor()){
+    if(!editor)return null;const doc=reportDocument(editor),win=reportWindow(editor),sel=win.getSelection();sel.removeAllRanges();
+    let r=savedReportRanges.get(editor);
+    if(!r||!r.startContainer||!doc.contains(r.startContainer)){r=doc.createRange();r.selectNodeContents(editor);r.collapse(false);}
+    try{sel.addRange(r);}catch{r=doc.createRange();r.selectNodeContents(editor);r.collapse(false);sel.addRange(r);}
+    savedReportRanges.set(editor,r.cloneRange());lastReportEditor=editor;return r;
+  }
+  function sanitizeReportHtml(html){
+    const t=document.createElement('template');t.innerHTML=String(html||'');
+    t.content.querySelectorAll('script,iframe,object,embed,link,meta,style,form,input,button,textarea,select').forEach(n=>n.remove());
+    t.content.querySelectorAll('*').forEach(el=>{[...el.attributes].forEach(a=>{const n=a.name.toLowerCase(),v=String(a.value||'').trim().toLowerCase();if(n.startsWith('on')||(n==='href'||n==='src')&&v.startsWith('javascript:'))el.removeAttribute(a.name);});});
+    return t.innerHTML;
+  }
+  function canonicalReportHtml(){return sanitizeReportHtml(els.reportEditor?.innerHTML||'');}
+  function syncReportEditors(sourceEditor=null,htmlOverride=null){
+    const html=sanitizeReportHtml(htmlOverride!==null?htmlOverride:(sourceEditor?.innerHTML??canonicalReportHtml()));
+    if(els.reportEditor&&els.reportEditor!==sourceEditor&&els.reportEditor.innerHTML!==html)els.reportEditor.innerHTML=html;
+    const pe=popupReportEditor();if(pe&&pe!==sourceEditor&&pe.innerHTML!==html)pe.innerHTML=html;
+    updateReportStatus();queueReportAutosave();
+  }
+  function insertReportHtml(html,targetEditor=activeReportEditor()){
+    if(!targetEditor)return;
+    if(targetEditor===els.reportEditor)els.reportModule.open=true;
+    lastReportEditor=targetEditor;targetEditor.focus();const r=restoreReportSelection(targetEditor),doc=reportDocument(targetEditor),win=reportWindow(targetEditor);
+    const frag=r.createContextualFragment(html);const last=frag.lastChild;r.deleteContents();r.insertNode(frag);
+    if(last){const nr=doc.createRange();nr.setStartAfter(last);nr.collapse(true);const sel=win.getSelection();sel.removeAllRanges();sel.addRange(nr);savedReportRanges.set(targetEditor,nr.cloneRange());}
+    syncReportEditors(targetEditor);
+  }
+  function updateReportStatus(){
+    if(!els.reportEditor)return;
+    const text=(els.reportEditor.innerText||'').trim(),words=text?text.split(/\s+/).filter(Boolean).length:0;
+    const figures=els.reportEditor.querySelectorAll('figure').length,tables=els.reportEditor.querySelectorAll('table').length;
+    const txt=`${words} word${words===1?'':'s'} · ${figures} graph${figures===1?'':'s'} · ${tables} table${tables===1?'':'s'}`;
+    if(els.reportStatus)els.reportStatus.textContent=txt;if(els.reportSummaryStatus)els.reportSummaryStatus.textContent=`${words} words · ${figures} graph${figures===1?'':'s'} · ${tables} table${tables===1?'':'s'}`;
+    if(popupReportIsOpen()){const s=reportPopup.document.getElementById('popupReportStatus');if(s)s.textContent=txt;}
+  }
+  function updateReportSelectors(){
+    if(!state.parsed||!els.reportGraphSelect)return;
+    const priorGraph=els.reportGraphSelect.value,priorTableGraph=els.reportTableGraphSelect.value;
+    els.reportGraphSelect.innerHTML='<option value="all">All graphs</option>';els.reportTableGraphSelect.innerHTML='';
+    state.parsed.graphs.forEach((g,gi)=>{const label=state.graphSettings[gi]?.label||`Graph ${gi+1}`;const a=document.createElement('option');a.value=String(gi);a.textContent=`Graph ${gi+1} — ${label}`;els.reportGraphSelect.appendChild(a);const b=a.cloneNode(true);els.reportTableGraphSelect.appendChild(b);});
+    els.reportGraphSelect.value=[...els.reportGraphSelect.options].some(o=>o.value===priorGraph)?priorGraph:'all';
+    els.reportTableGraphSelect.value=[...els.reportTableGraphSelect.options].some(o=>o.value===priorTableGraph)?priorTableGraph:'0';
+    updateReportTableSeriesOptions();syncReportPopupSelectors();
+  }
+  function updateReportTableSeriesOptions(){
+    if(!state.parsed||!els.reportTableSeriesSelect)return;
+    const gi=Number(els.reportTableGraphSelect.value||0),g=state.parsed.graphs[gi],prev=els.reportTableSeriesSelect.value;
+    els.reportTableSeriesSelect.innerHTML='<option value="all">All series in graph</option>';
+    if(g)g.seriesIndexes.forEach(si=>{const o=document.createElement('option');o.value=String(si);o.textContent=state.parsed.series[si].label;els.reportTableSeriesSelect.appendChild(o);});
+    els.reportTableSeriesSelect.value=[...els.reportTableSeriesSelect.options].some(o=>o.value===prev)?prev:'all';syncReportPopupSelectors();
+  }
+  function reportGraphSnapshotHtml(choice=els.reportGraphSelect.value){
+    if(!state.parsed)throw new Error('Load valid data before inserting a graph.');
+    const source=els.graphWrap.querySelector('svg');if(!source)throw new Error('No graph is currently available.');
+    const clone=source.cloneNode(true);clone.removeAttribute('role');clone.removeAttribute('aria-label');clone.setAttribute('xmlns','http://www.w3.org/2000/svg');clone.setAttribute('width','100%');clone.removeAttribute('height');clone.setAttribute('style','width:100%;height:auto;display:block');
+    let caption='Current SCGraph2 graph';
+    if(choice!=='all'){
+      const gi=Number(choice),layout=graphMetrics(),gl=layout.groups[gi];if(!gl)throw new Error('The selected graph is no longer available.');
+      const y0=Math.max(0,gl.groupTop-4),y1=Math.min(layout.H,gl.bottom+22);clone.setAttribute('viewBox',`0 ${y0} ${layout.W} ${Math.max(1,y1-y0)}`);caption=state.graphSettings[gi]?.label||`Graph ${gi+1}`;
+    }
+    return `<figure class="report-figure">${clone.outerHTML}<figcaption>Figure. ${escapeHtml(caption)}.</figcaption></figure><p><br></p>`;
+  }
+  function reportDataTableHtml(graphChoice=els.reportTableGraphSelect.value,seriesChoice=els.reportTableSeriesSelect.value){
+    if(!state.parsed)throw new Error('Load valid data before inserting a data table.');
+    const gi=Number(graphChoice||0),g=state.parsed.graphs[gi];if(!g)throw new Error('Choose a graph for the data table.');
+    const seriesIndexes=seriesChoice==='all'?g.seriesIndexes:[Number(seriesChoice)];
+    const rows=[];seriesIndexes.forEach(si=>{const ser=state.parsed.series[si];if(!ser)return;ser.points.forEach(p=>rows.push({series:ser.label,session:p.session,phase:state.parsed.phaseNames[p.phaseIndex]||`Phase ${p.phaseIndex+1}`,score:p.score,status:p.ghosted?'Ghosted':'Active'}));});
+    if(!rows.length)throw new Error('No data are available for that table.');
+    const body=rows.map(r=>`<tr><td>${escapeHtml(r.series)}</td><td>${r.session}</td><td>${escapeHtml(r.phase)}</td><td>${escapeHtml(fmt(r.score,6))}</td><td>${r.status}</td></tr>`).join('');
+    return `<table><thead><tr><th>Series</th><th>Session</th><th>Phase</th><th>Score</th><th>Status</th></tr></thead><tbody>${body}</tbody></table><p><br></p>`;
+  }
+  function reportAnalysisResultsHtml(){
+    if(!state.results.length)throw new Error('Run an analysis before inserting analysis results.');
+    const si=selectedAnalysisSeries();let results=si>=0?state.results.filter(r=>!r.analysisId||String(r.analysisId).startsWith(`${si}::`)):state.results.slice();
+    if(!results.length)throw new Error('There are no active analysis results for the selected series.');
+    const ser=si>=0&&state.parsed?state.parsed.series[si]:null;
+    return `<h2>Analysis Results${ser?` — ${escapeHtml(ser.label)}`:''}</h2>`+results.slice().reverse().map(r=>`<div><p><strong>${escapeHtml(r.title)}</strong>${r.meta?`<br><em>${escapeHtml(r.meta)}</em>`:''}</p><ul>${r.lines.map(line=>`<li>${escapeHtml(line)}</li>`).join('')}</ul></div>`).join('')+'<p><br></p>';
+  }
+  function reportTemplateHtml(){
+    const date=new Date().toLocaleDateString();
+    return `<h1>Single-Case Analysis Report</h1><p><strong>Student:</strong> ______________________________<br><strong>Date:</strong> ${escapeHtml(date)}</p><h2>Purpose / Research Question</h2><p><br></p><h2>Graph</h2><p><em>Insert the current SCGraph2 graph here.</em></p><h2>Visual Analysis</h2><p><br></p><h2>Quantitative Analysis</h2><p><br></p><h2>Data</h2><p><em>Insert a data table here if appropriate.</em></p><h2>Interpretation / Conclusion</h2><p><br></p>`;
+  }
+  function setReportPreview(on){
+    reportPreviewMode=!!on;els.reportModule.classList.toggle('previewing',reportPreviewMode);els.reportEditor.contentEditable=reportPreviewMode?'false':'true';$('reportPreviewBtn').textContent=reportPreviewMode?'Edit Report':'Preview';
+    if(popupReportIsOpen()){
+      const d=reportPopup.document,e=d.getElementById('popupReportEditor'),b=d.getElementById('popupPreviewBtn');if(e)e.contentEditable=reportPreviewMode?'false':'true';if(b)b.textContent=reportPreviewMode?'Edit Report':'Preview';d.body.classList.toggle('previewing',reportPreviewMode);
+    }
+    if(!reportPreviewMode)setTimeout(()=>{const e=activeReportEditor();if(e)e.focus();},0);
+    queueReportAutosave();
+  }
+  function printReport(){
+    const pe=popupReportEditor();if(pe)syncReportEditors(pe);
+    if(!(els.reportEditor.innerText||'').trim()&&!els.reportEditor.querySelector('img,svg,table')){status('Add report content before saving as PDF.','error');return;}
+    const wasOpen=els.reportModule.open,wasPreview=reportPreviewMode;els.reportModule.open=true;setReportPreview(true);document.body.classList.add('report-printing');
+    const cleanup=()=>{document.body.classList.remove('report-printing');if(!wasPreview)setReportPreview(false);els.reportModule.open=wasOpen;window.removeEventListener('afterprint',cleanup);};
+    window.addEventListener('afterprint',cleanup);setTimeout(()=>{try{window.print();}catch(e){cleanup();status(`Could not open the print/PDF dialog: ${e.message||e}`,'error');}},50);
+  }
+  function executeReportCommand(command,value=null,editor=activeReportEditor()){
+    if(!editor)return;if(reportPreviewMode)setReportPreview(false);lastReportEditor=editor;editor.focus();restoreReportSelection(editor);
+    const doc=reportDocument(editor);doc.execCommand(command,false,value);saveReportSelection(editor);syncReportEditors(editor);
+  }
+  function handleReportPaste(e,editor){
+    const items=[...(e.clipboardData?.items||[])],imageItem=items.find(i=>i.type&&i.type.startsWith('image/'));
+    if(imageItem){e.preventDefault();const file=imageItem.getAsFile();if(!file)return;const reader=new FileReader();reader.onload=()=>insertReportHtml(`<img src="${String(reader.result).replace(/"/g,'&quot;')}" alt="Pasted image"><p><br></p>`,editor);reader.readAsDataURL(file);return;}
+    const html=e.clipboardData?.getData('text/html'),text=e.clipboardData?.getData('text/plain');if(html||text){e.preventDefault();insertReportHtml(html?sanitizeReportHtml(html):escapeHtml(text).replace(/\n/g,'<br>'),editor);}
+  }
+
+  function openReportAutosaveDb(){
+    return new Promise((resolve,reject)=>{if(typeof indexedDB==='undefined')return reject(new Error('IndexedDB unavailable'));const req=indexedDB.open(REPORT_AUTOSAVE_DB,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(REPORT_AUTOSAVE_STORE))req.result.createObjectStore(REPORT_AUTOSAVE_STORE);};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('Could not open report autosave storage.'));});
+  }
+  async function writeReportAutosave(){
+    reportAutosaveTimer=null;const payload={html:canonicalReportHtml(),savedAt:new Date().toISOString()};let stored=false;
+    try{const db=await openReportAutosaveDb();await new Promise((resolve,reject)=>{const tx=db.transaction(REPORT_AUTOSAVE_STORE,'readwrite');tx.objectStore(REPORT_AUTOSAVE_STORE).put(payload,REPORT_AUTOSAVE_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();stored=true;}catch{}
+    if(!stored){try{localStorage.setItem(REPORT_AUTOSAVE_FALLBACK_KEY,JSON.stringify(payload));}catch{}}
+  }
+  function queueReportAutosave(){clearTimeout(reportAutosaveTimer);reportAutosaveTimer=setTimeout(writeReportAutosave,350);}
+  async function restoreReportAutosave(){
+    if((els.reportEditor?.innerHTML||'').trim())return;let payload=null;
+    try{const db=await openReportAutosaveDb();payload=await new Promise((resolve,reject)=>{const tx=db.transaction(REPORT_AUTOSAVE_STORE,'readonly');const req=tx.objectStore(REPORT_AUTOSAVE_STORE).get(REPORT_AUTOSAVE_KEY);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error);});db.close();}catch{}
+    if(!payload){try{payload=JSON.parse(localStorage.getItem(REPORT_AUTOSAVE_FALLBACK_KEY)||'null');}catch{}}
+    if(payload?.html){els.reportEditor.innerHTML=sanitizeReportHtml(payload.html);syncReportEditors(els.reportEditor);status('Autosaved report restored.','ok');}
+  }
+  async function clearReportAutosave(){clearTimeout(reportAutosaveTimer);reportAutosaveTimer=null;try{const db=await openReportAutosaveDb();await new Promise((resolve,reject)=>{const tx=db.transaction(REPORT_AUTOSAVE_STORE,'readwrite');tx.objectStore(REPORT_AUTOSAVE_STORE).delete(REPORT_AUTOSAVE_KEY);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}catch{}try{localStorage.removeItem(REPORT_AUTOSAVE_FALLBACK_KEY);}catch{}}
+
+  function popupStyles(){return `
+    *{box-sizing:border-box}html,body{margin:0;background:#edf1f4;color:#111827;font-family:Arial,Helvetica,sans-serif;height:100%}body{display:flex;flex-direction:column}
+    header{height:48px;background:#fff;border-bottom:1px solid #d7dde5;display:flex;align-items:center;justify-content:space-between;padding:0 12px;flex:0 0 auto}header strong{font-size:15px}.tools{background:#fff;border-bottom:1px solid #d7dde5;padding:8px 10px;display:flex;flex-direction:column;gap:6px;flex:0 0 auto}.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.group{display:flex;gap:5px;align-items:center;padding-right:8px;border-right:1px solid #dfe4ea;flex-wrap:wrap}.group:last-child{border-right:0}button,select{font:inherit;border:1px solid #b9c4d1;background:#fff;color:#111827;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:600}button.primary{background:#1f4e79;color:white;border-color:#1f4e79}select{min-width:110px}.wide{min-width:170px;max-width:270px}.status{font-size:11px;color:#667085;margin-left:auto}.paper-wrap{padding:18px;overflow:auto;flex:1 1 auto;display:flex;justify-content:center}.editor{width:min(8.5in,100%);min-height:10in;background:#fff;border:1px solid #cfd6de;box-shadow:0 5px 18px rgba(15,23,42,.10);padding:.68in .72in;line-height:1.48;font-size:12pt;outline:none}.editor h1{font-size:20pt;margin:0 0 14px}.editor h2{font-size:15pt;margin:18px 0 8px}.editor p{margin:0 0 9px}.editor ul,.editor ol{margin:4px 0 10px 24px}.editor img,.editor svg{max-width:100%;height:auto}.editor table{width:100%;border-collapse:collapse;margin:12px 0 16px;font-size:10.5pt}.editor th,.editor td{border:1px solid #aeb7c2;padding:5px 6px;text-align:left;vertical-align:top}.editor th{background:#f1f4f6}.previewing .edit-tools{display:none}`;}
+  function popupMarkup(){return `<!doctype html><html><head><meta charset="utf-8"><title>SCGraph2 Report</title><style>${popupStyles()}</style></head><body><header><strong>SCGraph2 Report</strong><div><span id="popupReportStatus" class="status"></span> <button id="popupCloseBtn">Close</button></div></header><div class="tools"><div class="row edit-tools"><div class="group"><select id="popupFormatSelect"><option value="p">Normal</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option></select><button data-popup-command="bold"><strong>B</strong></button><button data-popup-command="italic"><em>I</em></button><button data-popup-command="insertUnorderedList">• List</button><button data-popup-command="insertOrderedList">1. List</button><button data-popup-command="undo">↶</button><button data-popup-command="redo">↷</button></div><div class="group"><button id="popupTemplateBtn">Insert Template</button><button id="popupNotesBtn">Insert Notes</button><button id="popupDividerBtn">Divider</button></div></div><div class="row edit-tools"><div class="group"><select id="popupGraphSelect" class="wide"></select><button id="popupGraphBtn">Insert Graph</button></div><div class="group"><select id="popupTableGraphSelect" class="wide"></select><select id="popupTableSeriesSelect" class="wide"></select><button id="popupTableBtn">Insert Data Table</button></div><div class="group"><button id="popupResultsBtn">Insert Analysis Results</button></div></div><div class="row"><button id="popupPreviewBtn">Preview</button><button id="popupPdfBtn" class="primary">Save as PDF</button><span class="status">Autosaved locally</span></div></div><div class="paper-wrap"><article id="popupReportEditor" class="editor" contenteditable="true" spellcheck="true"></article></div></body></html>`;}
+  function populatePopupTableSeries(gi,select,preferred='all'){
+    if(!select||!state.parsed)return;const g=state.parsed.graphs[Number(gi)||0];select.innerHTML='<option value="all">All series in graph</option>';if(g)g.seriesIndexes.forEach(si=>{const o=reportPopup.document.createElement('option');o.value=String(si);o.textContent=state.parsed.series[si].label;select.appendChild(o);});select.value=[...select.options].some(o=>o.value===preferred)?preferred:'all';
+  }
+  function syncReportPopupSelectors(){
+    if(!popupReportIsOpen()||!state.parsed)return;try{const d=reportPopup.document,pg=d.getElementById('popupGraphSelect'),ptg=d.getElementById('popupTableGraphSelect'),pts=d.getElementById('popupTableSeriesSelect');if(!pg||!ptg||!pts)return;const pgVal=pg.value,ptgVal=ptg.value,ptsVal=pts.value;pg.innerHTML=els.reportGraphSelect.innerHTML;ptg.innerHTML=els.reportTableGraphSelect.innerHTML;pg.value=[...pg.options].some(o=>o.value===pgVal)?pgVal:els.reportGraphSelect.value;ptg.value=[...ptg.options].some(o=>o.value===ptgVal)?ptgVal:els.reportTableGraphSelect.value;populatePopupTableSeries(ptg.value,pts,ptsVal);}catch{}
+  }
+  function wireReportPopup(){
+    if(!popupReportIsOpen())return;const d=reportPopup.document,e=d.getElementById('popupReportEditor');if(!e)return;e.innerHTML=canonicalReportHtml();lastReportEditor=e;syncReportPopupSelectors();setReportPreview(reportPreviewMode);updateReportStatus();
+    d.getElementById('popupCloseBtn').addEventListener('click',()=>reportPopup.close());
+    d.querySelectorAll('[data-popup-command]').forEach(b=>{b.addEventListener('mousedown',ev=>ev.preventDefault());b.addEventListener('click',()=>executeReportCommand(b.dataset.popupCommand,null,e));});
+    d.getElementById('popupFormatSelect').addEventListener('change',ev=>executeReportCommand('formatBlock',ev.target.value,e));
+    ['keyup','mouseup','focus'].forEach(ev=>e.addEventListener(ev,()=>{lastReportEditor=e;saveReportSelection(e);}));e.addEventListener('input',()=>{lastReportEditor=e;saveReportSelection(e);syncReportEditors(e);});e.addEventListener('paste',ev=>handleReportPaste(ev,e));
+    d.getElementById('popupTemplateBtn').addEventListener('click',()=>insertReportHtml(reportTemplateHtml(),e));
+    d.getElementById('popupNotesBtn').addEventListener('click',()=>{const n=els.notesInput.value.trim();if(!n){status('There are no Notes / context to insert.','error');return;}insertReportHtml(`<h2>Notes / Context</h2><p>${escapeHtml(n).replace(/\n/g,'<br>')}</p>`,e);});
+    d.getElementById('popupDividerBtn').addEventListener('click',()=>insertReportHtml('<hr><p><br></p>',e));
+    d.getElementById('popupGraphBtn').addEventListener('click',()=>{try{insertReportHtml(reportGraphSnapshotHtml(d.getElementById('popupGraphSelect').value),e);status('Graph snapshot inserted into the report.','ok');}catch(err){status(err.message,'error');}});
+    d.getElementById('popupTableGraphSelect').addEventListener('change',ev=>populatePopupTableSeries(ev.target.value,d.getElementById('popupTableSeriesSelect'),'all'));
+    d.getElementById('popupTableBtn').addEventListener('click',()=>{try{insertReportHtml(reportDataTableHtml(d.getElementById('popupTableGraphSelect').value,d.getElementById('popupTableSeriesSelect').value),e);status('Data table inserted into the report.','ok');}catch(err){status(err.message,'error');}});
+    d.getElementById('popupResultsBtn').addEventListener('click',()=>{try{insertReportHtml(reportAnalysisResultsHtml(),e);status('Analysis results inserted into the report.','ok');}catch(err){status(err.message,'error');}});
+    d.getElementById('popupPreviewBtn').addEventListener('click',()=>setReportPreview(!reportPreviewMode));d.getElementById('popupPdfBtn').addEventListener('click',()=>{syncReportEditors(e);printReport();});
+  }
+  function updateReportPopupButton(){const b=$('reportBtn');if(b)b.textContent=popupReportIsOpen()?'Hide Report':'Show Report';}
+  function openReportPopup(){
+    if(popupReportIsOpen()){reportPopup.focus();updateReportPopupButton();return;}
+    const w=window.open('','SCGraph2ReportWindow','popup=yes,width=1050,height=900,resizable=yes,scrollbars=yes');if(!w){status('The browser blocked the report pop-out. Allow pop-ups for SCGraph2 and try Show Report again.','error');return;}
+    reportPopup=w;try{w.document.open();w.document.write(popupMarkup());w.document.close();wireReportPopup();w.addEventListener('beforeunload',()=>{try{const e=w.document.getElementById('popupReportEditor');if(e)syncReportEditors(e);}catch{}reportPopup=null;lastReportEditor=els.reportEditor;setTimeout(updateReportPopupButton,0);});updateReportPopupButton();w.focus();status('Report shown over the left panel.','ok');}catch(err){reportPopup=null;updateReportPopupButton();status(`Could not open the report window: ${err.message||err}`,'error');}
+  }
+  function toggleReportPopup(){if(popupReportIsOpen()){try{const e=popupReportEditor();if(e)syncReportEditors(e);reportPopup.close();}catch{}reportPopup=null;lastReportEditor=els.reportEditor;updateReportPopupButton();status('Report hidden.','ok');}else openReportPopup();}
 
   function theilSen(points){
     const p=points.filter(x=>Number.isFinite(x.session)&&Number.isFinite(x.score)); if(p.length<2)return {slope:0,intercept:p.length?p[0].score:NaN};
@@ -859,8 +1597,64 @@ title: Reading Fluency</div>
   function pairwiseDominance(a,b,direction){let favorable=0,unfavorable=0,ties=0;b.forEach(y=>a.forEach(x=>{if(y===x)ties++;else if(direction==='decrease'?(y<x):(y>x))favorable++;else unfavorable++;}));const pairs=a.length*b.length;return {favorable,unfavorable,ties,pairs,tau:pairs?(favorable-unfavorable)/pairs:NaN};}
   function kendallTrend(points,direction){let fav=0,unfav=0,ties=0;for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++){const d=points[j].score-points[i].score;if(d===0)ties++;else if(direction==='decrease'?(d<0):(d>0))fav++;else unfav++;}const pairs=fav+unfav+ties;return {tau:pairs?(fav-unfav)/pairs:0,fav,unfav,ties,pairs};}
   function tauUTest(a,b,pointsA,direction,mode){
-    const raw=pairwiseDominance(a,b,direction), base=kendallTrend(pointsA,direction); let correct=mode==='yes'||(mode==='auto'&&Math.abs(base.tau)>=.20); let tau=raw.tau-(correct?base.tau:0); tau=clamp(tau,-1,1);
-    const nA=a.length,nB=b.length,se=Math.sqrt((nA+nB+1)/(3*nA*nB)),z=se?tau/se:0,p=2*(1-normalCDF(Math.abs(z))); return {rawTau:raw.tau,baselineTau:base.tau,correct,tau,se,z,p,...raw};
+    const raw=pairwiseDominance(a,b,direction),base=kendallTrend(pointsA,direction);
+    const nA=a.length,nB=b.length;
+    const sAB=raw.favorable-raw.unfavorable;
+    const sA=base.fav-base.unfav;
+    // Auto correction targets preexisting improvement in the same direction as the
+    // desired outcome.  "Always" can still be used to inspect any baseline trend.
+    const correct=mode==='yes'||(mode==='auto'&&base.tau>=.20);
+    const correction=correct&&nA&&nB?sA/(nA*nB):0;
+    const tau=raw.tau-correction; // Parker-style Tau-U: (S_AB - S_A)/(nA*nB)
+
+    // The existing rank-contrast normal approximation is retained only for the
+    // uncorrected A-vs-B contrast. A standard sampling distribution for corrected
+    // Tau-U has not been established, so SCGraph2 does not manufacture a corrected p.
+    const rawSE=Math.sqrt((nA+nB+1)/(3*nA*nB));
+    const rawZ=rawSE?raw.tau/rawSE:0;
+    const rawP=2*(1-normalCDF(Math.abs(rawZ)));
+    return {...raw,rawTau:raw.tau,baselineTau:base.tau,sAB,sA,correct,correction,tau,rawSE,rawZ,rawP,p:correct?null:rawP};
+  }
+
+  function tauPairSign(laterScore,earlierScore,direction){
+    if(laterScore===earlierScore)return 0;
+    const raw=laterScore>earlierScore?1:-1;
+    return direction==='decrease'?-raw:raw;
+  }
+
+  function tauPointContributions(pointsA,pointsB,direction,sA,correct){
+    const nA=pointsA.length;
+    const rawLocalB=[];
+    const rawCumulative=[];
+    const correctionBySession=[];
+    const tauUCumulative=[];
+    let cumulativeSAB=0;
+
+    pointsB.forEach((pb,j)=>{
+      let pointS=0;
+      for(const pa of pointsA)pointS+=tauPairSign(pb.score,pa.score,direction);
+      cumulativeSAB+=pointS;
+      const k=j+1;
+      const denom=nA*k;
+      const localTau=nA?pointS/nA:0;
+      const rawTauK=denom?cumulativeSAB/denom:0;
+      const correctionK=correct&&denom?sA/denom:0;
+      rawLocalB.push(localTau);
+      rawCumulative.push(rawTauK);
+      correctionBySession.push(correctionK);
+      tauUCumulative.push(rawTauK-correctionK);
+    });
+
+    // Baseline rings show local evidence of preexisting trend. Each baseline point
+    // is compared only with earlier baseline observations.
+    const baselineLocal=pointsA.map((p,j)=>{
+      if(j===0)return 0;
+      let s=0;
+      for(let i=0;i<j;i++)s+=tauPairSign(p.score,pointsA[i].score,direction);
+      return s/j;
+    });
+
+    return {rawLocalB,rawCumulative,correctionBySession,tauUCumulative,baselineLocal,cumulativeSAB};
   }
 
   function analysisToggleKey(command,seriesIndex){
@@ -952,8 +1746,62 @@ title: Reading Fluency</div>
         addResult(`Trend + 0.30 IQR / binomial — ${ser.label} — ${state.parsed.phaseNames[pA]} → ${state.parsed.phaseNames[pB]}`,[`Reference-phase Theil–Sen trend residual IQR = ${fmt(iqrStats.iqr,3)}; 0.30 × IQR = ${fmt(iqrStats.margin,3)}. Parallel bounds were projected at trend ± ${fmt(iqrStats.margin,3)}.`,`${state.parsed.phaseNames[pB]}: ${cls.above} observations above the upper bound, ${cls.below} below the lower bound, and ${cls.within} within the 0.30-IQR envelope.`,`${cls.successes}/${cls.n} observations (${fmt(cls.successes/cls.n*100,1)}%) crossed the ${dir==='decrease'?'lower':'upper'} boundary in the improvement direction.`,`One-sided binomial p ≈ ${fmt(p,4)} assuming p₀ = .50. ${sig?'Significant':'Not significant'} at α = ${fmt(alpha,3)}.`],`Series ${si+1}`,analysisId);renderGraph();return;
       }
       if(kind==='t-u'||kind==='tu'||kind==='tau-u'||kind==='tauu'){
-        const r=tauUTest(a,b,activePoints(pA,si),dir,els.tauCorrectionSelect.value),sig=r.p<alpha,non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length;
-        addResult(`Tau-U — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[`Raw phase contrast τ = ${fmt(r.rawTau,3)}; baseline trend τ = ${fmt(r.baselineTau,3)}.`,`${r.correct?'Baseline-trend correction applied.':'Baseline-trend correction not applied.'} Final Tau-U = ${fmt(r.tau,3)}.`,`Approximate two-sided p = ${fmt(r.p,4)}; ${sig?'significant':'not significant'} at α = ${fmt(alpha,3)}.`,`Direction: ${dir==='decrease'?'decrease':'increase'} = improvement. Separately, completely non-overlapping treatment observations = ${fmt(non/b.length*100,1)}%.`],`Series ${si+1}; nA=${a.length}, nB=${b.length}`,analysisId);return;
+        const ptsA=activePoints(pA,si),ptsB=activePoints(pB,si);
+        const mode=els.tauCorrectionSelect.value;
+        const r=tauUTest(a,b,ptsA,dir,mode),non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length;
+        const pointTau=tauPointContributions(ptsA,ptsB,dir,r.sA,r.correct);
+        const tr=ptsA.length>=2?theilSen(ptsA):null;
+        const phaseA=ser.phases[pA],phaseB=ser.phases[pB];
+        state.overlays.push({
+          type:'tauPointViz',
+          pointsA:ptsA.map(p=>({session:p.session,score:p.score})),
+          pointsB:ptsB.map(p=>({session:p.session,score:p.score})),
+          rawLocalB:pointTau.rawLocalB,
+          rawCumulative:pointTau.rawCumulative,
+          correctionBySession:pointTau.correctionBySession,
+          tauUCumulative:pointTau.tauUCumulative,
+          baselineLocal:pointTau.baselineLocal,
+          rawTau:r.rawTau,
+          baselineTau:r.baselineTau,
+          sAB:r.sAB,
+          sA:r.sA,
+          correction:r.correction,
+          finalTau:r.tau,
+          correct:r.correct,
+          nA:a.length,nB:b.length,
+          direction:dir,
+          phaseAStart:phaseA.startSession,
+          phaseAEnd:phaseA.endSession,
+          phaseBStart:phaseB.startSession,
+          phaseBEnd:phaseB.endSession,
+          trendLine:tr,
+          color:overlayColor,
+          seriesIndex:si,
+          ...(analysisId?{analysisId}:{})
+        });
+
+        const correctionLine=r.correct
+          ? `Baseline correction = S_A/(nA × nB) = ${fmt(r.sA,0)}/(${a.length} × ${b.length}) = ${fmt(r.correction,3)}. Final Tau-U = ${fmt(r.tau,3)}.`
+          : `Baseline correction was not applied. Final Tau-U = raw phase contrast τ = ${fmt(r.tau,3)}.`;
+        const pLine=r.correct
+          ? `Because the sampling distribution of baseline-corrected Tau-U is not established, SCGraph2 does not report a corrected Tau-U p value. For reference only, the uncorrected A→B rank contrast has approximate two-sided p = ${fmt(r.rawP,4)}.`
+          : `Approximate two-sided p for the A→B rank contrast = ${fmt(r.rawP,4)}; ${r.rawP<alpha?'significant':'not significant'} at α = ${fmt(alpha,3)}.`;
+        const firstCorr=pointTau.correctionBySession[0]??0,lastCorr=pointTau.correctionBySession.at(-1)??0;
+        const teachingLine=r.correct
+          ? `Session-dependent correction: the amount subtracted falls from ${fmt(firstCorr,3)} at the first intervention observation to ${fmt(lastCorr,3)} at intervention observation ${b.length}. The dashed gray rings around B points visualize this waning influence on a relative scale: B1 = 100%, and each later ring is scaled by |C_j|/|C_1|.`
+          : `No session-dependent baseline correction is shown because baseline correction was not applied.`;
+        addResult(`Tau-U — ${ser.label} — ${state.parsed.phaseNames[pA]} vs ${state.parsed.phaseNames[pB]}`,[
+          `Raw A→B contrast: S_AB = ${fmt(r.sAB,0)} across ${a.length*b.length} pairs; raw τ = ${fmt(r.rawTau,3)}.`,
+          `Baseline trend: S_A = ${fmt(r.sA,0)} across ${r.sA===0?ptsA.length*(ptsA.length-1)/2:ptsA.length*(ptsA.length-1)/2} ordered baseline pairs; baseline τ = ${fmt(r.baselineTau,3)}.`,
+          correctionLine,
+          pLine,
+          teachingLine,
+          `Graph encoding: solid outer B ring = that observation's raw comparison with A; colored B point = cumulative Tau-U through that intervention session; dashed gray B ring = baseline influence remaining relative to B1 (ring radius/width/opacity shrink across B); dashed A rings = local preexisting trend evidence.`,
+          `Direction: ${dir==='decrease'?'decrease':'increase'} = improvement. Separately, completely non-overlapping treatment observations = ${fmt(non/b.length*100,1)}%.`
+        ],`Series ${si+1}; nA=${a.length}, nB=${b.length}`,analysisId);
+        renderGraph();
+        status(`Tau-U complete. ${els.tauVizSelect?.value==='off'?'Visualization is currently OFF.':'Session-dependent Tau-U visualization added to the graph.'}`,'ok');
+        return;
       }
       throw new Error('Command not recognized.');
     }catch(e){status(e.message,'error');}
@@ -1016,19 +1864,19 @@ title: Reading Fluency</div>
       syncPhaseNameInputs();
       const priorSeriesLabel=els.analysisSeriesSelect?.selectedOptions[0]?.dataset?.label||'',priorGoalSeriesLabel=els.goalSeriesSelect?.selectedOptions[0]?.dataset?.label||'',priorGoalLines=JSON.parse(JSON.stringify(state.goalLines||[])),priorGraphSettings=JSON.parse(JSON.stringify(state.graphSettings||[])),priorControlGraph=state.parsed?Math.max(0,selectedControlGraph()):0,priorAnalysisGraph=state.parsed?Math.max(0,selectedAnalysisGraph()):0;
       state.parsed=parseData(els.dataInput.value);state.sourceText=els.dataInput.value;state.direction=els.directionSelect.value;state.ghosted=new Set(state.parsed.ghostedKeys||[]);syncGraphSettingsAfterParse(priorGraphSettings);state.goalLines=normalizeGoalLinesAfterParse(priorGoalLines);state.overlays=[];state.results=[];renderResults();
-      updateGraphEditOptions(Math.min(priorControlGraph,state.parsed.graphs.length-1));updateAnalysisGraphOptions(Math.min(priorAnalysisGraph,state.parsed.graphs.length-1));updateAnalysisSeriesOptions(priorSeriesLabel,selectedAnalysisGraph());updateGoalControls(priorGoalSeriesLabel);
-      renderGraph();status('Data loaded. Would you like to adjust the graph or perform a visual or quantitative analysis?','ok');
+      updateGraphEditOptions(Math.min(priorControlGraph,state.parsed.graphs.length-1));updateAnalysisGraphOptions(Math.min(priorAnalysisGraph,state.parsed.graphs.length-1));updateAnalysisSeriesOptions(priorSeriesLabel,selectedAnalysisGraph());updateGoalControls(priorGoalSeriesLabel);updateReportSelectors();
+      renderGraph();status('Data loaded. Would you like to adjust the graph, perform an analysis, or add material to the report?','ok');
     }catch(e){status(e.message,'error');}
   }
   function reset(){
-    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
+    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
   }
   function collectState(){
     saveSelectedGraphControls(false);
     const modules=[...document.querySelectorAll('details.module')];
     return {
       format:'SCGraph2-state',
-      version:7,
+      version:20,
       savedAt:new Date().toISOString(),
       data:{
         source:els.dataInput.value,
@@ -1054,6 +1902,7 @@ title: Reading Fluency</div>
         graphCommand:els.graphCommand.value,
         goalLines:JSON.parse(JSON.stringify(state.goalLines||[]))
       },
+      report:{html:els.reportEditor?els.reportEditor.innerHTML:'',preview:false},
       analysis:{
         command:els.analysisCommand.value,
         selectedGraphIndex:selectedAnalysisGraph(),
@@ -1062,6 +1911,8 @@ title: Reading Fluency</div>
         selectedSeriesLabel:selectedAnalysisSeries()>=0&&state.parsed?state.parsed.series[selectedAnalysisSeries()].label:'',
         alpha:els.alphaInput.value,
         tauCorrection:els.tauCorrectionSelect.value,
+        tauVisualization:els.tauVizSelect?.value||'both',
+        tauLegendVisible:els.tauLegendCheck?.checked!==false,
         overlays:JSON.parse(JSON.stringify(state.overlays||[])),
         results:JSON.parse(JSON.stringify(state.results||[]))
       },
@@ -1259,16 +2110,22 @@ title: Reading Fluency</div>
     if(!payload||typeof payload!=='object')throw new Error('The selected file does not contain a valid SCGraph2 state.');
     if(payload.format!=='SCGraph2-state')throw new Error('This JSON file is not an SCGraph2 saved-state file.');
     if(!Number.isFinite(Number(payload.version))||Number(payload.version)<1)throw new Error('The SCGraph2 state version is missing or invalid.');
-    const d=payload.data||{},g=payload.graph||{},a=payload.analysis||{},ui=payload.interface||{};
+    const d=payload.data||{},g=payload.graph||{},a=payload.analysis||{},r=payload.report||{},ui=payload.interface||{};
     if(typeof d.source!=='string'||!d.source.trim())throw new Error('The saved state does not contain valid source data.');
-    els.dataInput.value=d.source;
-    els.phaseNamesData.value=typeof d.phaseNames==='string'?d.phaseNames:'';
-    els.phaseLabelInput.value=typeof g.phaseLabels==='string'?g.phaseLabels:els.phaseNamesData.value;
-    els.directionSelect.value=d.direction==='decrease'?'decrease':'increase';
-    els.notesInput.value=typeof d.notes==='string'?d.notes:'';
-    els.titleInput.value=typeof g.title==='string'?g.title:'Performance Scores Over Sessions';
-    els.xLabelInput.value=typeof g.xLabel==='string'?g.xLabel:'Session';
-    els.yLabelInput.value=typeof g.yLabel==='string'?g.yLabel:'Score';
+    els.dataInput.value=d.source;els.phaseNamesData.value=typeof d.phaseNames==='string'?d.phaseNames:'';els.phaseLabelInput.value=typeof g.phaseLabels==='string'?g.phaseLabels:els.phaseNamesData.value;els.directionSelect.value=d.direction==='decrease'?'decrease':'increase';els.notesInput.value=typeof d.notes==='string'?d.notes:'';
+    els.titleInput.value=typeof g.title==='string'?g.title:'Performance Scores Over Sessions';els.xLabelInput.value=typeof g.xLabel==='string'?g.xLabel:'Session';els.markerSizeInput.value=g.markerSize??5;els.lineWidthInput.value=g.lineWidth??2;els.gridCheck.checked=!!g.grid;els.legendCheck.checked=g.legend!==false;els.phaseLabelsCheck.checked=g.showPhaseLabels!==false;els.showGhostCheck.checked=g.showGhosts!==false;els.graphCommand.value=typeof g.graphCommand==='string'?g.graphCommand:'';
+    // Parse first, then restore state objects whose indexes depend on the parsed data.
+    state.parsed=parseData(els.dataInput.value);state.sourceText=els.dataInput.value;state.direction=els.directionSelect.value;state.ghosted=new Set(state.parsed.ghostedKeys||[]);syncGraphSettingsAfterParse(Array.isArray(g.graphSettings)?g.graphSettings:[]);state.goalLines=normalizeGoalLinesAfterParse(Array.isArray(g.goalLines)?g.goalLines:[]);
+    updateGraphEditOptions(Number.isInteger(Number(g.selectedGraphIndex))?Number(g.selectedGraphIndex):0);loadSelectedGraphControls();updateGoalControls();
+    els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';els.alphaInput.value=a.alpha??0.05;els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';if(els.tauVizSelect)els.tauVizSelect.value=['both','raw','corrected','off'].includes(a.tauVisualization)?a.tauVisualization:'both';if(els.tauLegendCheck)els.tauLegendCheck.checked=a.tauLegendVisible!==false;
+    updateAnalysisGraphOptions(Number.isInteger(Number(a.selectedGraphIndex))?Number(a.selectedGraphIndex):0,a.selectedSeriesLabel||'');
+    if(a.selectedSeriesLabel)updateAnalysisSeriesOptions(a.selectedSeriesLabel,selectedAnalysisGraph());
+    state.overlays=Array.isArray(a.overlays)?JSON.parse(JSON.stringify(a.overlays)):[];state.results=Array.isArray(a.results)?JSON.parse(JSON.stringify(a.results)):[];
+    if(els.reportEditor)els.reportEditor.innerHTML=sanitizeReportHtml(typeof r.html==='string'?r.html:'');setReportPreview(false);syncReportEditors(els.reportEditor);updateReportSelectors();
+    const modules=[...document.querySelectorAll('details.module')];
+    if(ui.modulesOpenByName&&typeof ui.modulesOpenByName==='object')modules.forEach(d=>{const key=d.dataset.module||d.querySelector('summary')?.textContent.trim()||'';if(Object.prototype.hasOwnProperty.call(ui.modulesOpenByName,key))d.open=!!ui.modulesOpenByName[key];});
+    else if(Array.isArray(ui.modulesOpen))modules.forEach((d,i)=>{if(i<ui.modulesOpen.length)d.open=!!ui.modulesOpen[i];});
+    renderResults();renderGoalLineList();renderGraph();updateAnalysisToggleButtons();updateScaleControlStates();
     status(`SCGraph2 state restored${payload.savedAt?` from ${new Date(payload.savedAt).toLocaleString()}`:''}.`,'ok');
   }
   function loadStateJsonFile(file){
@@ -1404,6 +2261,79 @@ title: Reading Fluency</div>
   $('clearOverlaysBtn').addEventListener('click',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();updateAnalysisToggleButtons();status('Analysis overlays cleared. Goal lines were retained.','ok');});
   $('restoreGhostsBtn').addEventListener('click',()=>{els.dataInput.value=els.dataInput.value.replace(/\(\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*\)/g,'$1');loadData();status('All parenthesized observations restored in the data stream.','ok');});
   const startUpDialog=$('startUpDialog');
+  // Report workspace events
+  function refreshRightAccordionLayout(){
+    const stack=document.querySelector('.secondary-stack');
+    if(!stack)return;
+    const panels=[...stack.querySelectorAll(':scope > details.module')];
+    const first=panels[0], second=panels[1];
+    stack.classList.toggle('both-open',!!(first?.open&&second?.open));
+    stack.classList.toggle('first-only',!!(first?.open&&!second?.open));
+    stack.classList.toggle('second-only',!!(!first?.open&&second?.open));
+    // Force layout now so wheel/touch scrolling sees the updated viewport immediately.
+    void stack.offsetHeight;
+  }
+  document.querySelectorAll('.secondary-stack > details.module').forEach(d=>d.addEventListener('toggle',refreshRightAccordionLayout));
+  window.addEventListener('resize',refreshRightAccordionLayout);
+  refreshRightAccordionLayout();
+
+  $('reportBtn').addEventListener('click',toggleReportOverlay);
+  function updateDataInputViewportHeight(){
+    const pane=document.querySelector('details.module[data-module="data"]');
+    if(!pane||!pane.open)return;
+    const r=pane.getBoundingClientRect();
+    const header=document.querySelector('header');
+    const headerBottom=header?header.getBoundingClientRect().bottom:58;
+    // Use only the part of the viewport that is actually available beneath the pane's current top.
+    // This prevents the pane from having a nominal internal height that extends off-screen.
+    const visibleTop=Math.max(r.top,headerBottom+10);
+    const available=window.innerHeight-visibleTop-12;
+    const target=Math.max(190,Math.min(460,available));
+    pane.style.height=`${Math.round(target)}px`;
+  }
+  let dataViewportRAF=0;
+  function scheduleDataInputViewportHeight(){
+    if(dataViewportRAF)return;
+    dataViewportRAF=requestAnimationFrame(()=>{
+      dataViewportRAF=0;
+      updateDataInputViewportHeight();
+    });
+  }
+
+  window.addEventListener('resize',()=>{if(reportOverlayActive)positionReportOverlay();scheduleDataInputViewportHeight();});
+  window.addEventListener('scroll',()=>{if(reportOverlayActive)positionReportOverlay();scheduleDataInputViewportHeight();},{passive:true});
+  const dataModule=document.querySelector('details.module[data-module="data"]');
+  if(dataModule)dataModule.addEventListener('toggle',()=>{
+    if(dataModule.open)setTimeout(scheduleDataInputViewportHeight,0);
+  });
+  setTimeout(scheduleDataInputViewportHeight,0);
+
+  els.reportModule.addEventListener('toggle',()=>{
+    if(suppressReportOverlayToggle)return;
+    if(reportOverlayActive&&!els.reportModule.open){
+      reportOverlayActive=false;
+      els.reportModule.classList.remove('report-overlay');
+      ['left','width','top','height'].forEach(p=>els.reportModule.style[p]='');
+      updateReportOverlayButton();
+      queueReportAutosave();
+    }
+  });
+  document.querySelectorAll('[data-report-command]').forEach(btn=>{btn.addEventListener('mousedown',e=>e.preventDefault());btn.addEventListener('click',()=>executeReportCommand(btn.dataset.reportCommand));});
+  els.reportFormatSelect.addEventListener('change',()=>executeReportCommand('formatBlock',els.reportFormatSelect.value));
+  ['keyup','mouseup','focus'].forEach(ev=>els.reportEditor.addEventListener(ev,()=>{lastReportEditor=els.reportEditor;saveReportSelection(els.reportEditor);}));
+  els.reportEditor.addEventListener('input',()=>{lastReportEditor=els.reportEditor;saveReportSelection(els.reportEditor);syncReportEditors(els.reportEditor);});
+  document.addEventListener('selectionchange',()=>{if(document.activeElement===els.reportEditor)saveReportSelection(els.reportEditor);});
+  els.reportEditor.addEventListener('paste',e=>handleReportPaste(e,els.reportEditor));
+  $('insertReportTemplateBtn').addEventListener('click',()=>insertReportHtml(reportTemplateHtml()));
+  $('insertReportNotesBtn').addEventListener('click',()=>{const n=els.notesInput.value.trim();if(!n){status('There are no Notes / context to insert.','error');return;}insertReportHtml(`<h2>Notes / Context</h2><p>${escapeHtml(n).replace(/\n/g,'<br>')}</p>`);});
+  $('insertReportDividerBtn').addEventListener('click',()=>insertReportHtml('<hr><p><br></p>'));
+  $('insertReportGraphBtn').addEventListener('click',()=>{try{insertReportHtml(reportGraphSnapshotHtml());status('Graph snapshot inserted into the report.','ok');}catch(e){status(e.message,'error');}});
+  els.reportTableGraphSelect.addEventListener('change',updateReportTableSeriesOptions);
+  $('insertReportTableBtn').addEventListener('click',()=>{try{insertReportHtml(reportDataTableHtml());status('Data table inserted into the report.','ok');}catch(e){status(e.message,'error');}});
+  $('insertReportResultsBtn').addEventListener('click',()=>{try{insertReportHtml(reportAnalysisResultsHtml());status('Analysis results inserted into the report.','ok');}catch(e){status(e.message,'error');}});
+  $('reportPreviewBtn').addEventListener('click',()=>setReportPreview(!reportPreviewMode));
+  $('reportPdfBtn').addEventListener('click',printReport);
+
   $('startUpBtn').addEventListener('click',()=>{if(typeof startUpDialog.showModal==='function')startUpDialog.showModal();else startUpDialog.setAttribute('open','');});
   $('closeStartUpBtn').addEventListener('click',()=>startUpDialog.close?startUpDialog.close():startUpDialog.removeAttribute('open'));
   startUpDialog.addEventListener('click',e=>{if(e.target===startUpDialog&&startUpDialog.close)startUpDialog.close();});
@@ -1460,9 +2390,13 @@ title: Reading Fluency</div>
   els.yAutoModeSelect.addEventListener('change',()=>{updateScaleControlStates();saveSelectedGraphControls();});
   els.phaseLabelInput.addEventListener('change',()=>{if(state.parsed){const si=els.goalSeriesSelect.value,sp=els.goalStartPhaseSelect.value,ep=els.goalEndPhaseSelect.value;state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);updateGoalControls(state.parsed.series[Number(si)]?.label||'');els.goalStartPhaseSelect.value=sp;els.goalEndPhaseSelect.value=ep;renderGoalLineList();renderGraph();}});
   els.directionSelect.addEventListener('change',()=>{state.direction=els.directionSelect.value;}); els.phaseNamesData.addEventListener('change',()=>{els.phaseLabelInput.value=els.phaseNamesData.value;if(state.parsed){const si=els.goalSeriesSelect.value,sp=els.goalStartPhaseSelect.value,ep=els.goalEndPhaseSelect.value;state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);updateGoalControls(state.parsed.series[Number(si)]?.label||'');els.goalStartPhaseSelect.value=sp;els.goalEndPhaseSelect.value=ep;renderGoalLineList();}renderGraph();});
+  if(els.tauVizSelect)els.tauVizSelect.addEventListener('change',renderGraph);
+  if(els.tauLegendCheck)els.tauLegendCheck.addEventListener('change',renderGraph);
   window.addEventListener('resize',()=>{});
   restoreRememberedSaveDirectory();
   loadData();
+  restoreReportAutosave();
+  updateReportPopupButton();
 })();
 </script>
 </body>

@@ -1,18 +1,14 @@
 # SCGraph2
 
-SCGraph2 is a single-file HTML application for single-case graphing and analysis.
+## Tau-U legend spacing fix
 
-## Run
-Open `index.html` or `SCGraph2.html` in a browser. For GitHub Pages, publish `index.html` from the repository root.
+The detailed Tau-U legend now uses a taller fixed layout with separate rows for:
+- baseline/correction status,
+- raw Tau ring explanation,
+- cumulative Tau-U point explanation,
+- baseline-influence ring explanation,
+- direction/color key.
 
-## Saving and exporting
+This prevents the lower legend lines and direction key from overlapping.
 
-Open SCGraph2 directly as a top-level page (for example, the GitHub Pages URL) when using Save Location, Save State, Export SVG, or Export PNG. Browsers block writable-folder pickers in cross-origin embedded previews, and sandboxed previews may also block ordinary downloads. In supported top-level Chrome/Edge pages, Save Location can remember a writable folder.
-
-## Data syntax
-- `|` creates phase boundaries.
-- `(value)` ghosts an observation while retaining its session position.
-- `+` creates vertically stacked multiple-baseline tiers on a shared session timeline.
-- `-` creates an independent graph panel. Up to three graph panels are supported.
-
-Each independent graph can have its own graph label, Y-axis label, vertical scale, tick interval, autoscale method, and number of phases.
+State format version: 20.
