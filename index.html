@@ -184,6 +184,7 @@
   .field{margin-bottom:9px}.row{display:flex;gap:7px;align-items:center}.row > *{min-width:0}.row.grow > input,.row.grow > textarea{flex:1}
   .hint{font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:5px}.subhead{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#667085;font-weight:700;margin:12px 0 7px}
   .checks{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}.checks label{font-weight:500;display:flex;align-items:center;gap:6px;margin:0}
+  .weekday-checks{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:5px}.weekday-checks label{display:flex;align-items:center;justify-content:center;gap:4px;margin:0;padding:6px 4px;border:1px solid #d7dde5;border-radius:7px;background:#fbfcfd;font-size:11px;font-weight:600;white-space:nowrap}.weekday-checks input{margin:0}.weekday-checks.disabled{opacity:.55}
   #status{font-size:12px;color:var(--muted);padding:5px 2px 0}.error{color:var(--danger)!important;font-weight:700}.ok{color:var(--ok)!important}
   .analysis-targets{margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid #e3e8ee}
   .analysis-targets label{color:#263444}
@@ -342,7 +343,7 @@
 </head>
 <body>
 <header>
-  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.1</span></div>
+  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.2</span></div>
   <div class="header-actions">
     <button id="startUpBtn" class="small">Start Up</button>
     <button id="helpBtn" class="small">Help</button>
@@ -508,7 +509,21 @@
           <div class="field"><label for="xAxisLabelModeSelect">Axis labels</label><select id="xAxisLabelModeSelect"><option value="session">Session number</option><option value="date">Date</option><option value="both">Session + date</option></select></div>
         </div>
         <div class="field" id="customMinSessionsField" style="display:none"><label for="customMinSessionsInput">Custom minimum sessions</label><input id="customMinSessionsInput" type="number" min="1" step="1" value="15"></div>
-        <div class="field"><label for="sessionDatesInput">Session dates</label><textarea id="sessionDatesInput" class="mono" style="min-height:78px" placeholder="1, 2026-09-07&#10;2, 2026-09-09&#10;3, 2026-09-14"></textarea><div class="hint">Required only for proportional calendar time. Enter one line per session as <span class="kbd">session, YYYY-MM-DD</span>. Dates are never invented; missing required dates stop calendar-time rendering with a validation message.</div></div>
+        <div class="field" id="calendarScheduleField" style="display:none">
+          <label for="firstSessionDateInput">First session date</label>
+          <input id="firstSessionDateInput" type="date">
+          <div class="subhead" style="margin:9px 0 5px">Session days</div>
+          <div class="weekday-checks" id="calendarWeekdayChecks" aria-label="Recurring session weekdays">
+            <label><input type="checkbox" data-calendar-weekday="1">Mon</label>
+            <label><input type="checkbox" data-calendar-weekday="2">Tue</label>
+            <label><input type="checkbox" data-calendar-weekday="3">Wed</label>
+            <label><input type="checkbox" data-calendar-weekday="4">Thu</label>
+            <label><input type="checkbox" data-calendar-weekday="5">Fri</label>
+            <label><input type="checkbox" data-calendar-weekday="6">Sat</label>
+            <label><input type="checkbox" data-calendar-weekday="0">Sun</label>
+          </div>
+          <div class="hint">For proportional calendar time, Session 1 uses the first date exactly. SCGraph2 then assigns each later observation to the next checked weekday, repeating the weekly schedule automatically. You do not need to enter individual session dates.</div>
+        </div>
         <div id="timelinePreview" class="footer-note">Sequential sessions · minimum span 15.</div>
         <div class="divider"></div>
         <div class="subhead">Goal Lines</div>
@@ -619,7 +634,7 @@ Accuracy: 40,45,50|70,78,85</div>
 
     <h3>3. Load and format the graph</h3>
     <p>Select <strong>Load &amp; Graph Data</strong>. In <strong>Graph Controls</strong>, choose the graph to edit. Each independent graph can have its own graph label, Y-axis label, vertical range, tick interval, and autoscale method.</p>
-    <p><strong>X-axis timeline:</strong> Graph Controls now supports a configurable minimum sequential-session span or proportional calendar-time spacing from explicit session dates. Calendar mode never invents missing dates and keeps statistical calculations session-order based.</p>
+    <p><strong>X-axis timeline:</strong> Graph Controls supports a configurable minimum sequential-session span or proportional calendar-time spacing from a recurring clinical schedule. Enter the first session date once, then check the days of the week on which sessions occur. Session 1 uses the entered date exactly; later observations are assigned automatically to the next checked weekday. Statistical calculations remain session-order based.</p>
     <p><strong>Auto-scale is on by default</strong> for new graphs. Autoscale choices include the single-case rules for nonnegative/unbounded measures, known measurement bounds, measures allowing negative values, and the original SCGraph heuristic. Turn Auto-scale off for a manual Y range. The current effective scale is shown in Graph Controls.</p>
 
     <h3>4. Add goal lines when needed</h3>
@@ -679,6 +694,9 @@ Student C: 1,2,2,3,3,4,4|7,8,9</div>
     <p>Analyses are always performed on one specified series at a time. The <strong>Graph to analyze</strong> and <strong>Series to analyze</strong> selectors are positioned at the <strong>top of the Analysis panel</strong>, above the analysis buttons. When multiple graph panels exist, choose the graph first and then the series/tier within that graph. A one-series graph auto-selects its series; a multiple-series or multiple-baseline graph asks you to choose the target series/tier.</p>
     <div class="help-example">Trend, series=2, 1<br>T-U, series=Accuracy, 1, 2</div>
     <p>The selected Graph scopes series references, so <span class="kbd">series=2</span> means the second series/tier within the selected graph. A series may also be referenced by its exact label. Natural-language requests such as <strong>“perform Tau-U on series Accuracy, phases 1 and 2”</strong> use the currently selected graph as context.</p>
+
+    <h3>Calendar-time scheduling</h3>
+    <p>Choose <strong>Proportional calendar time</strong> when the horizontal spacing should show the actual number of days between sessions. Enter the <strong>First session date</strong> and check the recurring session days from Monday through Sunday. SCGraph2 assigns Session 1 to the entered date, then moves forward one day at a time and places each later observation on the next checked weekday. For example, a Monday first session with Monday/Wednesday checked produces Monday, Wednesday, the following Monday, and so forth. Phase lines remain halfway in time between the adjoining sessions, while statistical analyses continue to use session order rather than elapsed days.</p>
 
     <h3>Ghosting observations</h3>
     <p>Ghosting is encoded <strong>inside the data stream</strong>. Surround one numerical value with parentheses.</p>
@@ -780,14 +798,14 @@ title: Reading Fluency</div>
     dataInput:$('dataInput'), phaseNamesData:$('phaseNamesData'), directionSelect:$('directionSelect'), notesInput:$('notesInput'),
     titleInput:$('titleInput'), xLabelInput:$('xLabelInput'), graphEditSelect:$('graphEditSelect'), graphLabelInput:$('graphLabelInput'), yLabelInput:$('yLabelInput'), yMinInput:$('yMinInput'), yMaxInput:$('yMaxInput'), yTickInput:$('yTickInput'), yAutoCheck:$('yAutoCheck'), yAutoModeSelect:$('yAutoModeSelect'), knownMinInput:$('knownMinInput'), knownMaxInput:$('knownMaxInput'), scalePreview:$('scalePreview'),
     markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), lineStyleSeriesSelect:$('lineStyleSeriesSelect'), lineDashSelect:$('lineDashSelect'), lineColorInput:$('lineColorInput'), showConnectingLineCheck:$('showConnectingLineCheck'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
-    xScaleModeSelect:$('xScaleModeSelect'), minSessionsSelect:$('minSessionsSelect'), customMinSessionsInput:$('customMinSessionsInput'), customMinSessionsField:$('customMinSessionsField'), xAxisLabelModeSelect:$('xAxisLabelModeSelect'), sessionDatesInput:$('sessionDatesInput'), timelinePreview:$('timelinePreview'),
+    xScaleModeSelect:$('xScaleModeSelect'), minSessionsSelect:$('minSessionsSelect'), customMinSessionsInput:$('customMinSessionsInput'), customMinSessionsField:$('customMinSessionsField'), xAxisLabelModeSelect:$('xAxisLabelModeSelect'), firstSessionDateInput:$('firstSessionDateInput'), calendarScheduleField:$('calendarScheduleField'), calendarWeekdayChecks:$('calendarWeekdayChecks'), timelinePreview:$('timelinePreview'),
     phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), analysisPhaseSelect:$('analysisPhaseSelect'), visualSourcePhaseSelect:$('visualSourcePhaseSelect'), visualDisplayThroughSelect:$('visualDisplayThroughSelect'), alphaInput:$('alphaInput'),
     goalSeriesSelect:$('goalSeriesSelect'), goalStartPhaseSelect:$('goalStartPhaseSelect'), goalEndPhaseSelect:$('goalEndPhaseSelect'), goalValueInput:$('goalValueInput'), goalLineList:$('goalLineList'),
     tauCorrectionSelect:$('tauCorrectionSelect'), tauVizSelect:$('tauVizSelect'), tauLegendCheck:$('tauLegendCheck'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill'),
     reportModule:$('reportModule'), reportEditor:$('reportEditor'), reportFormatSelect:$('reportFormatSelect'), reportGraphSelect:$('reportGraphSelect'), reportTableGraphSelect:$('reportTableGraphSelect'), reportTableSeriesSelect:$('reportTableSeriesSelect'), reportStatus:$('reportStatus'), reportSummaryStatus:$('reportSummaryStatus')
   };
 
-  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], graphSettings:[], results:[], sourceText:'', direction:'increase', timeline:{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',sessionDates:''} };
+  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], graphSettings:[], results:[], sourceText:'', direction:'increase', timeline:{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]} };
   const seriesStyles = [
     {stroke:'#111827', marker:'circle'}, {stroke:'#4b5563', marker:'square'}, {stroke:'#7c2d12', marker:'triangle'}, {stroke:'#1f4e79', marker:'diamond'}
   ];
@@ -1327,35 +1345,73 @@ title: Reading Fluency</div>
     if(Number.isFinite(interval)&&interval>0&&(max-min)/interval<=100){const out=[],start=Math.ceil(min/interval)*interval;for(let v=start;v<=max+interval*.001;v+=interval)out.push(Number(v.toPrecision(12)));return out;}
     return niceTicks(min,max,7);
   }
-  function parseSessionDates(text){
-    const map=new Map(), errors=[];
-    String(text||'').split(/\n/).forEach((line,i)=>{
-      const t=line.trim();if(!t)return;
-      const m=t.match(/^(\d+)\s*[,\t]\s*(\d{4})-(\d{2})-(\d{2})$/);
-      if(!m){errors.push(`Line ${i+1}: use session, YYYY-MM-DD.`);return;}
-      const session=Number(m[1]),y=Number(m[2]),mo=Number(m[3]),d=Number(m[4]);
-      const ms=Date.UTC(y,mo-1,d),dt=new Date(ms);
-      if(session<1||dt.getUTCFullYear()!==y||dt.getUTCMonth()!==mo-1||dt.getUTCDate()!==d){errors.push(`Line ${i+1}: invalid session or date.`);return;}
-      map.set(session,{ms,iso:`${m[2]}-${m[3]}-${m[4]}`});
-    });
-    return {map,errors};
+  const DAY_MS=86400000;
+  const weekdayOrder=[1,2,3,4,5,6,0];
+  const weekdayNames={0:'Sun',1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat'};
+  function parseIsoDate(iso){
+    const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);if(!m)return null;
+    const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]),ms=Date.UTC(y,mo-1,d),dt=new Date(ms);
+    if(dt.getUTCFullYear()!==y||dt.getUTCMonth()!==mo-1||dt.getUTCDate()!==d)return null;
+    return {ms,iso:`${m[1]}-${m[2]}-${m[3]}`,dow:dt.getUTCDay()};
+  }
+  function checkedCalendarWeekdays(){
+    return [...document.querySelectorAll('[data-calendar-weekday]:checked')].map(el=>Number(el.dataset.calendarWeekday)).filter(v=>Number.isInteger(v)&&v>=0&&v<=6);
+  }
+  function setCheckedCalendarWeekdays(days){
+    const selected=new Set((Array.isArray(days)?days:[]).map(Number));
+    document.querySelectorAll('[data-calendar-weekday]').forEach(el=>{el.checked=selected.has(Number(el.dataset.calendarWeekday));});
+  }
+  function legacyTimelineToSchedule(raw){
+    if(typeof raw?.sessionDates!=='string'||!raw.sessionDates.trim())return {firstSessionDate:'',weekdays:[]};
+    const rows=[];
+    raw.sessionDates.split(/\n/).forEach(line=>{const m=line.trim().match(/^(\d+)\s*[,\t]\s*(\d{4}-\d{2}-\d{2})$/);if(m){const d=parseIsoDate(m[2]);if(d)rows.push({session:Number(m[1]),...d});}});
+    rows.sort((a,b)=>a.session-b.session);if(!rows.length)return {firstSessionDate:'',weekdays:[]};
+    const first=(rows.find(r=>r.session===1)||rows[0]).iso;
+    const weekdays=[];rows.forEach(r=>{if(!weekdays.includes(r.dow))weekdays.push(r.dow);});
+    return {firstSessionDate:first,weekdays:weekdayOrder.filter(d=>weekdays.includes(d))};
+  }
+  function generateSessionDateMap(firstIso,weekdays,count){
+    const first=parseIsoDate(firstIso);if(!first)throw new Error('Calendar timeline requires a valid first session date.');
+    const selected=new Set((Array.isArray(weekdays)?weekdays:[]).map(Number).filter(v=>Number.isInteger(v)&&v>=0&&v<=6));
+    if(count>1&&!selected.size)throw new Error('Calendar timeline requires at least one recurring session weekday.');
+    const map=new Map([[1,{ms:first.ms,iso:first.iso}]]);let cursor=first.ms,session=2;
+    while(session<=count){
+      cursor+=DAY_MS;
+      if(selected.has(new Date(cursor).getUTCDay())){const dt=new Date(cursor);map.set(session,{ms:cursor,iso:`${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,'0')}-${String(dt.getUTCDate()).padStart(2,'0')}`});session++;}
+    }
+    return map;
   }
   function timelineSettingsFromUi(){
     const minChoice=els.minSessionsSelect?.value||'15';
-    return {mode:els.xScaleModeSelect?.value==='calendar'?'calendar':'sequential',minSessions:minChoice,customMinSessions:Math.max(1,Math.round(Number(els.customMinSessionsInput?.value)||15)),labelMode:['session','date','both'].includes(els.xAxisLabelModeSelect?.value)?els.xAxisLabelModeSelect.value:'session',sessionDates:els.sessionDatesInput?.value||''};
+    return {mode:els.xScaleModeSelect?.value==='calendar'?'calendar':'sequential',minSessions:minChoice,customMinSessions:Math.max(1,Math.round(Number(els.customMinSessionsInput?.value)||15)),labelMode:['session','date','both'].includes(els.xAxisLabelModeSelect?.value)?els.xAxisLabelModeSelect.value:'session',firstSessionDate:els.firstSessionDateInput?.value||'',weekdays:checkedCalendarWeekdays()};
   }
   function saveTimelineControls(){state.timeline=timelineSettingsFromUi();updateTimelineControlStates();}
   function loadTimelineControls(raw=state.timeline||{}){
-    const t={mode:raw.mode==='calendar'?'calendar':'sequential',minSessions:['auto','10','15','20','25','30','custom'].includes(String(raw.minSessions))?String(raw.minSessions):'15',customMinSessions:Math.max(1,Math.round(Number(raw.customMinSessions)||15)),labelMode:['session','date','both'].includes(raw.labelMode)?raw.labelMode:'session',sessionDates:typeof raw.sessionDates==='string'?raw.sessionDates:''};
+    const legacy=legacyTimelineToSchedule(raw);
+    const rawDays=Array.isArray(raw.weekdays)?raw.weekdays:legacy.weekdays;
+    const t={mode:raw.mode==='calendar'?'calendar':'sequential',minSessions:['auto','10','15','20','25','30','custom'].includes(String(raw.minSessions))?String(raw.minSessions):'15',customMinSessions:Math.max(1,Math.round(Number(raw.customMinSessions)||15)),labelMode:['session','date','both'].includes(raw.labelMode)?raw.labelMode:'session',firstSessionDate:typeof raw.firstSessionDate==='string'?raw.firstSessionDate:legacy.firstSessionDate,weekdays:weekdayOrder.filter(d=>rawDays.map(Number).includes(d))};
     state.timeline=t;
-    if(els.xScaleModeSelect)els.xScaleModeSelect.value=t.mode;if(els.minSessionsSelect)els.minSessionsSelect.value=t.minSessions;if(els.customMinSessionsInput)els.customMinSessionsInput.value=t.customMinSessions;if(els.xAxisLabelModeSelect)els.xAxisLabelModeSelect.value=t.labelMode;if(els.sessionDatesInput)els.sessionDatesInput.value=t.sessionDates;updateTimelineControlStates();
+    if(els.xScaleModeSelect)els.xScaleModeSelect.value=t.mode;if(els.minSessionsSelect)els.minSessionsSelect.value=t.minSessions;if(els.customMinSessionsInput)els.customMinSessionsInput.value=t.customMinSessions;if(els.xAxisLabelModeSelect)els.xAxisLabelModeSelect.value=t.labelMode;if(els.firstSessionDateInput)els.firstSessionDateInput.value=t.firstSessionDate;setCheckedCalendarWeekdays(t.weekdays);updateTimelineControlStates();
   }
   function updateTimelineControlStates(){
     const t=timelineSettingsFromUi(),cal=t.mode==='calendar';
     if(els.customMinSessionsField)els.customMinSessionsField.style.display=(!cal&&t.minSessions==='custom')?'':'none';
-    if(els.minSessionsSelect)els.minSessionsSelect.disabled=cal;if(els.customMinSessionsInput)els.customMinSessionsInput.disabled=cal;if(els.sessionDatesInput)els.sessionDatesInput.disabled=!cal;
-    if(els.xAxisLabelModeSelect){els.xAxisLabelModeSelect.disabled=false;if(!cal&&els.xAxisLabelModeSelect.value!=='session')els.xAxisLabelModeSelect.value='session';}
-    if(els.timelinePreview)els.timelinePreview.textContent=cal?'Proportional calendar time · dates determine horizontal spacing.':`Sequential sessions · minimum span ${t.minSessions==='auto'?'Auto':t.minSessions==='custom'?t.customMinSessions:t.minSessions}.`;
+    if(els.minSessionsSelect)els.minSessionsSelect.disabled=cal;if(els.customMinSessionsInput)els.customMinSessionsInput.disabled=cal;
+    if(els.calendarScheduleField)els.calendarScheduleField.style.display=cal?'':'none';
+    if(els.firstSessionDateInput)els.firstSessionDateInput.disabled=!cal;
+    document.querySelectorAll('[data-calendar-weekday]').forEach(el=>{el.disabled=!cal;});
+    if(els.calendarWeekdayChecks)els.calendarWeekdayChecks.classList.toggle('disabled',!cal);
+    if(els.xAxisLabelModeSelect){if(!cal&&els.xAxisLabelModeSelect.value!=='session')els.xAxisLabelModeSelect.value='session';els.xAxisLabelModeSelect.disabled=!cal;}
+    if(els.timelinePreview){
+      if(!cal){els.timelinePreview.textContent=`Sequential sessions · minimum span ${t.minSessions==='auto'?'Auto':t.minSessions==='custom'?t.customMinSessions:t.minSessions}.`;}
+      else if(!parseIsoDate(t.firstSessionDate)){els.timelinePreview.textContent='Calendar time · enter the first session date, then choose the recurring session days.';}
+      else{
+        const dayText=t.weekdays.length?t.weekdays.map(d=>weekdayNames[d]).join(', '):'no recurring days selected';
+        const n=Math.max(1,state.parsed?.maxSessions||1);
+        try{const map=generateSessionDateMap(t.firstSessionDate,t.weekdays,n),sample=[];for(let i=1;i<=Math.min(n,4);i++)sample.push(`S${i} ${shortDate(map.get(i)?.iso||'')}`);els.timelinePreview.textContent=`Calendar time · ${dayText} · ${sample.join(' · ')}${n>4?' …':''}`;}
+        catch(e){els.timelinePreview.textContent=`Calendar time · ${dayText}.`;}
+      }
+    }
   }
   function timelineGeometry(){
     const t=timelineSettingsFromUi(),actualMax=Math.max(1,state.parsed?.maxSessions||1),left=96,right=38,W=1000,innerW=W-left-right;
@@ -1363,19 +1419,16 @@ title: Reading Fluency</div>
       const requested=t.minSessions==='auto'?actualMax:(t.minSessions==='custom'?t.customMinSessions:Number(t.minSessions)||15),xmax=Math.max(actualMax,requested);
       return {mode:'sequential',xmax,labelMode:'session',x:s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,dateMap:new Map()};
     }
-    const parsed=parseSessionDates(t.sessionDates);if(parsed.errors.length)throw new Error(`Calendar timeline: ${parsed.errors[0]}`);
-    const missing=[];for(let i=1;i<=actualMax;i++)if(!parsed.map.has(i))missing.push(i);
-    if(missing.length)throw new Error(`Calendar timeline requires dates for every displayed observation session. Missing session${missing.length===1?'':'s'}: ${missing.slice(0,8).join(', ')}${missing.length>8?'…':''}.`);
-    let prev=-Infinity;for(let i=1;i<=actualMax;i++){const ms=parsed.map.get(i).ms;if(ms<prev)throw new Error(`Calendar timeline dates must not move backward: Session ${i} precedes the prior session date.`);prev=ms;}
-    const first=parsed.map.get(1).ms,last=parsed.map.get(actualMax).ms,span=Math.max(86400000,last-first);
+    const dateMap=generateSessionDateMap(t.firstSessionDate,t.weekdays,actualMax);
+    const first=dateMap.get(1).ms,last=dateMap.get(actualMax).ms,span=Math.max(DAY_MS,last-first);
     const sessionMs=s=>{
-      if(Number.isInteger(s)&&parsed.map.has(s))return parsed.map.get(s).ms;
+      if(Number.isInteger(s)&&dateMap.has(s))return dateMap.get(s).ms;
       const lo=Math.floor(s),hi=Math.ceil(s);
-      if(lo>=1&&hi<=actualMax&&parsed.map.has(lo)&&parsed.map.has(hi)){if(lo===hi)return parsed.map.get(lo).ms;return parsed.map.get(lo).ms+(s-lo)*(parsed.map.get(hi).ms-parsed.map.get(lo).ms);}
-      if(s<1){const step=actualMax>1?parsed.map.get(2).ms-first:86400000;return first+(s-1)*step;}
-      const step=actualMax>1?last-parsed.map.get(actualMax-1).ms:86400000;return last+(s-actualMax)*step;
+      if(lo>=1&&hi<=actualMax&&dateMap.has(lo)&&dateMap.has(hi)){if(lo===hi)return dateMap.get(lo).ms;return dateMap.get(lo).ms+(s-lo)*(dateMap.get(hi).ms-dateMap.get(lo).ms);}
+      if(s<1){const step=actualMax>1?dateMap.get(2).ms-first:DAY_MS;return first+(s-1)*step;}
+      const step=actualMax>1?last-dateMap.get(actualMax-1).ms:DAY_MS;return last+(s-actualMax)*step;
     };
-    return {mode:'calendar',xmax:actualMax,labelMode:t.labelMode,dateMap:parsed.map,x:s=>left+((sessionMs(s)-first)/span)*innerW};
+    return {mode:'calendar',xmax:actualMax,labelMode:t.labelMode,dateMap,x:s=>left+((sessionMs(s)-first)/span)*innerW};
   }
   function shortDate(iso){const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${Number(m[2])}/${Number(m[3])}`:iso;}
   function graphMetrics(){
@@ -2419,14 +2472,14 @@ title: Reading Fluency</div>
     }catch(e){status(e.message,'error');}
   }
   function reset(){
-    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=true;loadTimelineControls({mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',sessionDates:''});els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
+    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=true;loadTimelineControls({mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]});els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
   }
   function collectState(){
     saveSelectedGraphControls(false);
     const modules=[...document.querySelectorAll('details.module')];
     return {
       format:'SCGraph2-state',
-      version:30,
+      version:31,
       savedAt:new Date().toISOString(),
       data:{
         source:els.dataInput.value,
@@ -2673,7 +2726,7 @@ title: Reading Fluency</div>
     const savedGraphSettings=Array.isArray(g.graphSettings)?g.graphSettings:[];syncGraphSettingsAfterParse(savedGraphSettings);
     if(!savedGraphSettings.length)state.graphSettings=state.graphSettings.map((cfg,gi)=>normalizeGraphSetting({...cfg,xLabel:typeof g.xLabel==='string'?g.xLabel:'Session',phaseLabels:typeof g.phaseLabels==='string'?g.phaseLabels:''},gi));
     state.goalLines=normalizeGoalLinesAfterParse(Array.isArray(g.goalLines)?g.goalLines:[]);
-    loadTimelineControls(g.timeline||{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',sessionDates:''});updateGraphEditOptions(Number.isInteger(Number(g.selectedGraphIndex))?Number(g.selectedGraphIndex):0);loadSelectedGraphControls();updateGoalControls();
+    loadTimelineControls(g.timeline||{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]});updateGraphEditOptions(Number.isInteger(Number(g.selectedGraphIndex))?Number(g.selectedGraphIndex):0);loadSelectedGraphControls();updateGoalControls();
     els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';els.alphaInput.value=a.alpha??0.05;els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';if(els.tauVizSelect)els.tauVizSelect.value=['both','cloud','points','raw','corrected','off'].includes(a.tauVisualization)?a.tauVisualization:'both';if(els.tauLegendCheck)els.tauLegendCheck.checked=a.tauLegendVisible!==false;
     updateAnalysisGraphOptions(Number.isInteger(Number(a.selectedGraphIndex))?Number(a.selectedGraphIndex):0,a.selectedSeriesLabel||'');
     if(a.selectedSeriesLabel)updateAnalysisSeriesOptions(a.selectedSeriesLabel,selectedAnalysisGraph());
@@ -2984,7 +3037,9 @@ title: Reading Fluency</div>
   if(els.lineDashSelect)els.lineDashSelect.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
   if(els.lineColorInput)els.lineColorInput.addEventListener('input',()=>{saveSelectedSeriesStyleControls();renderGraph();});
   if(els.showConnectingLineCheck)els.showConnectingLineCheck.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
-  [els.xScaleModeSelect,els.minSessionsSelect,els.customMinSessionsInput,els.xAxisLabelModeSelect,els.sessionDatesInput].filter(Boolean).forEach(el=>el.addEventListener(el===els.sessionDatesInput?'input':'change',()=>{saveTimelineControls();renderGraph();}));
+  [els.xScaleModeSelect,els.minSessionsSelect,els.customMinSessionsInput,els.xAxisLabelModeSelect].filter(Boolean).forEach(el=>el.addEventListener('change',()=>{saveTimelineControls();renderGraph();}));
+  if(els.firstSessionDateInput)els.firstSessionDateInput.addEventListener('change',()=>{saveTimelineControls();renderGraph();});
+  document.querySelectorAll('[data-calendar-weekday]').forEach(el=>el.addEventListener('change',()=>{saveTimelineControls();renderGraph();}));
   els.graphEditSelect.addEventListener('change',loadSelectedGraphControls);
   els.graphWrap.addEventListener('dblclick',e=>{const t=e.target.closest?.('[data-direct-edit]');if(t){e.preventDefault();e.stopPropagation();startDirectGraphLabelEdit(t);}});
   [els.graphLabelInput,els.yLabelInput,els.yMinInput,els.yMaxInput,els.yTickInput,els.knownMinInput,els.knownMaxInput].forEach(el=>el.addEventListener('change',()=>saveSelectedGraphControls()));
