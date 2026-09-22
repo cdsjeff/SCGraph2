@@ -1,13 +1,17 @@
 # SCGraph2
 
-## Startup accordion layout
+## Line-style and Trend IQR update
 
-SCGraph2 now launches with:
-- **Graph Controls fully open**, filling the available right-side space.
-- **Analysis closed**.
+This build adds per-series line styling and shaded Trend IQR bands.
 
-Opening Analysis causes the two right-side panes to share the available height. Collapsing either pane allows the other open pane to fill the available space.
+### New graph-line styling
+- Choose a series within the selected graph.
+- Set its line color.
+- Set its line pattern: solid, short dash, medium dash, or long dash.
+- Marker outlines follow the same series color.
 
-Saved project files can still restore their own saved accordion state after loading.
+### Trend IQR shading
+- IQR Trend overlays now include a shaded band between the Q1 and Q3 residual trend lines.
+- The band uses the same translucent fill style as IQR Level bands.
 
-State version: 38.
+State version: 29.
