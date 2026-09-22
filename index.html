@@ -342,7 +342,7 @@
 </head>
 <body>
 <header>
-  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis</span></div>
+  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.1</span></div>
   <div class="header-actions">
     <button id="startUpBtn" class="small">Start Up</button>
     <button id="helpBtn" class="small">Help</button>
@@ -490,13 +490,26 @@
           <div class="field"><label for="lineDashSelect">Line dash</label><select id="lineDashSelect"><option value="solid">Solid</option><option value="short">Short dash</option><option value="medium">Medium dash</option><option value="long">Long dash</option></select></div>
           <div class="field"><label for="lineColorInput">Line color</label><input id="lineColorInput" type="color" value="#111827"></div>
         </div>
-        <div class="hint">Choose a series within the selected graph, then assign a line dash and color. Marker outlines follow the same series color.</div>
+        <div class="checks" style="margin-top:3px">
+          <label><input type="checkbox" id="showConnectingLineCheck" checked> Show connecting line</label>
+        </div>
+        <div class="hint">Choose a series within the selected graph, then assign a line dash, color, and whether its connecting line is shown. Markers remain visible when the line is hidden.</div>
         <div class="checks">
           <label><input type="checkbox" id="gridCheck"> Light gridlines</label>
           <label><input type="checkbox" id="legendCheck" checked> Legend when needed</label>
           <label><input type="checkbox" id="phaseLabelsCheck" checked> Phase labels</label>
           <label><input type="checkbox" id="showGhostCheck" checked> Show ghosted points</label>
         </div>
+        <div class="divider"></div>
+        <div class="subhead">X-Axis / Session Timeline</div>
+        <div class="grid3">
+          <div class="field"><label for="xScaleModeSelect">Scale</label><select id="xScaleModeSelect"><option value="sequential">Sequential sessions</option><option value="calendar">Proportional calendar time</option></select></div>
+          <div class="field"><label for="minSessionsSelect">Minimum displayed sessions</label><select id="minSessionsSelect"><option value="auto">Auto</option><option value="10">10</option><option value="15" selected>15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="custom">Custom</option></select></div>
+          <div class="field"><label for="xAxisLabelModeSelect">Axis labels</label><select id="xAxisLabelModeSelect"><option value="session">Session number</option><option value="date">Date</option><option value="both">Session + date</option></select></div>
+        </div>
+        <div class="field" id="customMinSessionsField" style="display:none"><label for="customMinSessionsInput">Custom minimum sessions</label><input id="customMinSessionsInput" type="number" min="1" step="1" value="15"></div>
+        <div class="field"><label for="sessionDatesInput">Session dates</label><textarea id="sessionDatesInput" class="mono" style="min-height:78px" placeholder="1, 2026-09-07&#10;2, 2026-09-09&#10;3, 2026-09-14"></textarea><div class="hint">Required only for proportional calendar time. Enter one line per session as <span class="kbd">session, YYYY-MM-DD</span>. Dates are never invented; missing required dates stop calendar-time rendering with a validation message.</div></div>
+        <div id="timelinePreview" class="footer-note">Sequential sessions · minimum span 15.</div>
         <div class="divider"></div>
         <div class="subhead">Goal Lines</div>
         <div class="field"><label for="goalSeriesSelect">Series / multiple-baseline tier</label><select id="goalSeriesSelect"></select></div>
@@ -518,7 +531,7 @@
       </div>
     </details>
 
-<details class="module" data-module="analysis" open>
+<details class="module" data-module="analysis">
       <summary>Analysis</summary>
       <div class="module-body">
         <div class="grid2 analysis-targets">
@@ -530,6 +543,12 @@
           <select id="analysisPhaseSelect" multiple size="4" style="min-height:86px"></select>
           <div class="hint">Select one or several phases for Level/Trend analyses. Select exactly two phases for PND, Mann–Whitney, Trend + 0.3 IQR, or Tau-U. Use Cmd/Ctrl-click to select nonadjacent phases such as 1 and 3.</div>
         </div>
+        <div class="subhead" style="margin-top:4px">Visual Analysis Span</div>
+        <div class="grid2 analysis-targets" style="margin-bottom:10px">
+          <div class="field"><label for="visualSourcePhaseSelect">Calculate from</label><select id="visualSourcePhaseSelect"></select></div>
+          <div class="field"><label for="visualDisplayThroughSelect">Display through</label><select id="visualDisplayThroughSelect"></select></div>
+        </div>
+        <div class="hint" style="margin-top:-6px;margin-bottom:10px">When Display through is later than Calculate from, Level, IQR Level, Trend, and IQR Trend are calculated only from the source phase and projected unchanged through the selected adjacent phase(s).</div>
         <div class="quick-grid">
           <button data-analysis="Level" data-analysis-scope="visual">Level — selected phase(s)</button>
           <button data-analysis="Trend" data-analysis-scope="visual">Trend — selected phase(s)</button>
@@ -600,12 +619,14 @@ Accuracy: 40,45,50|70,78,85</div>
 
     <h3>3. Load and format the graph</h3>
     <p>Select <strong>Load &amp; Graph Data</strong>. In <strong>Graph Controls</strong>, choose the graph to edit. Each independent graph can have its own graph label, Y-axis label, vertical range, tick interval, and autoscale method.</p>
+    <p><strong>X-axis timeline:</strong> Graph Controls now supports a configurable minimum sequential-session span or proportional calendar-time spacing from explicit session dates. Calendar mode never invents missing dates and keeps statistical calculations session-order based.</p>
     <p><strong>Auto-scale is on by default</strong> for new graphs. Autoscale choices include the single-case rules for nonnegative/unbounded measures, known measurement bounds, measures allowing negative values, and the original SCGraph heuristic. Turn Auto-scale off for a manual Y range. The current effective scale is shown in Graph Controls.</p>
 
     <h3>4. Add goal lines when needed</h3>
     <p>Under <strong>Graph Controls → Goal Lines</strong>, choose the series/tier, phase span, and Y value. Goal lines are retained independently of analysis overlays and are saved in the JSON state.</p>
 
     <h3>5. Run an analysis</h3>
+    <p><strong>Visual Analysis Span:</strong> for Level, IQR Level, Trend, and IQR Trend, choose a source phase under <strong>Calculate from</strong> and a later adjacent endpoint under <strong>Display through</strong>. SCGraph2 computes the statistic only from the source phase and extends the unchanged analytic element through the requested phase.</p>
     <p>At the <strong>top of the Analysis panel</strong>, choose <strong>Graph to analyze</strong> first and then <strong>Series to analyze</strong>. The two selectors appear above the analysis buttons so the current target remains visible before you turn analyses on or off. Visual analyses include Level, Trend, IQR variants, and Trend + 0.3 IQR. Quantitative analyses include PND, Mann–Whitney, Trend + 0.3 IQR binomial, and Tau-U. Tau-U uses the Parker-style S-statistic correction (S_AB − S_A)/(nA×nB). Its data-anchored teaching visualization is session-dependent: intervention points are colored by the cumulative effect, solid outer rings show each point's raw A→B contribution, and—only when baseline correction is actually applied—dashed gray B rings show the remaining baseline correction S_A/(nA×j). The detailed Tau-U legend reports baseline τ and S_A, whether correction was applied, the Auto criterion when relevant, and explicitly explains why waning gray rings are absent when no correction occurs. Its explanatory rows are vertically separated so the lower direction key remains readable.</p>
 
     <h3>6. Choose a save location, then save or export</h3>
@@ -758,14 +779,15 @@ title: Reading Fluency</div>
   const els = {
     dataInput:$('dataInput'), phaseNamesData:$('phaseNamesData'), directionSelect:$('directionSelect'), notesInput:$('notesInput'),
     titleInput:$('titleInput'), xLabelInput:$('xLabelInput'), graphEditSelect:$('graphEditSelect'), graphLabelInput:$('graphLabelInput'), yLabelInput:$('yLabelInput'), yMinInput:$('yMinInput'), yMaxInput:$('yMaxInput'), yTickInput:$('yTickInput'), yAutoCheck:$('yAutoCheck'), yAutoModeSelect:$('yAutoModeSelect'), knownMinInput:$('knownMinInput'), knownMaxInput:$('knownMaxInput'), scalePreview:$('scalePreview'),
-    markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), lineStyleSeriesSelect:$('lineStyleSeriesSelect'), lineDashSelect:$('lineDashSelect'), lineColorInput:$('lineColorInput'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
-    phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), analysisPhaseSelect:$('analysisPhaseSelect'), alphaInput:$('alphaInput'),
+    markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), lineStyleSeriesSelect:$('lineStyleSeriesSelect'), lineDashSelect:$('lineDashSelect'), lineColorInput:$('lineColorInput'), showConnectingLineCheck:$('showConnectingLineCheck'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
+    xScaleModeSelect:$('xScaleModeSelect'), minSessionsSelect:$('minSessionsSelect'), customMinSessionsInput:$('customMinSessionsInput'), customMinSessionsField:$('customMinSessionsField'), xAxisLabelModeSelect:$('xAxisLabelModeSelect'), sessionDatesInput:$('sessionDatesInput'), timelinePreview:$('timelinePreview'),
+    phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), analysisPhaseSelect:$('analysisPhaseSelect'), visualSourcePhaseSelect:$('visualSourcePhaseSelect'), visualDisplayThroughSelect:$('visualDisplayThroughSelect'), alphaInput:$('alphaInput'),
     goalSeriesSelect:$('goalSeriesSelect'), goalStartPhaseSelect:$('goalStartPhaseSelect'), goalEndPhaseSelect:$('goalEndPhaseSelect'), goalValueInput:$('goalValueInput'), goalLineList:$('goalLineList'),
     tauCorrectionSelect:$('tauCorrectionSelect'), tauVizSelect:$('tauVizSelect'), tauLegendCheck:$('tauLegendCheck'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill'),
     reportModule:$('reportModule'), reportEditor:$('reportEditor'), reportFormatSelect:$('reportFormatSelect'), reportGraphSelect:$('reportGraphSelect'), reportTableGraphSelect:$('reportTableGraphSelect'), reportTableSeriesSelect:$('reportTableSeriesSelect'), reportStatus:$('reportStatus'), reportSummaryStatus:$('reportSummaryStatus')
   };
 
-  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], graphSettings:[], results:[], sourceText:'', direction:'increase' };
+  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], graphSettings:[], results:[], sourceText:'', direction:'increase', timeline:{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',sessionDates:''} };
   const seriesStyles = [
     {stroke:'#111827', marker:'circle'}, {stroke:'#4b5563', marker:'square'}, {stroke:'#7c2d12', marker:'triangle'}, {stroke:'#1f4e79', marker:'diamond'}
   ];
@@ -778,7 +800,7 @@ title: Reading Fluency</div>
       if(v&&typeof v==='object'){
         const dashStyle=Object.prototype.hasOwnProperty.call(dataDashOptions,String(v.dashStyle||''))?String(v.dashStyle):'solid';
         const color=validHexColor(v.color||'','#111827');
-        out[String(k)]={dashStyle,color};
+        out[String(k)]={dashStyle,color,showLine:v.showLine!==false};
       }
     });
     return out;
@@ -789,7 +811,7 @@ title: Reading Fluency</div>
     const custom=cfg.seriesLineStyles?.[String(si)]||{};
     const stroke=validHexColor(custom.color||base.stroke,base.stroke);
     const dashStyle=Object.prototype.hasOwnProperty.call(dataDashOptions,String(custom.dashStyle||''))?String(custom.dashStyle):'solid';
-    return {...base,stroke,dashStyle,dashArray:dataDashOptions[dashStyle]||''};
+    return {...base,stroke,dashStyle,dashArray:dataDashOptions[dashStyle]||'',showLine:custom.showLine!==false};
   }
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const fmt=(v,d=3)=> Number.isFinite(v) ? Number(v.toFixed(d)).toString() : 'NA';
@@ -1108,6 +1130,7 @@ title: Reading Fluency</div>
     const st=seriesStyleFor(gi,si);
     els.lineDashSelect.value=st.dashStyle||'solid';
     els.lineColorInput.value=validHexColor(st.stroke,seriesStyles[si%seriesStyles.length].stroke);
+    if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=st.showLine!==false;
   }
   function saveSelectedSeriesStyleControls(){
     if(!state.parsed||!els.lineStyleSeriesSelect||!els.lineDashSelect||!els.lineColorInput)return;
@@ -1118,8 +1141,9 @@ title: Reading Fluency</div>
     const dashStyle=Object.prototype.hasOwnProperty.call(dataDashOptions,els.lineDashSelect.value)?els.lineDashSelect.value:'solid';
     const base=seriesStyles[si%seriesStyles.length]||seriesStyles[0];
     const color=validHexColor(els.lineColorInput.value,base.stroke);
-    if(dashStyle==='solid' && color.toLowerCase()===String(base.stroke).toLowerCase()) delete styles[String(si)];
-    else styles[String(si)]={dashStyle,color};
+    const showLine=els.showConnectingLineCheck?els.showConnectingLineCheck.checked:true;
+    if(dashStyle==='solid' && color.toLowerCase()===String(base.stroke).toLowerCase() && showLine) delete styles[String(si)];
+    else styles[String(si)]={dashStyle,color,showLine};
     state.graphSettings[gi]=normalizeGraphSetting({...prior,seriesLineStyles:styles},gi);
   }
   function graphScale(gi){
@@ -1211,12 +1235,18 @@ title: Reading Fluency</div>
     names.forEach((name,pi)=>{const o=document.createElement('option');o.value=String(pi);o.textContent=`${pi+1}. ${name}`;els.analysisPhaseSelect.appendChild(o);});
     const defaults=keep.size?keep:new Set(ser.phases.length>=2?[0,1]:[0]);
     [...els.analysisPhaseSelect.options].forEach(o=>{o.selected=defaults.has(Number(o.value));});
+    updateVisualSpanOptions();
   }
+  function updateVisualSpanOptions(source=null,through=null){
+    if(!els.visualSourcePhaseSelect||!els.visualDisplayThroughSelect||!state.parsed)return;const si=selectedAnalysisSeries();els.visualSourcePhaseSelect.innerHTML='';els.visualDisplayThroughSelect.innerHTML='';if(si<0)return;const ser=state.parsed.series[si],names=graphPhaseNames(ser.graphIndex,ser.phases.length),selected=selectedAnalysisPhases();const src=source!==null?Number(source):(Number.isInteger(Number(els.visualSourcePhaseSelect.value))?Number(els.visualSourcePhaseSelect.value):(selected[0]??0));names.forEach((name,pi)=>{const a=document.createElement('option');a.value=String(pi);a.textContent=`${pi+1}. ${name}`;els.visualSourcePhaseSelect.appendChild(a);const b=a.cloneNode(true);els.visualDisplayThroughSelect.appendChild(b);});els.visualSourcePhaseSelect.value=String(clamp(src,0,names.length-1));const min=Number(els.visualSourcePhaseSelect.value)||0;[...els.visualDisplayThroughSelect.options].forEach(o=>o.disabled=Number(o.value)<min);let dest=through!==null?Number(through):(Number.isInteger(Number(els.visualDisplayThroughSelect.value))?Number(els.visualDisplayThroughSelect.value):min);if(dest<min)dest=min;els.visualDisplayThroughSelect.value=String(clamp(dest,min,names.length-1));
+  }
+  function visualSpanSelection(){const source=Number(els.visualSourcePhaseSelect?.value),through=Number(els.visualDisplayThroughSelect?.value);return {source:Number.isInteger(source)?source:0,through:Number.isInteger(through)?through:(Number.isInteger(source)?source:0)};}
   function analysisCommandForButton(button){
     const phases=selectedAnalysisPhases(),kind=button.dataset.analysis||'';
     if(button.dataset.analysisScope==='compare'){
       if(phases.length!==2)throw new Error('Select exactly two phases for this statistical comparison.');
     }else if(!phases.length)throw new Error('Select at least one phase for this visual analysis.');
+    if(button.dataset.analysisScope==='visual'){const span=visualSpanSelection();if(span.through>span.source)return `${kind}, ${span.source+1}`;}
     return `${kind}, ${phases.map(p=>p+1).join(', ')}`;
   }
 
@@ -1297,20 +1327,71 @@ title: Reading Fluency</div>
     if(Number.isFinite(interval)&&interval>0&&(max-min)/interval<=100){const out=[],start=Math.ceil(min/interval)*interval;for(let v=start;v<=max+interval*.001;v+=interval)out.push(Number(v.toPrecision(12)));return out;}
     return niceTicks(min,max,7);
   }
+  function parseSessionDates(text){
+    const map=new Map(), errors=[];
+    String(text||'').split(/\n/).forEach((line,i)=>{
+      const t=line.trim();if(!t)return;
+      const m=t.match(/^(\d+)\s*[,\t]\s*(\d{4})-(\d{2})-(\d{2})$/);
+      if(!m){errors.push(`Line ${i+1}: use session, YYYY-MM-DD.`);return;}
+      const session=Number(m[1]),y=Number(m[2]),mo=Number(m[3]),d=Number(m[4]);
+      const ms=Date.UTC(y,mo-1,d),dt=new Date(ms);
+      if(session<1||dt.getUTCFullYear()!==y||dt.getUTCMonth()!==mo-1||dt.getUTCDate()!==d){errors.push(`Line ${i+1}: invalid session or date.`);return;}
+      map.set(session,{ms,iso:`${m[2]}-${m[3]}-${m[4]}`});
+    });
+    return {map,errors};
+  }
+  function timelineSettingsFromUi(){
+    const minChoice=els.minSessionsSelect?.value||'15';
+    return {mode:els.xScaleModeSelect?.value==='calendar'?'calendar':'sequential',minSessions:minChoice,customMinSessions:Math.max(1,Math.round(Number(els.customMinSessionsInput?.value)||15)),labelMode:['session','date','both'].includes(els.xAxisLabelModeSelect?.value)?els.xAxisLabelModeSelect.value:'session',sessionDates:els.sessionDatesInput?.value||''};
+  }
+  function saveTimelineControls(){state.timeline=timelineSettingsFromUi();updateTimelineControlStates();}
+  function loadTimelineControls(raw=state.timeline||{}){
+    const t={mode:raw.mode==='calendar'?'calendar':'sequential',minSessions:['auto','10','15','20','25','30','custom'].includes(String(raw.minSessions))?String(raw.minSessions):'15',customMinSessions:Math.max(1,Math.round(Number(raw.customMinSessions)||15)),labelMode:['session','date','both'].includes(raw.labelMode)?raw.labelMode:'session',sessionDates:typeof raw.sessionDates==='string'?raw.sessionDates:''};
+    state.timeline=t;
+    if(els.xScaleModeSelect)els.xScaleModeSelect.value=t.mode;if(els.minSessionsSelect)els.minSessionsSelect.value=t.minSessions;if(els.customMinSessionsInput)els.customMinSessionsInput.value=t.customMinSessions;if(els.xAxisLabelModeSelect)els.xAxisLabelModeSelect.value=t.labelMode;if(els.sessionDatesInput)els.sessionDatesInput.value=t.sessionDates;updateTimelineControlStates();
+  }
+  function updateTimelineControlStates(){
+    const t=timelineSettingsFromUi(),cal=t.mode==='calendar';
+    if(els.customMinSessionsField)els.customMinSessionsField.style.display=(!cal&&t.minSessions==='custom')?'':'none';
+    if(els.minSessionsSelect)els.minSessionsSelect.disabled=cal;if(els.customMinSessionsInput)els.customMinSessionsInput.disabled=cal;if(els.sessionDatesInput)els.sessionDatesInput.disabled=!cal;
+    if(els.xAxisLabelModeSelect){els.xAxisLabelModeSelect.disabled=false;if(!cal&&els.xAxisLabelModeSelect.value!=='session')els.xAxisLabelModeSelect.value='session';}
+    if(els.timelinePreview)els.timelinePreview.textContent=cal?'Proportional calendar time · dates determine horizontal spacing.':`Sequential sessions · minimum span ${t.minSessions==='auto'?'Auto':t.minSessions==='custom'?t.customMinSessions:t.minSessions}.`;
+  }
+  function timelineGeometry(){
+    const t=timelineSettingsFromUi(),actualMax=Math.max(1,state.parsed?.maxSessions||1),left=96,right=38,W=1000,innerW=W-left-right;
+    if(t.mode!=='calendar'){
+      const requested=t.minSessions==='auto'?actualMax:(t.minSessions==='custom'?t.customMinSessions:Number(t.minSessions)||15),xmax=Math.max(actualMax,requested);
+      return {mode:'sequential',xmax,labelMode:'session',x:s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,dateMap:new Map()};
+    }
+    const parsed=parseSessionDates(t.sessionDates);if(parsed.errors.length)throw new Error(`Calendar timeline: ${parsed.errors[0]}`);
+    const missing=[];for(let i=1;i<=actualMax;i++)if(!parsed.map.has(i))missing.push(i);
+    if(missing.length)throw new Error(`Calendar timeline requires dates for every displayed observation session. Missing session${missing.length===1?'':'s'}: ${missing.slice(0,8).join(', ')}${missing.length>8?'…':''}.`);
+    let prev=-Infinity;for(let i=1;i<=actualMax;i++){const ms=parsed.map.get(i).ms;if(ms<prev)throw new Error(`Calendar timeline dates must not move backward: Session ${i} precedes the prior session date.`);prev=ms;}
+    const first=parsed.map.get(1).ms,last=parsed.map.get(actualMax).ms,span=Math.max(86400000,last-first);
+    const sessionMs=s=>{
+      if(Number.isInteger(s)&&parsed.map.has(s))return parsed.map.get(s).ms;
+      const lo=Math.floor(s),hi=Math.ceil(s);
+      if(lo>=1&&hi<=actualMax&&parsed.map.has(lo)&&parsed.map.has(hi)){if(lo===hi)return parsed.map.get(lo).ms;return parsed.map.get(lo).ms+(s-lo)*(parsed.map.get(hi).ms-parsed.map.get(lo).ms);}
+      if(s<1){const step=actualMax>1?parsed.map.get(2).ms-first:86400000;return first+(s-1)*step;}
+      const step=actualMax>1?last-parsed.map.get(actualMax-1).ms:86400000;return last+(s-actualMax)*step;
+    };
+    return {mode:'calendar',xmax:actualMax,labelMode:t.labelMode,dateMap:parsed.map,x:s=>left+((sessionMs(s)-first)/span)*innerW};
+  }
+  function shortDate(iso){const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${Number(m[2])}/${Number(m[3])}`:iso;}
   function graphMetrics(){
     const W=1000,left=96,right=38,plotH=220,tierGap=34,groupGap=42,titleBand=58,xBand=58,phaseBand=55;
     let cursor=titleBand;const groups=[];
     state.parsed.graphs.forEach((group,gi)=>{
       const cfg=graphScale(gi),ymin=cfg.yMin,ymax=cfg.yMax,ticks=graphTicks(ymin,ymax,cfg.yTick),tierLayouts=[],groupTop=cursor;
-      group.tiers.forEach((tier,ti)=>{const top=cursor+phaseBand,innerW=W-left-right,innerH=plotH,xmax=Math.max(15,group.maxSessions);const x=s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,y=v=>top+innerH-((v-ymin)/(ymax-ymin))*innerH;tierLayouts.push({tier,top,innerW,innerH,xmax,x,y,ymin,ymax,ticks,cfg,m:{left,right,top,bottom:0},W});cursor=top+plotH+(ti<group.tiers.length-1?tierGap:0);});
-      const first=tierLayouts[0],last=tierLayouts[tierLayouts.length-1],xAxisY=last.top+last.innerH;cursor=xAxisY+xBand;groups.push({group,groupTop,tierLayouts,xAxisY,x:first.x,xmax:first.xmax,innerW:first.innerW,bottom:cursor,cfg,ymin,ymax,ticks});if(gi<state.parsed.graphs.length-1)cursor+=groupGap;
+      const timeline=timelineGeometry();group.tiers.forEach((tier,ti)=>{const top=cursor+phaseBand,innerW=W-left-right,innerH=plotH,xmax=timeline.xmax;const x=timeline.x,y=v=>top+innerH-((v-ymin)/(ymax-ymin))*innerH;tierLayouts.push({tier,top,innerW,innerH,xmax,x,y,ymin,ymax,ticks,cfg,timeline,m:{left,right,top,bottom:0},W});cursor=top+plotH+(ti<group.tiers.length-1?tierGap:0);});
+      const first=tierLayouts[0],last=tierLayouts[tierLayouts.length-1],xAxisY=last.top+last.innerH;cursor=xAxisY+xBand;groups.push({group,groupTop,tierLayouts,xAxisY,x:first.x,xmax:first.xmax,innerW:first.innerW,bottom:cursor,cfg,ymin,ymax,ticks,timeline:first.timeline});if(gi<state.parsed.graphs.length-1)cursor+=groupGap;
     });
     return {W,H:cursor+18,left,right,groups};
   }
 
   function renderGraph(){
     if(!state.parsed)return;syncPhaseNameInputs();state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);
-    const layout=graphMetrics(),svg=svgEl('svg',{viewBox:`0 0 ${layout.W} ${layout.H}`,role:'img','aria-label':'APA-style single-case graph'});svg.appendChild(svgEl('rect',{x:0,y:0,width:layout.W,height:layout.H,fill:'#fff'}));
+    let layout;try{layout=graphMetrics();}catch(e){els.graphWrap.innerHTML=`<div style="padding:24px;color:#a63b32;font-weight:700">${escapeHtml(e.message)}</div>`;status(e.message,'error');return false;}const svg=svgEl('svg',{viewBox:`0 0 ${layout.W} ${layout.H}`,role:'img','aria-label':'APA-style single-case graph'});svg.appendChild(svgEl('rect',{x:0,y:0,width:layout.W,height:layout.H,fill:'#fff'}));
     const title=els.titleInput.value.trim()||'Performance Scores Over Sessions';svg.appendChild(svgEl('text',{x:layout.W/2,y:29,'text-anchor':'middle','font-size':19,'font-weight':700,fill:'#111827','data-direct-edit':'figure-title','aria-label':'Double-click to edit overall figure title'},title));
     layout.groups.forEach((gl,gi)=>{
       const group=gl.group,cfg=gl.cfg;
@@ -1322,39 +1403,40 @@ title: Reading Fluency</div>
         svg.appendChild(svgEl('line',{x1:layout.left,y1:tg.top,x2:layout.left,y2:tg.top+tg.innerH,stroke:'#111827','stroke-width':1.5}));
         gl.ticks.forEach(v=>{svg.appendChild(svgEl('line',{x1:layout.left-6,y1:tg.y(v),x2:layout.left,y2:tg.y(v),stroke:'#111827'}));svg.appendChild(svgEl('text',{x:layout.left-10,y:tg.y(v)+4,'text-anchor':'end','font-size':11,fill:'#111827'},fmt(v,2)));});
         refSer.boundaries.forEach(b=>svg.appendChild(svgEl('line',{x1:tg.x(b),y1:tg.top-8,x2:tg.x(b),y2:tg.top+tg.innerH,stroke:'#8b8f94','stroke-width':1.1})));
-        if(els.phaseLabelsCheck.checked){const names=graphPhaseNames(gi,refSer.phases.length);refSer.phases.forEach((p,i)=>{const c=(p.startSession+p.endSession)/2;svg.appendChild(svgEl('text',{x:tg.x(c),y:tg.top-15,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#374151','data-direct-edit':'phase-label','data-graph-index':gi,'data-phase-index':i,'aria-label':`Double-click to edit phase ${i+1} label`},names[i]||`Phase ${i+1}`));});}
+        if(els.phaseLabelsCheck.checked){const names=graphPhaseNames(gi,refSer.phases.length);refSer.phases.forEach((p,i)=>{const cx=(tg.x(p.startSession)+tg.x(p.endSession))/2;svg.appendChild(svgEl('text',{x:cx,y:tg.top-15,'text-anchor':'middle','font-size':12,'font-weight':700,fill:'#374151','data-direct-edit':'phase-label','data-graph-index':gi,'data-phase-index':i,'aria-label':`Double-click to edit phase ${i+1} label`},names[i]||`Phase ${i+1}`));});}
         if(group.tiers.length>1){const labels=tier.seriesIndexes.map(si=>state.parsed.series[si].label).join(' / ');svg.appendChild(svgEl('text',{x:layout.left+8,y:tg.top+18,'font-size':12,'font-weight':700,fill:'#374151'},labels));}
         state.goalLines.filter(o=>tier.seriesIndexes.includes(o.seriesIndex)).forEach(o=>drawGoalLine(svg,tg,o));
         const tierOverlays=state.overlays.filter(o=>tier.seriesIndexes.includes(o.seriesIndex));
         tierOverlays.filter(o=>o.type!=='tauPointViz').forEach(o=>drawOverlay(svg,tg,o));
         tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyleFor(gi,si),lw=Number(els.lineWidthInput.value)||2,r=Number(els.markerSizeInput.value)||5;
-          ser.phases.forEach(ph=>{const pts=ser.points.filter(p=>p.phaseIndex===ph.phaseIndex&&!state.ghosted.has(p.key));for(let i=0;i<pts.length-1;i++)if(pts[i+1].session===pts[i].session+1)svg.appendChild(svgEl('line',{x1:tg.x(pts[i].session),y1:tg.y(pts[i].score),x2:tg.x(pts[i+1].session),y2:tg.y(pts[i+1].score),stroke:st.stroke,'stroke-width':lw,fill:'none',...(st.dashArray?{'stroke-dasharray':st.dashArray}:{})}));});
+          if(st.showLine!==false)ser.phases.forEach(ph=>{const pts=ser.points.filter(p=>p.phaseIndex===ph.phaseIndex&&!state.ghosted.has(p.key));for(let i=0;i<pts.length-1;i++)if(pts[i+1].session===pts[i].session+1)svg.appendChild(svgEl('line',{x1:tg.x(pts[i].session),y1:tg.y(pts[i].score),x2:tg.x(pts[i+1].session),y2:tg.y(pts[i+1].score),stroke:st.stroke,'stroke-width':lw,fill:'none',...(st.dashArray?{'stroke-dasharray':st.dashArray}:{})}));});
           ser.points.forEach(p=>{const ghost=state.ghosted.has(p.key);if(ghost&&!els.showGhostCheck.checked)return;drawMarker(svg,{x:tg.x(p.session),y:tg.y(p.score)},st,r,ghost);});
         });
         // Tau-U is deliberately drawn last so its teaching visualization can never
         // be hidden underneath the ordinary observation markers.
         tierOverlays.filter(o=>o.type==='tauPointViz').forEach(o=>drawOverlay(svg,tg,o));
-        if(els.legendCheck.checked&&tier.seriesIndexes.length>1){let ly=tg.top+18;tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyleFor(gi,si);svg.appendChild(svgEl('line',{x1:layout.W-202,y1:ly-4,x2:layout.W-178,y2:ly-4,stroke:st.stroke,'stroke-width':2,...(st.dashArray?{'stroke-dasharray':st.dashArray}:{})}));drawMarker(svg,{x:layout.W-190,y:ly-4},st,4,false);svg.appendChild(svgEl('text',{x:layout.W-170,y:ly,'font-size':11,fill:'#374151'},ser.label));ly+=18;});}
+        if(els.legendCheck.checked&&tier.seriesIndexes.length>1){let ly=tg.top+18;tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyleFor(gi,si);if(st.showLine!==false)svg.appendChild(svgEl('line',{x1:layout.W-202,y1:ly-4,x2:layout.W-178,y2:ly-4,stroke:st.stroke,'stroke-width':2,...(st.dashArray?{'stroke-dasharray':st.dashArray}:{})}));drawMarker(svg,{x:layout.W-190,y:ly-4},st,4,false);svg.appendChild(svgEl('text',{x:layout.W-170,y:ly,'font-size':11,fill:'#374151'},ser.label));ly+=18;});}
       });
       if(group.tiers.length>1) drawMultipleBaselinePhaseConnectors(svg,gl);
       const last=gl.tierLayouts[gl.tierLayouts.length-1];
-      const xStep=gl.xmax<=20?1:gl.xmax<=40?2:5;
+      const xStep=gl.timeline?.mode==='calendar'?Math.max(1,Math.ceil(gl.xmax/10)):(gl.xmax<=20?1:gl.xmax<=40?2:5);
       // Every multiple-baseline tier gets its own horizontal axis and tick marks.
-      // Session-number labels are printed only on the final (bottom) tier.
+      // Labels are printed only on the final (bottom) tier and are reduced automatically.
       gl.tierLayouts.forEach((tg,ti)=>{
         const axisY=tg.top+tg.innerH;
         const isLast=ti===gl.tierLayouts.length-1;
         svg.appendChild(svgEl('line',{x1:layout.left,y1:axisY,x2:layout.left+tg.innerW,y2:axisY,stroke:'#111827','stroke-width':1.5}));
         for(let ss=1;ss<=gl.xmax;ss+=xStep){
           svg.appendChild(svgEl('line',{x1:tg.x(ss),y1:axisY,x2:tg.x(ss),y2:axisY+6,stroke:'#111827'}));
-          if(isLast)svg.appendChild(svgEl('text',{x:tg.x(ss),y:axisY+23,'text-anchor':'middle','font-size':12,fill:'#111827'},String(ss)));
+          if(isLast){let lab=String(ss);if(gl.timeline?.mode==='calendar'){const iso=gl.timeline.dateMap.get(ss)?.iso||'';lab=gl.timeline.labelMode==='date'?shortDate(iso):gl.timeline.labelMode==='both'?`S${ss} ${shortDate(iso)}`:String(ss);}svg.appendChild(svgEl('text',{x:tg.x(ss),y:axisY+23,'text-anchor':'middle','font-size':gl.timeline?.mode==='calendar'?10.5:12,fill:'#111827'},lab));}
         }
+        if(isLast&&gl.xmax>1&&(gl.xmax-1)%xStep!==0){const ss=gl.xmax;svg.appendChild(svgEl('line',{x1:tg.x(ss),y1:axisY,x2:tg.x(ss),y2:axisY+6,stroke:'#111827'}));if(gl.timeline?.mode==='calendar'){const iso=gl.timeline.dateMap.get(ss)?.iso||'',lab=gl.timeline.labelMode==='date'?shortDate(iso):gl.timeline.labelMode==='both'?`S${ss} ${shortDate(iso)}`:String(ss);svg.appendChild(svgEl('text',{x:tg.x(ss),y:axisY+23,'text-anchor':'middle','font-size':10.5,fill:'#111827'},lab));}}
       });
       svg.appendChild(svgEl('text',{x:layout.left+last.innerW/2,y:gl.xAxisY+47,'text-anchor':'middle','font-size':14,'font-weight':600,'data-direct-edit':'x-axis','data-graph-index':gi,'aria-label':`Double-click to edit Graph ${gi+1} X-axis label`},cfg.xLabel||'Session'));
       const yCenter=(gl.tierLayouts[0].top+gl.tierLayouts[gl.tierLayouts.length-1].top+gl.tierLayouts[gl.tierLayouts.length-1].innerH)/2;svg.appendChild(svgEl('text',{x:22,y:yCenter,'text-anchor':'middle','font-size':14,'font-weight':600,transform:`rotate(-90 22 ${yCenter})`,'data-direct-edit':'y-axis','data-graph-index':gi,'aria-label':`Double-click to edit Graph ${gi+1} Y-axis label`},cfg.yLabel||'Score'));
       if(gi<layout.groups.length-1)svg.appendChild(svgEl('line',{x1:layout.left,y1:gl.bottom+18,x2:layout.W-layout.right,y2:gl.bottom+18,stroke:'#d1d5db','stroke-width':1}));
     });
-    els.graphWrap.innerHTML='';els.graphWrap.appendChild(svg);updatePills();updateScalePreview();
+    els.graphWrap.innerHTML='';els.graphWrap.appendChild(svg);updatePills();updateScalePreview();return true;
   }
   function startDirectGraphLabelEdit(target){
     if(!target||!state.parsed)return;
@@ -2114,7 +2196,7 @@ title: Reading Fluency</div>
     els.results.innerHTML=state.results.map(r=>`<div class="result"><h3>${escapeHtml(r.title)}</h3>${r.meta?`<p class="meta">${escapeHtml(r.meta)}</p>`:''}${r.lines.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`).join('');
     updateAnalysisToggleButtons();
   }
-  function phaseSpanFrom(phase,seriesIndex){const ser=state.parsed.series[seriesIndex],p=ser.phases[phase];return {x1:p.startSession,x2:p.endSession};}
+  function phaseSpanFrom(phase,seriesIndex,throughPhase=phase){const ser=state.parsed.series[seriesIndex],p=ser.phases[phase],end=ser.phases[Math.max(phase,Math.min(throughPhase,ser.phases.length-1))];return {x1:p.startSession,x2:end.endSession};}
   function parseSeriesFromCommand(command){
     let s=String(command||'').trim(), explicit=null;
     // Compact form: series=2 or series=Series Label, terminated by the next comma.
@@ -2144,15 +2226,15 @@ title: Reading Fluency</div>
       if(kind==='ghost'){ghostSession(Number(parts[1]),si);return;}
       if(kind==='restore'){restoreSession(Number(parts[1]),si);return;}
       if(['level','iqrlevel','trend','iqrtrend','whiskertrend','whisker-level','whiskerlevel'].includes(kind)){
-        const ph=phaseIndex(parts[1]||'1',si);if(ph<0)throw new Error('Phase not found.'); const pts=activePoints(ph,si); if(!pts.length)throw new Error(`No active observations in ${ser.label}, ${phaseName(si,ph)}.`); const span=phaseSpanFrom(ph,si);
+        const ph=phaseIndex(parts[1]||'1',si);if(ph<0)throw new Error('Phase not found.'); const pts=activePoints(ph,si); if(!pts.length)throw new Error(`No active observations in ${ser.label}, ${phaseName(si,ph)}.`); const uiSpan=visualSpanSelection(),through=(uiSpan.source===ph&&uiSpan.through>=ph)?uiSpan.through:ph; const span=phaseSpanFrom(ph,si,through); const spanNote=through>ph?` Calculated from ${phaseName(si,ph)} only; displayed through ${phaseName(si,through)}.`:'';
         if(kind==='level'||kind==='iqrlevel'||kind==='whisker-level'||kind==='whiskerlevel'){
-          const med=median(pts.map(p=>p.score)); state.overlays.push({type:'hline',...span,y:med,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})}); let lines=[`Median level = ${fmt(med,3)}.`];
+          const med=median(pts.map(p=>p.score)); state.overlays.push({type:'hline',...span,y:med,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})}); let lines=[`Median level = ${fmt(med,3)}.${spanNote}`];
           if(kind!=='level'){const res=pts.map(p=>p.score-med),q1=quantile(res,.25),q3=quantile(res,.75);state.overlays.push({type:'band',...span,low:med+q1,high:med+q3,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});lines.push(`Residual Q1 = ${fmt(q1,3)}; Q3 = ${fmt(q3,3)}.`);}
           addResult(`${displayKind(kind)} — ${ser.label} — ${phaseName(si,ph)}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId); renderGraph(); return;
         }
         const tr=theilSen(pts), angle=Math.atan(tr.slope)*180/Math.PI, dir=tr.slope>0?'increasing':tr.slope<0?'decreasing':'flat';
         state.overlays.push({type:'trend',...span,...tr,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
-        let lines=[`Theil–Sen slope = ${fmt(tr.slope,3)} per session (${dir}); angle = ${fmt(angle,1)}°.`];
+        let lines=[`Theil–Sen slope = ${fmt(tr.slope,3)} per session (${dir}); angle = ${fmt(angle,1)}°.${spanNote}`];
         if(kind==='iqrtrend'||kind==='whiskertrend'){
           const iqrStats=trendIQRMargin(pts,tr);
           state.overlays.push({type:'trendBand',...span,...tr,q1:iqrStats.q1,q3:iqrStats.q3,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
@@ -2337,14 +2419,14 @@ title: Reading Fluency</div>
     }catch(e){status(e.message,'error');}
   }
   function reset(){
-    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
+    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=true;loadTimelineControls({mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',sessionDates:''});els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
   }
   function collectState(){
     saveSelectedGraphControls(false);
     const modules=[...document.querySelectorAll('details.module')];
     return {
       format:'SCGraph2-state',
-      version:29,
+      version:30,
       savedAt:new Date().toISOString(),
       data:{
         source:els.dataInput.value,
@@ -2368,7 +2450,8 @@ title: Reading Fluency</div>
         showPhaseLabels:els.phaseLabelsCheck.checked,
         showGhosts:els.showGhostCheck.checked,
         graphCommand:els.graphCommand.value,
-        goalLines:JSON.parse(JSON.stringify(state.goalLines||[]))
+        goalLines:JSON.parse(JSON.stringify(state.goalLines||[])),
+        timeline:JSON.parse(JSON.stringify(timelineSettingsFromUi()))
       },
       report:{html:els.reportEditor?els.reportEditor.innerHTML:'',preview:false},
       analysis:{
@@ -2382,6 +2465,8 @@ title: Reading Fluency</div>
         tauCorrection:els.tauCorrectionSelect.value,
         tauVisualization:els.tauVizSelect?.value||'both',
         tauLegendVisible:els.tauLegendCheck?.checked!==false,
+        visualSourcePhase:Number(els.visualSourcePhaseSelect?.value)||0,
+        visualDisplayThrough:Number(els.visualDisplayThroughSelect?.value)||0,
         overlays:JSON.parse(JSON.stringify(state.overlays||[])),
         results:JSON.parse(JSON.stringify(state.results||[]))
       },
@@ -2588,17 +2673,17 @@ title: Reading Fluency</div>
     const savedGraphSettings=Array.isArray(g.graphSettings)?g.graphSettings:[];syncGraphSettingsAfterParse(savedGraphSettings);
     if(!savedGraphSettings.length)state.graphSettings=state.graphSettings.map((cfg,gi)=>normalizeGraphSetting({...cfg,xLabel:typeof g.xLabel==='string'?g.xLabel:'Session',phaseLabels:typeof g.phaseLabels==='string'?g.phaseLabels:''},gi));
     state.goalLines=normalizeGoalLinesAfterParse(Array.isArray(g.goalLines)?g.goalLines:[]);
-    updateGraphEditOptions(Number.isInteger(Number(g.selectedGraphIndex))?Number(g.selectedGraphIndex):0);loadSelectedGraphControls();updateGoalControls();
+    loadTimelineControls(g.timeline||{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',sessionDates:''});updateGraphEditOptions(Number.isInteger(Number(g.selectedGraphIndex))?Number(g.selectedGraphIndex):0);loadSelectedGraphControls();updateGoalControls();
     els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';els.alphaInput.value=a.alpha??0.05;els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';if(els.tauVizSelect)els.tauVizSelect.value=['both','cloud','points','raw','corrected','off'].includes(a.tauVisualization)?a.tauVisualization:'both';if(els.tauLegendCheck)els.tauLegendCheck.checked=a.tauLegendVisible!==false;
     updateAnalysisGraphOptions(Number.isInteger(Number(a.selectedGraphIndex))?Number(a.selectedGraphIndex):0,a.selectedSeriesLabel||'');
     if(a.selectedSeriesLabel)updateAnalysisSeriesOptions(a.selectedSeriesLabel,selectedAnalysisGraph());
-    updateAnalysisPhaseOptions(Array.isArray(a.selectedPhases)?a.selectedPhases:[]);
+    updateAnalysisPhaseOptions(Array.isArray(a.selectedPhases)?a.selectedPhases:[]);updateVisualSpanOptions(Number.isInteger(Number(a.visualSourcePhase))?Number(a.visualSourcePhase):null,Number.isInteger(Number(a.visualDisplayThrough))?Number(a.visualDisplayThrough):null);
     state.overlays=Array.isArray(a.overlays)?JSON.parse(JSON.stringify(a.overlays)):[];state.results=Array.isArray(a.results)?JSON.parse(JSON.stringify(a.results)):[];
     if(els.reportEditor)els.reportEditor.innerHTML=sanitizeReportHtml(typeof r.html==='string'?r.html:'');setReportPreview(false);syncReportEditors(els.reportEditor);updateReportSelectors();
     const modules=[...document.querySelectorAll('details.module')];
     if(ui.modulesOpenByName&&typeof ui.modulesOpenByName==='object')modules.forEach(d=>{const key=d.dataset.module||d.querySelector('summary')?.textContent.trim()||'';if(Object.prototype.hasOwnProperty.call(ui.modulesOpenByName,key))d.open=!!ui.modulesOpenByName[key];});
     else if(Array.isArray(ui.modulesOpen))modules.forEach((d,i)=>{if(i<ui.modulesOpen.length)d.open=!!ui.modulesOpen[i];});
-    renderResults();renderGoalLineList();renderGraph();updateAnalysisToggleButtons();updateScaleControlStates();
+    renderResults();renderGoalLineList();renderGraph();updateAnalysisToggleButtons();updateScaleControlStates();refreshRightAccordionLayout();
     status(`SCGraph2 state restored${payload.savedAt?` from ${new Date(payload.savedAt).toLocaleString()}`:''}.`,'ok');
   }
   function loadStateJsonFile(file){
@@ -2726,7 +2811,9 @@ title: Reading Fluency</div>
   });});
   els.analysisGraphSelect.addEventListener('change',()=>{const gi=selectedAnalysisGraph();updateAnalysisSeriesOptions('',gi);updateAnalysisToggleButtons();status(gi>=0?`Analysis graph set to ${state.graphSettings[gi]?.label||`Graph ${gi+1}`}.`:'Choose the graph you want to analyze.','ok');});
   els.analysisSeriesSelect.addEventListener('change',()=>{const si=selectedAnalysisSeries();updateAnalysisPhaseOptions();updateAnalysisToggleButtons();status(si>=0?`Analysis series set to ${state.parsed.series[si].label}.`:'Choose the series you want to analyze.','ok');});
-  if(els.analysisPhaseSelect)els.analysisPhaseSelect.addEventListener('change',()=>{updateAnalysisToggleButtons();});
+  if(els.analysisPhaseSelect)els.analysisPhaseSelect.addEventListener('change',()=>{const p=selectedAnalysisPhases();if(p.length===1)updateVisualSpanOptions(p[0],p[0]);updateAnalysisToggleButtons();});
+  if(els.visualSourcePhaseSelect)els.visualSourcePhaseSelect.addEventListener('change',()=>{updateVisualSpanOptions(Number(els.visualSourcePhaseSelect.value),Number(els.visualSourcePhaseSelect.value));updateAnalysisToggleButtons();});
+  if(els.visualDisplayThroughSelect)els.visualDisplayThroughSelect.addEventListener('change',updateAnalysisToggleButtons);
   $('addGoalLineBtn').addEventListener('click',addOrUpdateGoalLine);
   $('clearGoalLinesBtn').addEventListener('click',()=>{state.goalLines=[];renderGoalLineList();renderGraph();status('Goal lines cleared.','ok');});
   els.goalSeriesSelect.addEventListener('change',()=>{const si=Number(els.goalSeriesSelect.value);if(state.parsed&&Number.isInteger(si)&&state.parsed.series[si])updateGoalControls(state.parsed.series[si].label);});
@@ -2896,6 +2983,8 @@ title: Reading Fluency</div>
   if(els.lineStyleSeriesSelect)els.lineStyleSeriesSelect.addEventListener('change',loadSelectedSeriesStyleControls);
   if(els.lineDashSelect)els.lineDashSelect.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
   if(els.lineColorInput)els.lineColorInput.addEventListener('input',()=>{saveSelectedSeriesStyleControls();renderGraph();});
+  if(els.showConnectingLineCheck)els.showConnectingLineCheck.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
+  [els.xScaleModeSelect,els.minSessionsSelect,els.customMinSessionsInput,els.xAxisLabelModeSelect,els.sessionDatesInput].filter(Boolean).forEach(el=>el.addEventListener(el===els.sessionDatesInput?'input':'change',()=>{saveTimelineControls();renderGraph();}));
   els.graphEditSelect.addEventListener('change',loadSelectedGraphControls);
   els.graphWrap.addEventListener('dblclick',e=>{const t=e.target.closest?.('[data-direct-edit]');if(t){e.preventDefault();e.stopPropagation();startDirectGraphLabelEdit(t);}});
   [els.graphLabelInput,els.yLabelInput,els.yMinInput,els.yMaxInput,els.yTickInput,els.knownMinInput,els.knownMaxInput].forEach(el=>el.addEventListener('change',()=>saveSelectedGraphControls()));
@@ -2907,6 +2996,8 @@ title: Reading Fluency</div>
   if(els.tauLegendCheck)els.tauLegendCheck.addEventListener('change',renderGraph);
   window.addEventListener('resize',()=>{});
   restoreRememberedSaveDirectory();
+  loadTimelineControls(state.timeline);
+  const startupControls=document.querySelector('.secondary-stack > details.module[data-module="controls"]'),startupAnalysis=document.querySelector('.secondary-stack > details.module[data-module="analysis"]');if(startupControls)startupControls.open=true;if(startupAnalysis)startupAnalysis.open=false;refreshRightAccordionLayout();
   loadData();
   restoreReportAutosave();
   updateReportPopupButton();
