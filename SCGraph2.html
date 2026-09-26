@@ -172,19 +172,48 @@
   #graphWrap [data-direct-edit]{cursor:text}
   #graphWrap [data-direct-edit]:hover{fill:#1f4e79;text-decoration:underline;text-decoration-style:dotted}
   .graph-inline-editor{position:absolute;z-index:8;min-width:150px;max-width:360px;padding:5px 7px;border:2px solid #1f4e79;border-radius:6px;background:#fff;color:#111827;font:600 13px Arial,Helvetica,sans-serif;box-shadow:0 4px 14px rgba(15,23,42,.16);outline:none}
+  #graphWrap [data-calendar-date-session]{cursor:pointer}
+  #graphWrap [data-calendar-date-session]:hover{fill:#1f4e79;text-decoration:underline;text-decoration-style:dotted}
+  .calendar-date-editor{min-width:142px;max-width:180px;padding:5px 7px}
   .primary-stack.graph-maximized > details.module[data-module="graph"][open]{max-height:none}
   .primary-stack.graph-maximized > details.module[data-module="graph"][open] > .graph-body{overflow:hidden}
   .primary-stack.graph-maximized #graphWrap{flex:1 1 auto;min-height:0;overflow:auto}
   .primary-stack.graph-maximized #graphWrap svg{height:100%;min-height:0;width:100%;display:block}
   .graph-toolbar{display:flex;gap:6px;flex-wrap:wrap;padding:0 0 8px}
+  #graphWrap [data-observation-point]{cursor:help}
+  #graphWrap [data-tau-viz]{pointer-events:none}
+  .graph-data-table-drawer{display:none;border:1px solid #d8e0e8;border-radius:9px;background:#f8fafc;margin:8px 0 2px;overflow:hidden}
+  .graph-data-table-drawer.open{display:block}
+  .graph-data-table-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-bottom:1px solid #d8e0e8;background:#eef3f7}
+  .graph-data-table-head strong{font-size:12px;color:#374151}
+  .graph-data-table-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:9px 10px 4px}
+  .graph-data-table-actions{display:flex;gap:7px;flex-wrap:wrap;padding:0 10px 9px}
+  .graph-data-table-wrap{max-height:210px;overflow:auto;border-top:1px solid #e3e8ee;background:#fff}
+  .graph-data-table{width:100%;border-collapse:collapse;font-size:11.5px}
+  .graph-data-table th,.graph-data-table td{padding:5px 7px;border-bottom:1px solid #e5e7eb;text-align:left;white-space:nowrap}
+  .graph-data-table th{position:sticky;top:0;background:#f8fafc;font-weight:700;color:#374151;z-index:1}
+  .graph-data-table tbody tr:hover{background:#f5f8fb}
+  .graph-data-table .num{text-align:right;font-variant-numeric:tabular-nums}
+  .graph-data-table-empty{padding:12px;color:var(--muted);font-size:12px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
   label{display:block;font-size:12px;font-weight:700;color:#374151;margin:0 0 4px}
   input[type="text"],input[type="number"],select,textarea{width:100%;border:1px solid #c8d1dc;border-radius:8px;background:#fff;padding:8px 9px;color:#111827}
   textarea{resize:vertical;min-height:92px;line-height:1.35}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
   .field{margin-bottom:9px}.row{display:flex;gap:7px;align-items:center}.row > *{min-width:0}.row.grow > input,.row.grow > textarea{flex:1}
   .hint{font-size:11.5px;color:var(--muted);line-height:1.35;margin-top:5px}.subhead{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#667085;font-weight:700;margin:12px 0 7px}
+  /* Nested Graph Controls / Analysis panes: collapsed by default, independently expandable. */
+  details.subpane{border:1px solid #d8e0e8;border-radius:9px;margin:0 0 8px;overflow:hidden;box-shadow:none;min-width:0}
+  .module-body > details.subpane:nth-of-type(odd){background:#fafbfd}
+  .module-body > details.subpane:nth-of-type(even){background:#eef3f7}
+  details.subpane > summary{padding:8px 10px;font-size:12px;text-transform:uppercase;letter-spacing:.055em;color:#465568;font-weight:700;background:transparent;border-bottom:0}
+  details.subpane[open] > summary{border-bottom:1px solid rgba(120,136,153,.24)}
+  details.subpane > summary::after{font-size:13px}
+  details.subpane > .subpane-body{padding:10px 10px 11px;min-width:0}
+  details.subpane .subsection-label{font-size:11px;text-transform:uppercase;letter-spacing:.055em;color:#6b7785;font-weight:700;margin:9px 0 6px}
+  details.subpane:last-child{margin-bottom:0}
   .checks{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px}.checks label{font-weight:500;display:flex;align-items:center;gap:6px;margin:0}
-  .weekday-checks{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:5px}.weekday-checks label{display:flex;align-items:center;justify-content:center;gap:4px;margin:0;padding:6px 4px;border:1px solid #d7dde5;border-radius:7px;background:#fbfcfd;font-size:11px;font-weight:600;white-space:nowrap}.weekday-checks input{margin:0}.weekday-checks.disabled{opacity:.55}
+  .weekday-checks{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:5px}.weekday-checks button{width:100%;min-width:0;padding:7px 2px;border:1px solid #b9c4d1;border-radius:7px;background:#fff;color:#374151;font-size:12px;font-weight:700;line-height:1;box-shadow:none}.weekday-checks button:hover{background:#f6f8fa}.weekday-checks button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}.weekday-checks button[aria-pressed="true"]:hover{background:#163d61}.weekday-checks.disabled{opacity:.55}.weekday-checks.disabled button{cursor:not-allowed}
+  .phase-numbering-list{display:flex;flex-direction:column;gap:6px;margin-top:5px}.phase-numbering-row{display:grid;grid-template-columns:minmax(0,1fr) 132px;gap:8px;align-items:center}.phase-numbering-row .phase-numbering-name{font-size:12px;color:#374151;min-width:0}.phase-numbering-row input{padding:6px 8px}.phase-numbering-continuation{font-size:10.5px;color:var(--muted);margin-top:2px}.phase-numbering-empty{font-size:11.5px;color:var(--muted)}
   #status{font-size:12px;color:var(--muted);padding:5px 2px 0}.error{color:var(--danger)!important;font-weight:700}.ok{color:var(--ok)!important}
   .analysis-targets{margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid #e3e8ee}
   .analysis-targets label{color:#263444}
@@ -335,6 +364,7 @@
     .primary-stack > details.module[data-module="data"][open] > .data-pane-body{height:100%;max-height:none;overflow:hidden}
     .data-scroll-content{height:100%;min-height:0;overflow-y:auto}
     .grid3{grid-template-columns:1fr 1fr}
+    .graph-data-table-controls{grid-template-columns:1fr}
   }
   @media (max-width: 620px){header{height:auto;min-height:58px;align-items:flex-start;padding:10px;gap:8px}.brand span{display:none}.grid2,.grid3,.checks{grid-template-columns:1fr}.quick-grid{grid-template-columns:1fr}.header-actions{justify-content:flex-end}}
 
@@ -343,7 +373,7 @@
 </head>
 <body>
 <header>
-  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.2</span></div>
+  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.8</span></div>
   <div class="header-actions">
     <button id="startUpBtn" class="small">Start Up</button>
     <button id="helpBtn" class="small">Help</button>
@@ -366,8 +396,21 @@
       <div class="module-body graph-body">
         <div class="graph-toolbar">
           <span class="pill" id="seriesPill">1 series</span><span class="pill" id="phasePill">2 phases</span><span class="pill" id="activePill">8 active observations</span>
+          <button id="toggleDataTableBtn" class="small" type="button" aria-expanded="false" title="Show or hide a compact data table beneath the graph. The table does not reduce graph width.">Show Data Table</button>
         </div>
         <div id="graphWrap" aria-label="APA-style single-case graph"></div>
+        <section id="graphDataTableDrawer" class="graph-data-table-drawer" aria-label="Graph data table">
+          <div class="graph-data-table-head"><strong>Data Table</strong><span class="hint" style="margin:0">Collapsed by default; select only the data you want to inspect or insert.</span></div>
+          <div class="graph-data-table-controls">
+            <div class="field"><label for="graphTableGraphSelect">Graph</label><select id="graphTableGraphSelect" title="Choose which graph supplies rows to the table."></select></div>
+            <div class="field"><label for="graphTableSeriesSelect">Series</label><select id="graphTableSeriesSelect" title="Show all series in the selected graph or restrict the table to one series."></select></div>
+            <div class="field"><label for="graphTablePhaseSelect">Phase</label><select id="graphTablePhaseSelect" title="Show all phases or restrict the table to one phase. Phase filtering does not change the graph or the data."></select></div>
+          </div>
+          <div class="graph-data-table-actions">
+            <button id="insertGraphTableReportBtn" type="button" class="small" title="Insert the currently selected table into the Report workspace without changing the graph.">Insert Table in Report</button>
+          </div>
+          <div id="graphDataTableWrap" class="graph-data-table-wrap"><div class="graph-data-table-empty">Load data to view a table.</div></div>
+        </section>
         <div id="status">Ready.</div>
       </div>
     </details>
@@ -383,7 +426,6 @@
             <div class="field"><label for="phaseNamesData">Default phase names</label><input id="phaseNamesData" type="text" placeholder="Baseline, Intervention"></div>
             <div class="field"><label for="directionSelect">Improvement direction</label><select id="directionSelect"><option value="increase">Higher scores = improvement</option><option value="decrease">Lower scores = improvement</option></select></div>
           </div>
-          <div class="field"><label for="notesInput">Notes / context</label><textarea id="notesInput" style="min-height:70px" placeholder="Optional context for interpretation"></textarea></div>
           <div class="footer-note">Data are processed locally in this HTML file. SCGraph2 does not send the dataset anywhere.</div>
           <div class="data-action-footer">
             <button id="renderBtn" class="primary">Load & Graph Data</button>
@@ -412,7 +454,6 @@
           </div>
           <div class="tool-group">
             <button id="insertReportTemplateBtn" type="button">Insert Template</button>
-            <button id="insertReportNotesBtn" type="button">Insert Notes</button>
             <button id="insertReportDividerBtn" type="button">Divider</button>
           </div>
         </div>
@@ -447,163 +488,215 @@
 <details class="module" data-module="controls" open>
       <summary>Graph Controls</summary>
       <div class="module-body">
-        <div class="subhead">Global Figure Settings</div>
-        <div class="field"><label for="titleInput">Overall figure title</label><input id="titleInput" type="text" value="Performance Scores Over Sessions"></div>
-        <div class="hint">Tip: double-click any graph title, axis label, or phase label on the graph to edit it directly.</div>
-        <div class="divider"></div>
-        <div class="subhead">Selected Graph</div>
-        <div class="field"><label for="graphEditSelect">Graph to edit</label><select id="graphEditSelect"></select></div>
-        <div class="grid3">
-          <div class="field"><label for="graphLabelInput">Graph title</label><input id="graphLabelInput" type="text" placeholder="e.g., Naming"></div>
-          <div class="field"><label for="xLabelInput">X-axis label</label><input id="xLabelInput" type="text" value="Session"></div>
-          <div class="field"><label for="yLabelInput">Y-axis label</label><input id="yLabelInput" type="text" value="Score"></div>
-        </div>
-        <div class="field"><label for="phaseLabelInput">Phase labels for this graph</label><input id="phaseLabelInput" type="text" placeholder="Baseline, Intervention"></div>
-        <div class="grid3">
-          <div class="field"><label for="yMinInput">Y minimum</label><input id="yMinInput" type="number" step="any" value="0"></div>
-          <div class="field"><label for="yMaxInput">Y maximum</label><input id="yMaxInput" type="number" step="any" value="100"></div>
-          <div class="field"><label for="yTickInput">Y tick interval</label><input id="yTickInput" type="number" min="0" step="any" placeholder="Auto"></div>
-        </div>
-        <div class="checks">
-          <label><input type="checkbox" id="yAutoCheck" checked> Auto-scale selected graph Y axis</label>
-        </div>
-        <div class="grid3">
-          <div class="field"><label for="yAutoModeSelect">Auto-scale method</label><select id="yAutoModeSelect">
-            <option value="single-nonnegative">Single-case — unbounded ≥ 0</option>
-            <option value="known-bounds">Single-case — known bounds</option>
-            <option value="single-negative">Single-case — allow negative values</option>
-            <option value="legacy-heuristic">Original SCGraph heuristic</option>
-          </select></div>
-          <div class="field"><label for="knownMinInput">Known minimum</label><input id="knownMinInput" type="number" step="any" value="0"></div>
-          <div class="field"><label for="knownMaxInput">Known maximum</label><input id="knownMaxInput" type="number" step="any" value="100"></div>
-        </div>
-        <div class="hint">Single-case auto scaling uses full known measurement bounds when supplied; otherwise it uses readable 1–2–5 tick intervals and extends to the next major tick beyond the displayed values. The original SCGraph heuristic preserves the earlier percentage-padding behavior.</div>
-        <div id="scalePreview" class="footer-note" style="margin-top:6px">Manual Y-axis scaling.</div>
-        <div class="divider"></div>
-        <div class="subhead">Plot Appearance</div>
-        <div class="grid2">
-          <div class="field"><label for="markerSizeInput">Marker size</label><input id="markerSizeInput" type="number" min="2" max="12" step="1" value="5"></div>
-          <div class="field"><label for="lineWidthInput">Data line width</label><input id="lineWidthInput" type="number" min="1" max="6" step="0.25" value="2"></div>
-        </div>
-        <div class="subhead" style="margin-top:8px">Series line style</div>
-        <div class="grid3">
-          <div class="field"><label for="lineStyleSeriesSelect">Series to style</label><select id="lineStyleSeriesSelect"></select></div>
-          <div class="field"><label for="lineDashSelect">Line dash</label><select id="lineDashSelect"><option value="solid">Solid</option><option value="short">Short dash</option><option value="medium">Medium dash</option><option value="long">Long dash</option></select></div>
-          <div class="field"><label for="lineColorInput">Line color</label><input id="lineColorInput" type="color" value="#111827"></div>
-        </div>
-        <div class="checks" style="margin-top:3px">
-          <label><input type="checkbox" id="showConnectingLineCheck" checked> Show connecting line</label>
-        </div>
-        <div class="hint">Choose a series within the selected graph, then assign a line dash, color, and whether its connecting line is shown. Markers remain visible when the line is hidden.</div>
-        <div class="checks">
-          <label><input type="checkbox" id="gridCheck"> Light gridlines</label>
-          <label><input type="checkbox" id="legendCheck" checked> Legend when needed</label>
-          <label><input type="checkbox" id="phaseLabelsCheck" checked> Phase labels</label>
-          <label><input type="checkbox" id="showGhostCheck" checked> Show ghosted points</label>
-        </div>
-        <div class="divider"></div>
-        <div class="subhead">X-Axis / Session Timeline</div>
-        <div class="grid3">
-          <div class="field"><label for="xScaleModeSelect">Scale</label><select id="xScaleModeSelect"><option value="sequential">Sequential sessions</option><option value="calendar">Proportional calendar time</option></select></div>
-          <div class="field"><label for="minSessionsSelect">Minimum displayed sessions</label><select id="minSessionsSelect"><option value="auto">Auto</option><option value="10">10</option><option value="15" selected>15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="custom">Custom</option></select></div>
-          <div class="field"><label for="xAxisLabelModeSelect">Axis labels</label><select id="xAxisLabelModeSelect"><option value="session">Session number</option><option value="date">Date</option><option value="both">Session + date</option></select></div>
-        </div>
-        <div class="field" id="customMinSessionsField" style="display:none"><label for="customMinSessionsInput">Custom minimum sessions</label><input id="customMinSessionsInput" type="number" min="1" step="1" value="15"></div>
-        <div class="field" id="calendarScheduleField" style="display:none">
-          <label for="firstSessionDateInput">First session date</label>
-          <input id="firstSessionDateInput" type="date">
-          <div class="subhead" style="margin:9px 0 5px">Session days</div>
-          <div class="weekday-checks" id="calendarWeekdayChecks" aria-label="Recurring session weekdays">
-            <label><input type="checkbox" data-calendar-weekday="1">Mon</label>
-            <label><input type="checkbox" data-calendar-weekday="2">Tue</label>
-            <label><input type="checkbox" data-calendar-weekday="3">Wed</label>
-            <label><input type="checkbox" data-calendar-weekday="4">Thu</label>
-            <label><input type="checkbox" data-calendar-weekday="5">Fri</label>
-            <label><input type="checkbox" data-calendar-weekday="6">Sat</label>
-            <label><input type="checkbox" data-calendar-weekday="0">Sun</label>
+        <details class="subpane" data-subpane="global-figure">
+          <summary>Global Figure Settings</summary>
+          <div class="subpane-body">
+            <div class="field"><label for="titleInput">Overall figure title</label><input id="titleInput" type="text" value="Performance Scores Over Sessions"></div>
+            <div class="hint">Tip: double-click any graph title, axis label, or phase label on the graph to edit it directly.</div>
           </div>
-          <div class="hint">For proportional calendar time, Session 1 uses the first date exactly. SCGraph2 then assigns each later observation to the next checked weekday, repeating the weekly schedule automatically. You do not need to enter individual session dates.</div>
-        </div>
-        <div id="timelinePreview" class="footer-note">Sequential sessions · minimum span 15.</div>
-        <div class="divider"></div>
-        <div class="subhead">Goal Lines</div>
-        <div class="field"><label for="goalSeriesSelect">Series / multiple-baseline tier</label><select id="goalSeriesSelect"></select></div>
-        <div class="grid3">
-          <div class="field"><label for="goalStartPhaseSelect">Start phase</label><select id="goalStartPhaseSelect"></select></div>
-          <div class="field"><label for="goalEndPhaseSelect">Through phase</label><select id="goalEndPhaseSelect"></select></div>
-          <div class="field"><label for="goalValueInput">Goal value (Y)</label><input id="goalValueInput" type="number" step="any" placeholder="e.g., 80"></div>
-        </div>
-        <div class="row"><button id="addGoalLineBtn" type="button">Add / update goal line</button><button id="clearGoalLinesBtn" type="button">Clear goal lines</button></div>
-        <div class="hint">A goal line is horizontal. Choose the series/tier, the first and last phase it spans, and its vertical-axis value. Use the same start/through phase to place a goal in one phase only.</div>
-        <div id="goalLineList" class="footer-note" style="margin-top:8px">No goal lines.</div>
-        <div class="divider"></div>
-        <div class="command-box">
-          <label for="graphCommand">Natural-language graph command</label>
-          <div class="row grow"><input id="graphCommand" type="text" placeholder="e.g., place level lines in both phases"><button id="graphCommandBtn" class="primary">Apply</button></div>
-          <div class="hint">Try: “set y-axis 0 to 20”, “hide gridlines”, “title: Reading Fluency”, “goal line phase 2 at 80”, or “place trend lines in both phases”.</div>
-        </div>
-        <div class="row" style="margin-top:10px"><button id="applyGraphBtn">Apply controls</button><button id="clearOverlaysBtn">Clear analysis overlays</button></div>
+        </details>
+
+        <details class="subpane" data-subpane="selected-graph">
+          <summary>Selected Graph</summary>
+          <div class="subpane-body">
+            <div class="field"><label for="graphEditSelect">Graph to edit</label><select id="graphEditSelect"></select></div>
+            <div class="grid3">
+              <div class="field"><label for="graphLabelInput">Graph title</label><input id="graphLabelInput" type="text" placeholder="e.g., Naming"></div>
+              <div class="field"><label for="xLabelInput">X-axis label</label><input id="xLabelInput" type="text" value="Session"></div>
+              <div class="field"><label for="yLabelInput">Y-axis label</label><input id="yLabelInput" type="text" value="Score"></div>
+            </div>
+            <div class="field"><label for="phaseLabelInput">Phase labels for this graph</label><input id="phaseLabelInput" type="text" placeholder="Baseline, Intervention"></div>
+            <div class="grid3">
+              <div class="field"><label for="yMinInput">Y minimum</label><input id="yMinInput" type="number" step="any" value="0"></div>
+              <div class="field"><label for="yMaxInput">Y maximum</label><input id="yMaxInput" type="number" step="any" value="100"></div>
+              <div class="field"><label for="yTickInput">Y tick interval</label><input id="yTickInput" type="number" min="0" step="any" placeholder="Auto"></div>
+            </div>
+            <div class="checks">
+              <label><input type="checkbox" id="yAutoCheck" checked> Auto-scale selected graph Y axis</label>
+            </div>
+            <div class="grid3">
+              <div class="field"><label for="yAutoModeSelect">Auto-scale method</label><select id="yAutoModeSelect">
+                <option value="single-nonnegative">Single-case — unbounded ≥ 0</option>
+                <option value="known-bounds">Single-case — known bounds</option>
+                <option value="single-negative">Single-case — allow negative values</option>
+                <option value="legacy-heuristic">Original SCGraph heuristic</option>
+              </select></div>
+              <div class="field"><label for="knownMinInput">Known minimum</label><input id="knownMinInput" type="number" step="any" value="0"></div>
+              <div class="field"><label for="knownMaxInput">Known maximum</label><input id="knownMaxInput" type="number" step="any" value="100"></div>
+            </div>
+            <div class="hint">Single-case auto scaling uses full known measurement bounds when supplied; otherwise it uses readable 1–2–5 tick intervals and extends to the next major tick beyond the displayed values. The original SCGraph heuristic preserves the earlier percentage-padding behavior.</div>
+            <div id="scalePreview" class="footer-note" style="margin-top:6px">Manual Y-axis scaling.</div>
+          </div>
+        </details>
+
+        <details class="subpane" data-subpane="plot-appearance">
+          <summary>Plot Appearance</summary>
+          <div class="subpane-body">
+            <div class="grid2">
+              <div class="field"><label for="markerSizeInput">Marker size</label><input id="markerSizeInput" type="number" min="2" max="12" step="1" value="5"></div>
+              <div class="field"><label for="lineWidthInput">Data line width</label><input id="lineWidthInput" type="number" min="1" max="6" step="0.25" value="2"></div>
+            </div>
+            <div class="subsection-label">Series line style</div>
+            <div class="grid3">
+              <div class="field"><label for="lineStyleSeriesSelect">Series to style</label><select id="lineStyleSeriesSelect"></select></div>
+              <div class="field"><label for="lineDashSelect">Line dash</label><select id="lineDashSelect"><option value="solid">Solid</option><option value="short">Short dash</option><option value="medium">Medium dash</option><option value="long">Long dash</option></select></div>
+              <div class="field"><label for="lineColorInput">Line color</label><input id="lineColorInput" type="color" value="#111827"></div>
+            </div>
+            <div class="checks" style="margin-top:3px">
+              <label><input type="checkbox" id="showConnectingLineCheck" checked> Show connecting line</label>
+            </div>
+            <div class="hint">Choose a series within the selected graph, then assign a line dash, color, and whether its connecting line is shown. Markers remain visible when the line is hidden.</div>
+            <div class="checks">
+              <label><input type="checkbox" id="gridCheck"> Light gridlines</label>
+              <label><input type="checkbox" id="legendCheck" checked> Legend when needed</label>
+              <label><input type="checkbox" id="phaseLabelsCheck" checked> Phase labels</label>
+              <label><input type="checkbox" id="showGhostCheck" checked> Show ghosted points</label>
+            </div>
+          </div>
+        </details>
+
+        <details class="subpane" data-subpane="x-axis-timeline">
+          <summary>X-Axis / Session Timeline</summary>
+          <div class="subpane-body">
+            <div class="grid3">
+              <div class="field"><label for="xScaleModeSelect">Scale</label><select id="xScaleModeSelect" title="Choose equal spacing by session order or proportional spacing by elapsed calendar days."><option value="sequential">Sequential sessions</option><option value="calendar">Proportional calendar time</option></select></div>
+              <div class="field" id="minSessionsField"><label for="minSessionsSelect">Minimum displayed sessions</label><select id="minSessionsSelect" title="Set the minimum sequential X-axis span. Actual observations are never truncated."><option value="auto">Auto</option><option value="10">10</option><option value="15" selected>15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="custom">Custom</option></select></div>
+              <div class="field" id="xAxisLabelModeField"><label for="xAxisLabelModeSelect">Axis labels</label><select id="xAxisLabelModeSelect" title="Choose the X-axis label format for sequential-session display. Calendar mode always shows displayed session number above date."><option value="session">Session number</option><option value="date">Date</option><option value="both">Session + date</option></select></div>
+            </div>
+            <div class="field" id="customMinSessionsField" style="display:none"><label for="customMinSessionsInput">Custom minimum sessions</label><input id="customMinSessionsInput" type="number" min="1" step="1" value="15" title="Enter a positive whole number for the minimum sequential-session span."></div>
+            <div class="field" id="calendarScheduleField" style="display:none">
+              <label for="firstSessionDateInput">First session date</label>
+              <input id="firstSessionDateInput" type="date" title="Set the actual date of underlying Session 1. Later dates are generated from the selected recurring weekdays unless individually edited on the graph.">
+              <div class="subsection-label">Session days</div>
+              <div class="weekday-checks" id="calendarWeekdayChecks" aria-label="Recurring session days">
+                <button type="button" data-calendar-weekday="1" aria-pressed="false" aria-label="Monday" title="Monday — include or exclude Monday from the recurring session schedule">M</button>
+                <button type="button" data-calendar-weekday="2" aria-pressed="false" aria-label="Tuesday" title="Tuesday — include or exclude Tuesday from the recurring session schedule">T</button>
+                <button type="button" data-calendar-weekday="3" aria-pressed="false" aria-label="Wednesday" title="Wednesday — include or exclude Wednesday from the recurring session schedule">W</button>
+                <button type="button" data-calendar-weekday="4" aria-pressed="false" aria-label="Thursday" title="Thursday — include or exclude Thursday from the recurring session schedule">R</button>
+                <button type="button" data-calendar-weekday="5" aria-pressed="false" aria-label="Friday" title="Friday — include or exclude Friday from the recurring session schedule">F</button>
+                <button type="button" data-calendar-weekday="6" aria-pressed="false" aria-label="Saturday" title="Saturday — include or exclude Saturday from the recurring session schedule">S</button>
+                <button type="button" data-calendar-weekday="0" aria-pressed="false" aria-label="Sunday" title="Sunday — include or exclude Sunday from the recurring session schedule">U</button>
+              </div>
+              <div class="hint">Enter the first date once, then press the days on which sessions normally occur. SCGraph2 generates all later dates automatically. Calendar mode always shows the <strong>displayed session number</strong> above the date; phase-specific renumbering changes that visible number only, not the underlying session identity used for chronology or analysis. Click any plotted date to edit that one date.</div>
+            </div>
+            <div class="subsection-label">Displayed session numbering by phase</div>
+            <div id="phaseNumberingList" class="phase-numbering-list" aria-label="Displayed session numbering by phase"></div>
+            <div id="phaseNumberingHint" class="hint">Leave a phase blank to continue numbering from the preceding phase. Enter a positive whole number only when you want that phase to begin with a different displayed session number. This relabels the X axis only; underlying session identity, calendar chronology, data, and analyses remain unchanged.</div>
+            <div id="timelinePreview" class="footer-note">Sequential sessions · minimum span 15.</div>
+          </div>
+        </details>
+
+        <details class="subpane" data-subpane="goal-lines">
+          <summary>Goal Lines</summary>
+          <div class="subpane-body">
+            <div class="field"><label for="goalSeriesSelect">Series / multiple-baseline tier</label><select id="goalSeriesSelect"></select></div>
+            <div class="grid3">
+              <div class="field"><label for="goalStartPhaseSelect">Start phase</label><select id="goalStartPhaseSelect"></select></div>
+              <div class="field"><label for="goalEndPhaseSelect">Through phase</label><select id="goalEndPhaseSelect"></select></div>
+              <div class="field"><label for="goalValueInput">Goal value (Y)</label><input id="goalValueInput" type="number" step="any" placeholder="e.g., 80"></div>
+            </div>
+            <div class="row"><button id="addGoalLineBtn" type="button">Add / update goal line</button><button id="clearGoalLinesBtn" type="button">Clear goal lines</button></div>
+            <div class="hint">A goal line is horizontal. Choose the series/tier, the first and last phase it spans, and its vertical-axis value. Use the same start/through phase to place a goal in one phase only.</div>
+            <div id="goalLineList" class="footer-note" style="margin-top:8px">No goal lines.</div>
+          </div>
+        </details>
+
+        <details class="subpane" data-subpane="graph-commands">
+          <summary>Graph Commands &amp; Actions</summary>
+          <div class="subpane-body">
+            <div class="command-box">
+              <label for="graphCommand">Natural-language graph command</label>
+              <div class="row grow"><input id="graphCommand" type="text" placeholder="e.g., place level lines in both phases"><button id="graphCommandBtn" class="primary">Apply</button></div>
+              <div class="hint">Try: “set y-axis 0 to 20”, “hide gridlines”, “title: Reading Fluency”, “goal line phase 2 at 80”, or “place trend lines in both phases”.</div>
+            </div>
+            <div class="row" style="margin-top:10px"><button id="applyGraphBtn">Apply controls</button><button id="clearOverlaysBtn">Clear analysis overlays</button></div>
+          </div>
+        </details>
       </div>
     </details>
 
 <details class="module" data-module="analysis">
       <summary>Analysis</summary>
       <div class="module-body">
-        <div class="grid2 analysis-targets">
-          <div class="field"><label for="analysisGraphSelect">Graph to analyze</label><select id="analysisGraphSelect"></select><div class="hint">Choose the graph first. With one graph, it is selected automatically.</div></div>
-          <div class="field"><label for="analysisSeriesSelect">Series to analyze</label><select id="analysisSeriesSelect"></select><div class="hint">Then choose the exact series or multiple-baseline tier within that graph.</div></div>
-        </div>
-        <div class="field">
-          <label for="analysisPhaseSelect">Phase(s) to analyze</label>
-          <select id="analysisPhaseSelect" multiple size="4" style="min-height:86px"></select>
-          <div class="hint">Select one or several phases for Level/Trend analyses. Select exactly two phases for PND, Mann–Whitney, Trend + 0.3 IQR, or Tau-U. Use Cmd/Ctrl-click to select nonadjacent phases such as 1 and 3.</div>
-        </div>
-        <div class="subhead" style="margin-top:4px">Visual Analysis Span</div>
-        <div class="grid2 analysis-targets" style="margin-bottom:10px">
-          <div class="field"><label for="visualSourcePhaseSelect">Calculate from</label><select id="visualSourcePhaseSelect"></select></div>
-          <div class="field"><label for="visualDisplayThroughSelect">Display through</label><select id="visualDisplayThroughSelect"></select></div>
-        </div>
-        <div class="hint" style="margin-top:-6px;margin-bottom:10px">When Display through is later than Calculate from, Level, IQR Level, Trend, and IQR Trend are calculated only from the source phase and projected unchanged through the selected adjacent phase(s).</div>
-        <div class="quick-grid">
-          <button data-analysis="Level" data-analysis-scope="visual">Level — selected phase(s)</button>
-          <button data-analysis="Trend" data-analysis-scope="visual">Trend — selected phase(s)</button>
-          <button data-analysis="IQRLevel" data-analysis-scope="visual">IQR Level — selected phase(s)</button>
-          <button data-analysis="IQRTrend" data-analysis-scope="visual">IQR Trend — selected phase(s)</button>
-          <button data-analysis="PND" data-analysis-scope="compare">PND — selected pair</button>
-          <button data-analysis="M-W" data-analysis-scope="compare">Mann–Whitney — selected pair</button>
-          <button data-analysis="TrendBinomial" data-analysis-scope="compare">Trend + 0.3 IQR — selected pair</button>
-          <button data-analysis="T-U" data-analysis-scope="compare">Tau-U — selected pair</button>
-        </div>
-        <div class="field"><label>Series-specific command syntax</label><div class="help-example" style="margin:0">T-U, series=Accuracy, 1, 2</div><div class="hint">The selected Graph scopes <span class="kbd">series=2</span> and series-label commands to that graph.</div></div>
-        <div class="field"><label for="analysisCommand">Analysis command or request</label>
-          <div class="row grow"><input id="analysisCommand" type="text" value="T-U, 1, 2"><button id="runAnalysisBtn" class="primary">Run</button></div>
-          <div class="hint">Compact commands and natural language both work: <span class="kbd">Level, 1, 3</span> draws separate level lines in phases 1 and 3; <span class="kbd">T-U, series=Accuracy, 1, 3</span> compares phases 1 and 3 even when phase 2 lies between them; <span class="kbd">TrendBinomial, 1, 3</span> works the same way. The phase selector above provides the same control without typing commands. Ghosting is stored directly in the data stream with parentheses.</div>
-        </div>
-        <div class="grid2">
-          <div class="field"><label for="alphaInput">Alpha</label><input id="alphaInput" type="number" min="0.001" max="0.5" step="0.001" value="0.05"></div>
-          <div class="field"><label for="tauCorrectionSelect">Tau-U baseline correction</label><select id="tauCorrectionSelect"><option value="auto">Auto when baseline improvement τ ≥ .20</option><option value="yes">Always correct</option><option value="no">Do not correct</option></select></div>
-        </div>
-        <div class="field" style="margin:2px 0 8px">
-          <label for="tauVizSelect">Tau-U visualization</label>
-          <select id="tauVizSelect">
-            <option value="both" selected>Cloud + points — recommended</option>
-            <option value="cloud">Cloud only — waning baseline influence</option>
-            <option value="points">Points only — raw ring + corrected point</option>
-            <option value="raw">Raw point contributions only</option>
-            <option value="corrected">Corrected points only</option>
-            <option value="off">Off</option>
-          </select>
-        </div>
-        <div class="checks" style="margin:0 0 8px">
-          <label><input type="checkbox" id="tauLegendCheck" checked> Show detailed Tau-U legend</label>
-        </div>
-        <div class="hint" style="margin-top:-3px;margin-bottom:8px">
-          The visualization is session-dependent. The blue cloud is a baseline-explainable influence field, not a probability distribution. For higher-is-better outcomes, it extends mainly downward from the projected Phase A trajectory because values at or below that trajectory do not exceed what the preexisting improvement can account for; for lower-is-better outcomes, the direction reverses. A smaller fading margin extends beyond the trajectory in the improvement direction to reflect baseline variability. The field also fades horizontally as S_A/(nA×j) wanes across B.
-        </div>
-        <div class="subhead">Results</div>
-        <div id="results"><div class="empty">Run an analysis to see results and interpretation.</div></div>
+        <details class="subpane" data-subpane="analysis-target">
+          <summary>Analysis Target</summary>
+          <div class="subpane-body">
+            <div class="grid2 analysis-targets">
+              <div class="field"><label for="analysisGraphSelect">Graph to analyze</label><select id="analysisGraphSelect"></select><div class="hint">Choose the graph first. With one graph, it is selected automatically.</div></div>
+              <div class="field"><label for="analysisSeriesSelect">Series to analyze</label><select id="analysisSeriesSelect"></select><div class="hint">Then choose the exact series or multiple-baseline tier within that graph.</div></div>
+            </div>
+            <div class="field">
+              <label for="analysisPhaseSelect">Phase(s) to analyze</label>
+              <select id="analysisPhaseSelect" multiple size="4" style="min-height:86px"></select>
+              <div class="hint">Select one or several phases for Level/Trend analyses. Select exactly two phases for PND, Mann–Whitney, Trend + 0.3 IQR, or Tau-U. Use Cmd/Ctrl-click to select nonadjacent phases such as 1 and 3.</div>
+            </div>
+          </div>
+        </details>
+
+        <details class="subpane" data-subpane="visual-analysis">
+          <summary>Visual Analysis</summary>
+          <div class="subpane-body">
+            <div class="grid2 analysis-targets" style="margin-bottom:10px">
+              <div class="field"><label for="visualSourcePhaseSelect">Calculate from</label><select id="visualSourcePhaseSelect"></select></div>
+              <div class="field"><label for="visualDisplayThroughSelect">Display through</label><select id="visualDisplayThroughSelect"></select></div>
+            </div>
+            <div class="hint" style="margin-top:-6px;margin-bottom:10px">When Display through is later than Calculate from, Level, IQR Level, Trend, and IQR Trend are calculated only from the source phase and projected unchanged through the selected adjacent phase(s).</div>
+            <div class="quick-grid">
+              <button data-analysis="Level" data-analysis-scope="visual">Level — selected phase(s)</button>
+              <button data-analysis="Trend" data-analysis-scope="visual">Trend — selected phase(s)</button>
+              <button data-analysis="IQRLevel" data-analysis-scope="visual">IQR Level — selected phase(s)</button>
+              <button data-analysis="IQRTrend" data-analysis-scope="visual">IQR Trend — selected phase(s)</button>
+            </div>
+          </div>
+        </details>
+
+        <details class="subpane" data-subpane="quantitative-analysis">
+          <summary>Comparative / Quantitative Analysis</summary>
+          <div class="subpane-body">
+            <div class="quick-grid">
+              <button data-analysis="PND" data-analysis-scope="compare">PND — selected pair</button>
+              <button data-analysis="M-W" data-analysis-scope="compare">Mann–Whitney — selected pair</button>
+              <button data-analysis="TrendBinomial" data-analysis-scope="compare">Trend + 0.3 IQR — selected pair</button>
+              <button data-analysis="T-U" data-analysis-scope="compare">Tau-U — selected pair</button>
+            </div>
+            <div class="field"><label>Series-specific command syntax</label><div class="help-example" style="margin:0">T-U, series=Accuracy, 1, 2</div><div class="hint">The selected Graph scopes <span class="kbd">series=2</span> and series-label commands to that graph.</div></div>
+            <div class="field"><label for="analysisCommand">Analysis command or request</label>
+              <div class="row grow"><input id="analysisCommand" type="text" value="T-U, 1, 2"><button id="runAnalysisBtn" class="primary">Run</button></div>
+              <div class="hint">Compact commands and natural language both work: <span class="kbd">Level, 1, 3</span> draws separate level lines in phases 1 and 3; <span class="kbd">T-U, series=Accuracy, 1, 3</span> compares phases 1 and 3 even when phase 2 lies between them; <span class="kbd">TrendBinomial, 1, 3</span> works the same way. The phase selector above provides the same control without typing commands. Ghosting is stored directly in the data stream with parentheses.</div>
+            </div>
+            <div class="grid2">
+              <div class="field"><label for="alphaInput">Alpha</label><input id="alphaInput" type="number" min="0.001" max="0.5" step="0.001" value="0.05"></div>
+              <div class="field"><label for="tauCorrectionSelect">Tau-U baseline correction</label><select id="tauCorrectionSelect"><option value="auto">Auto when baseline improvement τ ≥ .20</option><option value="yes">Always correct</option><option value="no">Do not correct</option></select></div>
+            </div>
+            <div class="field" style="margin:2px 0 8px">
+              <label for="tauVizSelect">Tau-U visualization</label>
+              <select id="tauVizSelect">
+                <option value="both" selected>Cloud + points — recommended</option>
+                <option value="cloud">Cloud only — waning baseline influence</option>
+                <option value="points">Points only — raw ring + corrected point</option>
+                <option value="raw">Raw point contributions only</option>
+                <option value="corrected">Corrected points only</option>
+                <option value="off">Off</option>
+              </select>
+            </div>
+            <div class="checks" style="margin:0 0 8px">
+              <label><input type="checkbox" id="tauLegendCheck" checked> Show detailed Tau-U legend</label>
+            </div>
+            <div class="hint" style="margin-top:-3px;margin-bottom:8px">
+              The visualization is session-dependent. The blue cloud is a baseline-explainable influence field, not a probability distribution. For higher-is-better outcomes, it extends mainly downward from the projected Phase A trajectory because values at or below that trajectory do not exceed what the preexisting improvement can account for; for lower-is-better outcomes, the direction reverses. A smaller fading margin extends beyond the trajectory in the improvement direction to reflect baseline variability. The field also fades horizontally as S_A/(nA×j) wanes across B.
+            </div>
+          </div>
+        </details>
+
+        <details class="subpane" data-subpane="analysis-results">
+          <summary>Results</summary>
+          <div class="subpane-body">
+            <div id="results"><div class="empty">Run an analysis to see results and interpretation.</div></div>
+          </div>
+        </details>
       </div>
     </details>
+
     </div>
   </section>
 
@@ -634,8 +727,9 @@ Accuracy: 40,45,50|70,78,85</div>
 
     <h3>3. Load and format the graph</h3>
     <p>Select <strong>Load &amp; Graph Data</strong>. In <strong>Graph Controls</strong>, choose the graph to edit. Each independent graph can have its own graph label, Y-axis label, vertical range, tick interval, and autoscale method.</p>
-    <p><strong>X-axis timeline:</strong> Graph Controls supports a configurable minimum sequential-session span or proportional calendar-time spacing from a recurring clinical schedule. Enter the first session date once, then check the days of the week on which sessions occur. Session 1 uses the entered date exactly; later observations are assigned automatically to the next checked weekday. Statistical calculations remain session-order based.</p>
+    <p><strong>X-axis timeline:</strong> Graph Controls supports a configurable minimum sequential-session span or proportional calendar-time spacing from a recurring clinical schedule. Enter the first session date once, then press the day buttons for the weekdays on which sessions occur. Session 1 uses the entered date exactly; later observations are assigned automatically to the next selected weekday. You can also change the <strong>displayed starting session number for any individual phase</strong>. Leave a phase blank to continue the prior numbering; for example, a retrospective Phase 1 can retain its numbering while Phase 2 restarts at 1 and Phase 3 continues from Phase 2. These are display labels only—underlying session identity and statistical calculations remain continuous and session-order based.</p>
     <p><strong>Auto-scale is on by default</strong> for new graphs. Autoscale choices include the single-case rules for nonnegative/unbounded measures, known measurement bounds, measures allowing negative values, and the original SCGraph heuristic. Turn Auto-scale off for a manual Y range. The current effective scale is shown in Graph Controls.</p>
+    <p><strong>Inspect individual observations:</strong> Hover over any plotted data marker to see its series, displayed session number, calendar date when used, phase, score, and active/ghosted status. Use <strong>Show Data Table</strong> above the graph for a compact table that can be filtered by graph, series, and phase without reducing graph width. The selected table can be inserted directly into the Report workspace.</p>
 
     <h3>4. Add goal lines when needed</h3>
     <p>Under <strong>Graph Controls → Goal Lines</strong>, choose the series/tier, phase span, and Y value. Goal lines are retained independently of analysis overlays and are saved in the JSON state.</p>
@@ -649,6 +743,8 @@ Accuracy: 40,45,50|70,78,85</div>
 
     <h3>7. Build a student report</h3>
     <p>Use <strong>Show Report</strong> in the header to lift the existing Report accordion into an overlay directly over the left panel; the button changes to <strong>Hide Report</strong> while the overlay is visible. The overlay is the same Report editor and toolbar—not a second copy—so edits, formatting, inserted graphs, tables, analysis results, and autosave are identical in both views. Report content is automatically saved locally as you work and is also included in SCGraph2 JSON state files. Use <strong>Save as PDF</strong> to open the browser print dialog and choose <strong>Save as PDF</strong>.</p>
+
+    <p><strong>Tip:</strong> Graph Controls and Analysis are organized into individually expandable sub-panes. They start collapsed; use the triangle on a sub-pane header to open only the section you need. Alternating shading separates adjacent sub-panes visually.</p>
 
     <p><strong>Tip:</strong> Set the analysis target with the darker <strong>Graph to analyze</strong> and <strong>Series to analyze</strong> selectors at the top of the Analysis panel. Analysis buttons are independent toggles: click once to add that analysis and click again to remove only that analysis. Active buttons are highlighted. Data Input stays directly below the graph. On wide screens, Graph Controls and Analysis split the right column equally when both are open; closing one lets the other expand. Use <strong>Help</strong> for the full command and analysis reference.</p>
   </div>
@@ -690,13 +786,18 @@ Student C: 1,2,2,3,3,4,4|7,8,9</div>
     <p>Each graph panel created with <strong>-</strong> has its own display settings. In <strong>Graph Controls → Graph to edit</strong>, choose Graph 1, Graph 2, or Graph 3, then set that graph’s <strong>Graph label</strong>, <strong>Y-axis label</strong>, <strong>Y minimum</strong>, <strong>Y maximum</strong>, and optional <strong>Y tick interval</strong>. These settings do not change the other graph panels. Auto-scale may also be enabled independently for each graph. A <strong>+</strong> multiple-baseline structure is treated as one graph panel, so its stacked tiers share that graph’s Y-axis settings while retaining their own series/tier labels.</p>
     <p><strong>Auto-scale methods:</strong> <strong>Single-case — unbounded ≥ 0</strong> starts at 0 and extends the upper axis to the next readable 1–2–5 major tick beyond the highest displayed data or goal value. <strong>Single-case — known bounds</strong> uses the full measurement range you enter in Known minimum/maximum. <strong>Single-case — allow negative values</strong> extends one readable major tick beyond both the lowest and highest displayed values. <strong>Original SCGraph heuristic</strong> preserves the earlier rule: start at 0 for nonnegative data (or pad below a negative minimum by about 5%) and add about 8% headroom above the maximum. Ghosted observations remain part of display scaling, and the single-case modes also include goal-line values so goals remain visible.</p>
 
+    <h3>Data table and point tooltips</h3>
+    <p>Use <strong>Show Data Table</strong> in the Graph toolbar to open a compact drawer beneath the graph. The graph itself keeps its full width. Filter the table by graph, series, and phase; calendar dates are included automatically when proportional calendar time is active, and displayed session numbers follow any phase-specific renumbering. If displayed and underlying session numbers differ, both are shown.</p>
+    <p><strong>Insert Table in Report</strong> places the currently selected table into the Report workspace. Hover over any plotted observation marker to see the point's series, displayed session, underlying session when different, date when available, phase, score, and active/ghosted status. These inspection tools do not alter the data or analyses.</p>
+
     <h3>Analyzing one series when several are graphed</h3>
     <p>Analyses are always performed on one specified series at a time. The <strong>Graph to analyze</strong> and <strong>Series to analyze</strong> selectors are positioned at the <strong>top of the Analysis panel</strong>, above the analysis buttons. When multiple graph panels exist, choose the graph first and then the series/tier within that graph. A one-series graph auto-selects its series; a multiple-series or multiple-baseline graph asks you to choose the target series/tier.</p>
     <div class="help-example">Trend, series=2, 1<br>T-U, series=Accuracy, 1, 2</div>
     <p>The selected Graph scopes series references, so <span class="kbd">series=2</span> means the second series/tier within the selected graph. A series may also be referenced by its exact label. Natural-language requests such as <strong>“perform Tau-U on series Accuracy, phases 1 and 2”</strong> use the currently selected graph as context.</p>
 
     <h3>Calendar-time scheduling</h3>
-    <p>Choose <strong>Proportional calendar time</strong> when the horizontal spacing should show the actual number of days between sessions. Enter the <strong>First session date</strong> and check the recurring session days from Monday through Sunday. SCGraph2 assigns Session 1 to the entered date, then moves forward one day at a time and places each later observation on the next checked weekday. For example, a Monday first session with Monday/Wednesday checked produces Monday, Wednesday, the following Monday, and so forth. Phase lines remain halfway in time between the adjoining sessions, while statistical analyses continue to use session order rather than elapsed days.</p>
+    <p>Choose <strong>Proportional calendar time</strong> when the horizontal spacing should show the actual number of days between sessions. Enter the <strong>First session date</strong> and press the recurring session-day buttons M, T, W, R, F, S, U. SCGraph2 assigns underlying Session 1 to the entered date, then moves forward one day at a time and places each later observation on the next selected weekday. The X axis always shows the <strong>displayed session number on the upper row and the date below it</strong>; as dates become crowded, the date row rotates clockwise until vertical. Click any date label to open a calendar and change that observation’s date. A later-session edit is stored as a one-session exception; editing Session 1 resets the schedule origin. Phase lines remain halfway in time between adjoining sessions, while statistical analyses continue to use underlying session order rather than elapsed days.</p>
+    <p><strong>Phase-specific displayed session numbering:</strong> In <strong>Graph Controls → X-Axis / Session Timeline</strong>, each phase has an optional <strong>Displayed start number</strong>. Leave the field blank to continue numbering from the preceding phase. Enter a positive whole number only when that phase should start with a different visible number. For example, with three phases, you can leave Phase 1 blank, enter <strong>1</strong> for Phase 2, and leave Phase 3 blank; Phase 3 then continues from the renumbered Phase 2 sequence. This changes only X-axis labels. The data still retain their original continuous underlying session identity, and calendar dates, phase geometry, analyses, goal lines, save/load, and date editing continue to use that underlying identity. In a multiple-baseline graph with different phase timings across tiers, the shared-axis numbering follows the first tier.</p>
 
     <h3>Ghosting observations</h3>
     <p>Ghosting is encoded <strong>inside the data stream</strong>. Surround one numerical value with parentheses.</p>
@@ -745,12 +846,12 @@ title: Reading Fluency</div>
 
     <h3>Student report workspace</h3>
     <p>The <strong>Report</strong> accordion beneath Data Input is a lightweight report editor. It supports headings, bold, italic, bulleted and numbered lists, undo/redo, direct typing, and locally embedded pasted images. Use <strong>Insert Template</strong> for a basic single-case report structure.</p>
-    <p><strong>Insert Graph</strong> inserts a static SVG snapshot of either the complete current figure or one selected graph panel. <strong>Insert Data Table</strong> creates an editable table from a selected graph and series (or all series in that graph). <strong>Insert Analysis Results</strong> inserts the active results for the current Analysis graph/series without replacing the student's own interpretation. <strong>Insert Notes</strong> copies the Data Input notes/context into the report.</p>
+    <p><strong>Insert Graph</strong> inserts a static SVG snapshot of either the complete current figure or one selected graph panel. <strong>Insert Data Table</strong> creates an editable table from a selected graph and series (or all series in that graph). <strong>Insert Analysis Results</strong> inserts the active results for the current Analysis graph/series without replacing the student's own interpretation. Narrative observations and interpretation can be entered directly in the Report workspace.</p>
     <p><strong>Show Report</strong> lifts the existing Report accordion into an in-page overlay over the left panel and changes to <strong>Hide Report</strong>. Because the overlay is the original accordion itself, all report content and tools remain the same automatically. <strong>Preview</strong> temporarily makes the report read-only. <strong>Save as PDF</strong> opens the browser's print dialog with a print-specific layout that hides SCGraph2 controls and prints only the report; choose the browser destination <strong>Save as PDF</strong>. Report edits are autosaved locally in the browser and the entire report is also stored in the SCGraph2 JSON session state.</p>
 
     <h3>Save location, save state, and load state</h3>
     <p><strong>Save Location</strong> opens the browser folder chooser directly and can remember the chosen folder when SCGraph2 is opened as a <strong>top-level HTTPS page</strong> in a browser that supports the File System Access API (notably Chrome and Edge). Browser security prevents directory pickers inside cross-origin embedded previews/iframes and in some non-secure contexts. In those situations SCGraph2 hides the unavailable folder action and automatically uses the browser's normal download mechanism instead of failing. A remembered folder can be changed or forgotten at any time and may occasionally require reauthorization.</p>
-    <p><strong>Save State</strong> opens a filename dialog, then writes a versioned <span class="kbd">.json</span> file to the remembered save folder when one is available; otherwise it sends the file to the browser's download location. The file contains the complete SCGraph2 session: the data stream (including <strong>+</strong>, <strong>-</strong>, phase boundaries, and parenthesized ghost points), per-graph labels, Y-axis labels, manual scales, tick intervals, autoscale methods and known bounds, goal lines, phase labels, selected analysis graph/series, analysis settings, overlays/results, commands, notes, and accordion open/closed state.</p>
+    <p><strong>Save State</strong> opens a filename dialog, then writes a versioned <span class="kbd">.json</span> file to the remembered save folder when one is available; otherwise it sends the file to the browser's download location. The file contains the complete SCGraph2 session: the data stream (including <strong>+</strong>, <strong>-</strong>, phase boundaries, and parenthesized ghost points), per-graph labels, Y-axis labels, manual scales, tick intervals, autoscale methods and known bounds, phase-specific displayed session-number overrides, goal lines, phase labels, calendar timeline settings, selected analysis graph/series, analysis settings, overlays/results, commands, report content, and accordion open/closed state.</p>
     <p><strong>Load State</strong> restores a previously saved SCGraph2 JSON session. The data are reparsed and verified before graph-specific settings, goal lines, and saved analyses/overlays are restored. Older SCGraph2 state files are migrated when possible. Loading always uses the browser's file chooser, so a state file can be opened from any accessible location.</p>
 
     <h3>Export</h3>
@@ -795,17 +896,18 @@ title: Reading Fluency</div>
   'use strict';
   const $ = id => document.getElementById(id);
   const els = {
-    dataInput:$('dataInput'), phaseNamesData:$('phaseNamesData'), directionSelect:$('directionSelect'), notesInput:$('notesInput'),
+    dataInput:$('dataInput'), phaseNamesData:$('phaseNamesData'), directionSelect:$('directionSelect'),
     titleInput:$('titleInput'), xLabelInput:$('xLabelInput'), graphEditSelect:$('graphEditSelect'), graphLabelInput:$('graphLabelInput'), yLabelInput:$('yLabelInput'), yMinInput:$('yMinInput'), yMaxInput:$('yMaxInput'), yTickInput:$('yTickInput'), yAutoCheck:$('yAutoCheck'), yAutoModeSelect:$('yAutoModeSelect'), knownMinInput:$('knownMinInput'), knownMaxInput:$('knownMaxInput'), scalePreview:$('scalePreview'),
     markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), lineStyleSeriesSelect:$('lineStyleSeriesSelect'), lineDashSelect:$('lineDashSelect'), lineColorInput:$('lineColorInput'), showConnectingLineCheck:$('showConnectingLineCheck'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
-    xScaleModeSelect:$('xScaleModeSelect'), minSessionsSelect:$('minSessionsSelect'), customMinSessionsInput:$('customMinSessionsInput'), customMinSessionsField:$('customMinSessionsField'), xAxisLabelModeSelect:$('xAxisLabelModeSelect'), firstSessionDateInput:$('firstSessionDateInput'), calendarScheduleField:$('calendarScheduleField'), calendarWeekdayChecks:$('calendarWeekdayChecks'), timelinePreview:$('timelinePreview'),
+    xScaleModeSelect:$('xScaleModeSelect'), minSessionsSelect:$('minSessionsSelect'), minSessionsField:$('minSessionsField'), customMinSessionsInput:$('customMinSessionsInput'), customMinSessionsField:$('customMinSessionsField'), xAxisLabelModeSelect:$('xAxisLabelModeSelect'), xAxisLabelModeField:$('xAxisLabelModeField'), firstSessionDateInput:$('firstSessionDateInput'), calendarScheduleField:$('calendarScheduleField'), calendarWeekdayChecks:$('calendarWeekdayChecks'), phaseNumberingList:$('phaseNumberingList'), phaseNumberingHint:$('phaseNumberingHint'), timelinePreview:$('timelinePreview'),
     phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), analysisPhaseSelect:$('analysisPhaseSelect'), visualSourcePhaseSelect:$('visualSourcePhaseSelect'), visualDisplayThroughSelect:$('visualDisplayThroughSelect'), alphaInput:$('alphaInput'),
     goalSeriesSelect:$('goalSeriesSelect'), goalStartPhaseSelect:$('goalStartPhaseSelect'), goalEndPhaseSelect:$('goalEndPhaseSelect'), goalValueInput:$('goalValueInput'), goalLineList:$('goalLineList'),
     tauCorrectionSelect:$('tauCorrectionSelect'), tauVizSelect:$('tauVizSelect'), tauLegendCheck:$('tauLegendCheck'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill'),
+    toggleDataTableBtn:$('toggleDataTableBtn'), graphDataTableDrawer:$('graphDataTableDrawer'), graphTableGraphSelect:$('graphTableGraphSelect'), graphTableSeriesSelect:$('graphTableSeriesSelect'), graphTablePhaseSelect:$('graphTablePhaseSelect'), graphDataTableWrap:$('graphDataTableWrap'), insertGraphTableReportBtn:$('insertGraphTableReportBtn'),
     reportModule:$('reportModule'), reportEditor:$('reportEditor'), reportFormatSelect:$('reportFormatSelect'), reportGraphSelect:$('reportGraphSelect'), reportTableGraphSelect:$('reportTableGraphSelect'), reportTableSeriesSelect:$('reportTableSeriesSelect'), reportStatus:$('reportStatus'), reportSummaryStatus:$('reportSummaryStatus')
   };
 
-  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], graphSettings:[], results:[], sourceText:'', direction:'increase', timeline:{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]} };
+  const state = { parsed:null, ghosted:new Set(), overlays:[], goalLines:[], graphSettings:[], results:[], sourceText:'', direction:'increase', timeline:{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[],dateOverrides:{}} };
   const seriesStyles = [
     {stroke:'#111827', marker:'circle'}, {stroke:'#4b5563', marker:'square'}, {stroke:'#7c2d12', marker:'triangle'}, {stroke:'#1f4e79', marker:'diamond'}
   ];
@@ -1080,6 +1182,15 @@ title: Reading Fluency</div>
     const max=nextTickAbove(Math.max(0,observedMax),step);
     return {min:0,max:max>0?max:step,tick:step};
   }
+  function normalizePhaseStartNumbers(raw,gi){
+    const graph=state.parsed?.graphs?.[gi],refSi=graph?.tiers?.[0]?.seriesIndexes?.[0] ?? graph?.seriesIndexes?.[0],phaseCount=Number.isInteger(refSi)?(state.parsed?.series?.[refSi]?.phases?.length||0):(graph?.phaseCount||0);
+    const src=Array.isArray(raw)?raw:[];
+    return Array.from({length:phaseCount},(_,i)=>{
+      const v=src[i];
+      if(v===null||v===undefined||String(v).trim()==='')return null;
+      const n=Number(v);return Number.isInteger(n)&&n>=1?n:null;
+    });
+  }
   function normalizeGraphSetting(setting,gi){
     const legacy=legacyGraphDataRange(gi),raw=setting||{};
     let yMin=Number(raw.yMin),yMax=Number(raw.yMax),yTick=Number(raw.yTick),knownMin=Number(raw.knownMin),knownMax=Number(raw.knownMax);
@@ -1091,7 +1202,7 @@ title: Reading Fluency</div>
     if(!Number.isFinite(knownMax)||knownMax<=knownMin)knownMax=Math.max(100,knownMin+1);
     const validModes=['single-nonnegative','known-bounds','single-negative','legacy-heuristic'];
     let autoScaleMode=validModes.includes(raw.autoScaleMode)?raw.autoScaleMode:(raw.autoScale?'legacy-heuristic':'single-nonnegative');
-    return {label:typeof raw.label==='string'?raw.label:`Graph ${gi+1}`,xLabel:typeof raw.xLabel==='string'?raw.xLabel:'Session',yLabel:typeof raw.yLabel==='string'?raw.yLabel:'Score',phaseLabels:typeof raw.phaseLabels==='string'?raw.phaseLabels:'',seriesLineStyles:normalizeSeriesLineStyles(raw.seriesLineStyles),yMin,yMax,yTick,autoScale:raw.autoScale===undefined?true:!!raw.autoScale,autoScaleMode,knownMin,knownMax};
+    return {label:typeof raw.label==='string'?raw.label:`Graph ${gi+1}`,xLabel:typeof raw.xLabel==='string'?raw.xLabel:'Session',yLabel:typeof raw.yLabel==='string'?raw.yLabel:'Score',phaseLabels:typeof raw.phaseLabels==='string'?raw.phaseLabels:'',phaseStartNumbers:normalizePhaseStartNumbers(raw.phaseStartNumbers,gi),seriesLineStyles:normalizeSeriesLineStyles(raw.seriesLineStyles),yMin,yMax,yTick,autoScale:raw.autoScale===undefined?true:!!raw.autoScale,autoScaleMode,knownMin,knownMax};
   }
   function syncGraphSettingsAfterParse(previous=[]){
     state.graphSettings=state.parsed.graphs.map((g,gi)=>{
@@ -1112,6 +1223,55 @@ title: Reading Fluency</div>
     const ser=state.parsed?.series?.[seriesIdx];
     if(!ser)return state.parsed?.phaseNames?.[phaseIdx]||`Phase ${phaseIdx+1}`;
     return graphPhaseNames(ser.graphIndex,ser.phases.length)[phaseIdx]||`Phase ${phaseIdx+1}`;
+  }
+  function graphNumberingReferenceSeries(gi){
+    const graph=state.parsed?.graphs?.[gi];
+    const si=graph?.tiers?.[0]?.seriesIndexes?.[0] ?? graph?.seriesIndexes?.[0];
+    return Number.isInteger(si)?state.parsed?.series?.[si]||null:null;
+  }
+  function graphPhaseDisplayStarts(gi){
+    const ser=graphNumberingReferenceSeries(gi);if(!ser)return [];
+    const cfg=normalizeGraphSetting(state.graphSettings?.[gi],gi),overrides=cfg.phaseStartNumbers||[];
+    const starts=[];let priorEnd=null;
+    ser.phases.forEach((ph,pi)=>{
+      const override=overrides[pi];
+      const start=Number.isInteger(override)&&override>=1?override:(pi===0?1:priorEnd+1);
+      starts.push(start);priorEnd=start+(ph.endSession-ph.startSession);
+    });
+    return starts;
+  }
+  function displayedSessionNumber(gi,session){
+    const ser=graphNumberingReferenceSeries(gi),ss=Number(session);if(!ser||!Number.isFinite(ss))return ss;
+    const starts=graphPhaseDisplayStarts(gi);
+    const ph=ser.phases.find(p=>ss>=p.startSession&&ss<=p.endSession);
+    if(ph)return starts[ph.phaseIndex]+(ss-ph.startSession);
+    if(ss>ser.maxSessions&&ser.phases.length){const last=ser.phases.at(-1),lastEnd=starts[last.phaseIndex]+(last.endSession-last.startSession);return lastEnd+(ss-ser.maxSessions);}
+    return ss;
+  }
+  function updatePhaseNumberingControls(){
+    if(!els.phaseNumberingList)return;els.phaseNumberingList.innerHTML='';
+    if(!state.parsed){els.phaseNumberingList.innerHTML='<div class="phase-numbering-empty">Load data to set phase-specific displayed session numbers.</div>';return;}
+    const gi=selectedControlGraph(),ser=graphNumberingReferenceSeries(gi);if(gi<0||!ser)return;
+    const cfg=normalizeGraphSetting(state.graphSettings[gi],gi);state.graphSettings[gi]=cfg;
+    const names=graphPhaseNames(gi,ser.phases.length),starts=graphPhaseDisplayStarts(gi);
+    ser.phases.forEach((ph,pi)=>{
+      const row=document.createElement('div');row.className='phase-numbering-row';
+      const text=document.createElement('div');text.className='phase-numbering-name';
+      const phaseLabel=document.createElement('div');phaseLabel.textContent=names[pi]||`Phase ${pi+1}`;
+      const continuation=document.createElement('div');continuation.className='phase-numbering-continuation';continuation.textContent=`Underlying sessions ${ph.startSession}–${ph.endSession} · currently displays ${starts[pi]}–${starts[pi]+(ph.endSession-ph.startSession)}`;
+      text.append(phaseLabel,continuation);
+      const input=document.createElement('input');input.type='number';input.min='1';input.step='1';input.dataset.phaseNumberingIndex=String(pi);input.value=cfg.phaseStartNumbers?.[pi]??'';input.placeholder=pi===0?'1 (default)':'Continue';
+      input.setAttribute('aria-label',`Displayed start number for ${names[pi]||`Phase ${pi+1}`}`);
+      input.title=`Optional displayed start number for ${names[pi]||`Phase ${pi+1}`}. Leave blank to ${pi===0?'start at 1':'continue from the preceding phase'}. This changes X-axis labels only; underlying session identity, dates, data, and analyses do not change.`;
+      row.append(text,input);els.phaseNumberingList.appendChild(row);
+    });
+    if(els.phaseNumberingHint){const multi=state.parsed.graphs[gi]?.mode==='multiple-baseline';els.phaseNumberingHint.textContent=`Leave a phase blank to continue numbering from the preceding phase. Enter a positive whole number only when you want that phase to begin with a different displayed session number. This relabels the X axis only; underlying session identity, calendar chronology, data, and analyses remain unchanged.${multi?` In this multiple-baseline graph, phase numbering follows the first tier (${ser.label}) because the X axis is shared.`:''}`;}
+  }
+  function savePhaseNumberingControls(render=true){
+    if(!state.parsed||!els.phaseNumberingList)return;const gi=selectedControlGraph();if(gi<0)return;
+    const prior=state.graphSettings[gi]||normalizeGraphSetting(null,gi),inputs=[...els.phaseNumberingList.querySelectorAll('[data-phase-numbering-index]')],next=[...(prior.phaseStartNumbers||[])];
+    for(const input of inputs){const pi=Number(input.dataset.phaseNumberingIndex),raw=input.value.trim();if(!raw){next[pi]=null;continue;}const n=Number(raw);if(!Number.isInteger(n)||n<1){status('Displayed phase start numbers must be positive whole numbers.','error');input.focus();return false;}next[pi]=n;}
+    state.graphSettings[gi]=normalizeGraphSetting({...prior,phaseStartNumbers:next},gi);updatePhaseNumberingControls();if(render)renderGraph();return true;
   }
   function graphStyleSeriesIndexes(gi){
     const g=state.parsed?.graphs?.[gi];
@@ -1191,7 +1351,7 @@ title: Reading Fluency</div>
     if(!state.parsed||!state.graphSettings.length)return;
     const gi=selectedControlGraph(),cfg=state.graphSettings[gi]||normalizeGraphSetting(null,gi);
     els.graphLabelInput.value=cfg.label||'';els.xLabelInput.value=cfg.xLabel||'Session';els.yLabelInput.value=cfg.yLabel||'Score';els.phaseLabelInput.value=cfg.phaseLabels||graphPhaseNames(gi,state.parsed.graphs[gi].phaseCount).join(', ');els.yMinInput.value=cfg.yMin;els.yMaxInput.value=cfg.yMax;els.yTickInput.value=cfg.yTick??'';els.yAutoCheck.checked=!!cfg.autoScale;els.yAutoModeSelect.value=cfg.autoScaleMode||'single-nonnegative';els.knownMinInput.value=cfg.knownMin;els.knownMaxInput.value=cfg.knownMax;
-    updateScaleControlStates();updateLineStyleSeriesOptions();
+    updateScaleControlStates();updateLineStyleSeriesOptions();updatePhaseNumberingControls();
   }
   function saveSelectedGraphControls(render=true){
     if(!state.parsed)return;const gi=selectedControlGraph();if(gi<0)return;
@@ -1333,12 +1493,25 @@ title: Reading Fluency</div>
   }
 
   function svgEl(tag,attrs={},text=''){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag); Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v)); if(text!=='' ) e.textContent=text; return e; }
-  function drawMarker(svg,p,style,r,ghost=false){
-    const common={stroke:ghost?'#9ca3af':style.stroke,'stroke-width':2,fill:'#fff',opacity:ghost?.6:1}; let el;
+  function drawMarker(svg,p,style,r,ghost=false,tooltip=''){
+    const common={stroke:ghost?'#9ca3af':style.stroke,'stroke-width':2,fill:'#fff',opacity:ghost?.6:1};
+    if(tooltip){common['data-observation-point']='true';common['aria-label']=tooltip.replace(/\n/g,', ');common.tabindex='0';}
+    let el;
     if(style.marker==='square') el=svgEl('rect',{x:p.x-r,y:p.y-r,width:r*2,height:r*2,...common});
     else if(style.marker==='triangle') el=svgEl('polygon',{points:`${p.x},${p.y-r-1} ${p.x-r-1},${p.y+r} ${p.x+r+1},${p.y+r}`,...common});
     else if(style.marker==='diamond') el=svgEl('polygon',{points:`${p.x},${p.y-r-1} ${p.x-r-1},${p.y} ${p.x},${p.y+r+1} ${p.x+r+1},${p.y}`,...common});
-    else el=svgEl('circle',{cx:p.x,cy:p.y,r,...common}); svg.appendChild(el);
+    else el=svgEl('circle',{cx:p.x,cy:p.y,r,...common});
+    if(tooltip)el.appendChild(svgEl('title',{},tooltip));
+    svg.appendChild(el);
+  }
+  function observationTooltip(si,p,gi,timeline){
+    const ser=state.parsed?.series?.[si],shown=displayedSessionNumber(gi,p.session),lines=[`Series: ${ser?.label||`Series ${si+1}`}`];
+    lines.push(shown===p.session?`Session: ${shown}`:`Displayed session: ${shown} (underlying ${p.session})`);
+    const date=timeline?.mode==='calendar'?timeline.dateMap?.get?.(p.session)?.iso:'';if(date)lines.push(`Date: ${date}`);
+    lines.push(`Phase: ${phaseName(si,p.phaseIndex)}`);
+    lines.push(`Score: ${fmt(p.score,6)}`);
+    lines.push(`Status: ${state.ghosted.has(p.key)?'Ghosted':'Active'}`);
+    return lines.join('\n');
   }
   function niceTicks(min,max,count=10){ const span=max-min||1, raw=span/count, pow=Math.pow(10,Math.floor(Math.log10(raw))), n=raw/pow; const step=(n<1.5?1:n<3?2:n<7?5:10)*pow; const start=Math.ceil(min/step)*step; const out=[]; for(let v=start;v<=max+step*.001;v+=step) out.push(Number(v.toPrecision(12))); return out; }
   function graphTicks(min,max,interval){
@@ -1355,11 +1528,11 @@ title: Reading Fluency</div>
     return {ms,iso:`${m[1]}-${m[2]}-${m[3]}`,dow:dt.getUTCDay()};
   }
   function checkedCalendarWeekdays(){
-    return [...document.querySelectorAll('[data-calendar-weekday]:checked')].map(el=>Number(el.dataset.calendarWeekday)).filter(v=>Number.isInteger(v)&&v>=0&&v<=6);
+    return [...document.querySelectorAll('[data-calendar-weekday][aria-pressed="true"]')].map(el=>Number(el.dataset.calendarWeekday)).filter(v=>Number.isInteger(v)&&v>=0&&v<=6);
   }
   function setCheckedCalendarWeekdays(days){
     const selected=new Set((Array.isArray(days)?days:[]).map(Number));
-    document.querySelectorAll('[data-calendar-weekday]').forEach(el=>{el.checked=selected.has(Number(el.dataset.calendarWeekday));});
+    document.querySelectorAll('[data-calendar-weekday]').forEach(el=>{const on=selected.has(Number(el.dataset.calendarWeekday));el.setAttribute('aria-pressed',on?'true':'false');});
   }
   function legacyTimelineToSchedule(raw){
     if(typeof raw?.sessionDates!=='string'||!raw.sessionDates.trim())return {firstSessionDate:'',weekdays:[]};
@@ -1370,56 +1543,83 @@ title: Reading Fluency</div>
     const weekdays=[];rows.forEach(r=>{if(!weekdays.includes(r.dow))weekdays.push(r.dow);});
     return {firstSessionDate:first,weekdays:weekdayOrder.filter(d=>weekdays.includes(d))};
   }
-  function generateSessionDateMap(firstIso,weekdays,count){
+  function normalizeDateOverrides(raw){
+    const out={};
+    if(!raw||typeof raw!=='object')return out;
+    Object.entries(raw).forEach(([k,v])=>{const session=Number(k),d=parseIsoDate(v);if(Number.isInteger(session)&&session>=2&&d)out[String(session)]=d.iso;});
+    return out;
+  }
+  function generateSessionDateMap(firstIso,weekdays,count,dateOverrides={}){
     const first=parseIsoDate(firstIso);if(!first)throw new Error('Calendar timeline requires a valid first session date.');
     const selected=new Set((Array.isArray(weekdays)?weekdays:[]).map(Number).filter(v=>Number.isInteger(v)&&v>=0&&v<=6));
     if(count>1&&!selected.size)throw new Error('Calendar timeline requires at least one recurring session weekday.');
-    const map=new Map([[1,{ms:first.ms,iso:first.iso}]]);let cursor=first.ms,session=2;
+    const map=new Map([[1,{ms:first.ms,iso:first.iso,overridden:false}]]);let cursor=first.ms,session=2;
     while(session<=count){
       cursor+=DAY_MS;
-      if(selected.has(new Date(cursor).getUTCDay())){const dt=new Date(cursor);map.set(session,{ms:cursor,iso:`${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,'0')}-${String(dt.getUTCDate()).padStart(2,'0')}`});session++;}
+      if(selected.has(new Date(cursor).getUTCDay())){const dt=new Date(cursor);map.set(session,{ms:cursor,iso:`${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,'0')}-${String(dt.getUTCDate()).padStart(2,'0')}`,overridden:false});session++;}
+    }
+    const overrides=normalizeDateOverrides(dateOverrides);
+    Object.entries(overrides).forEach(([key,iso])=>{const ss=Number(key);if(ss>1&&ss<=count){const d=parseIsoDate(iso);if(d)map.set(ss,{ms:d.ms,iso:d.iso,overridden:true});}});
+    for(let ss=2;ss<=count;ss++){
+      const prev=map.get(ss-1),cur=map.get(ss);
+      if(!prev||!cur)continue;
+      if(cur.ms<=prev.ms)throw new Error(`Session ${ss} must occur after Session ${ss-1}. Change the edited date or the recurring session pattern.`);
     }
     return map;
   }
   function timelineSettingsFromUi(){
     const minChoice=els.minSessionsSelect?.value||'15';
-    return {mode:els.xScaleModeSelect?.value==='calendar'?'calendar':'sequential',minSessions:minChoice,customMinSessions:Math.max(1,Math.round(Number(els.customMinSessionsInput?.value)||15)),labelMode:['session','date','both'].includes(els.xAxisLabelModeSelect?.value)?els.xAxisLabelModeSelect.value:'session',firstSessionDate:els.firstSessionDateInput?.value||'',weekdays:checkedCalendarWeekdays()};
+    return {mode:els.xScaleModeSelect?.value==='calendar'?'calendar':'sequential',minSessions:minChoice,customMinSessions:Math.max(1,Math.round(Number(els.customMinSessionsInput?.value)||15)),labelMode:els.xScaleModeSelect?.value==='calendar'?'both':'session',firstSessionDate:els.firstSessionDateInput?.value||'',weekdays:checkedCalendarWeekdays(),dateOverrides:normalizeDateOverrides(state.timeline?.dateOverrides)};
   }
   function saveTimelineControls(){state.timeline=timelineSettingsFromUi();updateTimelineControlStates();}
   function loadTimelineControls(raw=state.timeline||{}){
     const legacy=legacyTimelineToSchedule(raw);
     const rawDays=Array.isArray(raw.weekdays)?raw.weekdays:legacy.weekdays;
-    const t={mode:raw.mode==='calendar'?'calendar':'sequential',minSessions:['auto','10','15','20','25','30','custom'].includes(String(raw.minSessions))?String(raw.minSessions):'15',customMinSessions:Math.max(1,Math.round(Number(raw.customMinSessions)||15)),labelMode:['session','date','both'].includes(raw.labelMode)?raw.labelMode:'session',firstSessionDate:typeof raw.firstSessionDate==='string'?raw.firstSessionDate:legacy.firstSessionDate,weekdays:weekdayOrder.filter(d=>rawDays.map(Number).includes(d))};
+    const t={mode:raw.mode==='calendar'?'calendar':'sequential',minSessions:['auto','10','15','20','25','30','custom'].includes(String(raw.minSessions))?String(raw.minSessions):'15',customMinSessions:Math.max(1,Math.round(Number(raw.customMinSessions)||15)),labelMode:raw.mode==='calendar'?'both':'session',firstSessionDate:typeof raw.firstSessionDate==='string'?raw.firstSessionDate:legacy.firstSessionDate,weekdays:weekdayOrder.filter(d=>rawDays.map(Number).includes(d)),dateOverrides:normalizeDateOverrides(raw.dateOverrides)};
     state.timeline=t;
     if(els.xScaleModeSelect)els.xScaleModeSelect.value=t.mode;if(els.minSessionsSelect)els.minSessionsSelect.value=t.minSessions;if(els.customMinSessionsInput)els.customMinSessionsInput.value=t.customMinSessions;if(els.xAxisLabelModeSelect)els.xAxisLabelModeSelect.value=t.labelMode;if(els.firstSessionDateInput)els.firstSessionDateInput.value=t.firstSessionDate;setCheckedCalendarWeekdays(t.weekdays);updateTimelineControlStates();
   }
   function updateTimelineControlStates(){
     const t=timelineSettingsFromUi(),cal=t.mode==='calendar';
+    if(els.minSessionsField)els.minSessionsField.style.display=cal?'none':'';
     if(els.customMinSessionsField)els.customMinSessionsField.style.display=(!cal&&t.minSessions==='custom')?'':'none';
     if(els.minSessionsSelect)els.minSessionsSelect.disabled=cal;if(els.customMinSessionsInput)els.customMinSessionsInput.disabled=cal;
     if(els.calendarScheduleField)els.calendarScheduleField.style.display=cal?'':'none';
     if(els.firstSessionDateInput)els.firstSessionDateInput.disabled=!cal;
     document.querySelectorAll('[data-calendar-weekday]').forEach(el=>{el.disabled=!cal;});
     if(els.calendarWeekdayChecks)els.calendarWeekdayChecks.classList.toggle('disabled',!cal);
-    if(els.xAxisLabelModeSelect){if(!cal&&els.xAxisLabelModeSelect.value!=='session')els.xAxisLabelModeSelect.value='session';els.xAxisLabelModeSelect.disabled=!cal;}
+    if(els.xAxisLabelModeField)els.xAxisLabelModeField.style.display='none';
+    if(els.xAxisLabelModeSelect){els.xAxisLabelModeSelect.value=cal?'both':'session';els.xAxisLabelModeSelect.disabled=true;}
     if(els.timelinePreview){
       if(!cal){els.timelinePreview.textContent=`Sequential sessions · minimum span ${t.minSessions==='auto'?'Auto':t.minSessions==='custom'?t.customMinSessions:t.minSessions}.`;}
       else if(!parseIsoDate(t.firstSessionDate)){els.timelinePreview.textContent='Calendar time · enter the first session date, then choose the recurring session days.';}
       else{
         const dayText=t.weekdays.length?t.weekdays.map(d=>weekdayNames[d]).join(', '):'no recurring days selected';
         const n=Math.max(1,state.parsed?.maxSessions||1);
-        try{const map=generateSessionDateMap(t.firstSessionDate,t.weekdays,n),sample=[];for(let i=1;i<=Math.min(n,4);i++)sample.push(`S${i} ${shortDate(map.get(i)?.iso||'')}`);els.timelinePreview.textContent=`Calendar time · ${dayText} · ${sample.join(' · ')}${n>4?' …':''}`;}
-        catch(e){els.timelinePreview.textContent=`Calendar time · ${dayText}.`;}
+        try{const map=generateSessionDateMap(t.firstSessionDate,t.weekdays,n,t.dateOverrides),sample=[];for(let i=1;i<=Math.min(n,4);i++)sample.push(`S${i} ${shortDate(map.get(i)?.iso||'')}`);const edited=Object.keys(t.dateOverrides).length;els.timelinePreview.textContent=`Calendar time · ${dayText} · ${sample.join(' · ')}${n>4?' …':''}${edited?` · ${edited} edited date${edited===1?'':'s'}`:''}`;}
+        catch(e){els.timelinePreview.textContent=`Calendar time · ${dayText} · ${e.message}`;}
       }
     }
   }
+  function calendarDateLabelAngle(dateMap,count,x){
+    if(count<=1)return 0;
+    let minGap=Infinity;
+    for(let ss=1;ss<count;ss++){const gap=Math.abs(x(ss+1)-x(ss));if(Number.isFinite(gap))minGap=Math.min(minGap,gap);}
+    if(minGap>=50)return 0;
+    if(minGap>=40)return 20;
+    if(minGap>=32)return 35;
+    if(minGap>=25)return 50;
+    if(minGap>=18)return 65;
+    return 90;
+  }
+  function calendarAxisBand(angle){return angle<=0?70:angle<=20?76:angle<=35?82:angle<=50?90:angle<=65?98:108;}
   function timelineGeometry(){
     const t=timelineSettingsFromUi(),actualMax=Math.max(1,state.parsed?.maxSessions||1),left=96,right=38,W=1000,innerW=W-left-right;
     if(t.mode!=='calendar'){
       const requested=t.minSessions==='auto'?actualMax:(t.minSessions==='custom'?t.customMinSessions:Number(t.minSessions)||15),xmax=Math.max(actualMax,requested);
-      return {mode:'sequential',xmax,labelMode:'session',x:s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,dateMap:new Map()};
+      return {mode:'sequential',xmax,labelMode:'session',x:s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,dateMap:new Map(),dateAngle:0};
     }
-    const dateMap=generateSessionDateMap(t.firstSessionDate,t.weekdays,actualMax);
+    const dateMap=generateSessionDateMap(t.firstSessionDate,t.weekdays,actualMax,t.dateOverrides);
     const first=dateMap.get(1).ms,last=dateMap.get(actualMax).ms,span=Math.max(DAY_MS,last-first);
     const sessionMs=s=>{
       if(Number.isInteger(s)&&dateMap.has(s))return dateMap.get(s).ms;
@@ -1428,15 +1628,17 @@ title: Reading Fluency</div>
       if(s<1){const step=actualMax>1?dateMap.get(2).ms-first:DAY_MS;return first+(s-1)*step;}
       const step=actualMax>1?last-dateMap.get(actualMax-1).ms:DAY_MS;return last+(s-actualMax)*step;
     };
-    return {mode:'calendar',xmax:actualMax,labelMode:t.labelMode,dateMap,x:s=>left+((sessionMs(s)-first)/span)*innerW};
+    const x=s=>left+((sessionMs(s)-first)/span)*innerW;
+    const dateAngle=calendarDateLabelAngle(dateMap,actualMax,x);
+    return {mode:'calendar',xmax:actualMax,labelMode:'both',dateMap,x,dateAngle};
   }
   function shortDate(iso){const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${Number(m[2])}/${Number(m[3])}`:iso;}
   function graphMetrics(){
-    const W=1000,left=96,right=38,plotH=220,tierGap=34,groupGap=42,titleBand=58,xBand=58,phaseBand=55;
+    const W=1000,left=96,right=38,plotH=220,tierGap=34,groupGap=42,titleBand=58,phaseBand=55;
     let cursor=titleBand;const groups=[];
     state.parsed.graphs.forEach((group,gi)=>{
       const cfg=graphScale(gi),ymin=cfg.yMin,ymax=cfg.yMax,ticks=graphTicks(ymin,ymax,cfg.yTick),tierLayouts=[],groupTop=cursor;
-      const timeline=timelineGeometry();group.tiers.forEach((tier,ti)=>{const top=cursor+phaseBand,innerW=W-left-right,innerH=plotH,xmax=timeline.xmax;const x=timeline.x,y=v=>top+innerH-((v-ymin)/(ymax-ymin))*innerH;tierLayouts.push({tier,top,innerW,innerH,xmax,x,y,ymin,ymax,ticks,cfg,timeline,m:{left,right,top,bottom:0},W});cursor=top+plotH+(ti<group.tiers.length-1?tierGap:0);});
+      const timeline=timelineGeometry(),xBand=timeline.mode==='calendar'?calendarAxisBand(timeline.dateAngle):58;group.tiers.forEach((tier,ti)=>{const top=cursor+phaseBand,innerW=W-left-right,innerH=plotH,xmax=timeline.xmax;const x=timeline.x,y=v=>top+innerH-((v-ymin)/(ymax-ymin))*innerH;tierLayouts.push({tier,top,innerW,innerH,xmax,x,y,ymin,ymax,ticks,cfg,timeline,m:{left,right,top,bottom:0},W});cursor=top+plotH+(ti<group.tiers.length-1?tierGap:0);});
       const first=tierLayouts[0],last=tierLayouts[tierLayouts.length-1],xAxisY=last.top+last.innerH;cursor=xAxisY+xBand;groups.push({group,groupTop,tierLayouts,xAxisY,x:first.x,xmax:first.xmax,innerW:first.innerW,bottom:cursor,cfg,ymin,ymax,ticks,timeline:first.timeline});if(gi<state.parsed.graphs.length-1)cursor+=groupGap;
     });
     return {W,H:cursor+18,left,right,groups};
@@ -1463,7 +1665,7 @@ title: Reading Fluency</div>
         tierOverlays.filter(o=>o.type!=='tauPointViz').forEach(o=>drawOverlay(svg,tg,o));
         tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyleFor(gi,si),lw=Number(els.lineWidthInput.value)||2,r=Number(els.markerSizeInput.value)||5;
           if(st.showLine!==false)ser.phases.forEach(ph=>{const pts=ser.points.filter(p=>p.phaseIndex===ph.phaseIndex&&!state.ghosted.has(p.key));for(let i=0;i<pts.length-1;i++)if(pts[i+1].session===pts[i].session+1)svg.appendChild(svgEl('line',{x1:tg.x(pts[i].session),y1:tg.y(pts[i].score),x2:tg.x(pts[i+1].session),y2:tg.y(pts[i+1].score),stroke:st.stroke,'stroke-width':lw,fill:'none',...(st.dashArray?{'stroke-dasharray':st.dashArray}:{})}));});
-          ser.points.forEach(p=>{const ghost=state.ghosted.has(p.key);if(ghost&&!els.showGhostCheck.checked)return;drawMarker(svg,{x:tg.x(p.session),y:tg.y(p.score)},st,r,ghost);});
+          ser.points.forEach(p=>{const ghost=state.ghosted.has(p.key);if(ghost&&!els.showGhostCheck.checked)return;drawMarker(svg,{x:tg.x(p.session),y:tg.y(p.score)},st,r,ghost,observationTooltip(si,p,gi,tg.timeline));});
         });
         // Tau-U is deliberately drawn last so its teaching visualization can never
         // be hidden underneath the ordinary observation markers.
@@ -1472,25 +1674,76 @@ title: Reading Fluency</div>
       });
       if(group.tiers.length>1) drawMultipleBaselinePhaseConnectors(svg,gl);
       const last=gl.tierLayouts[gl.tierLayouts.length-1];
-      const xStep=gl.timeline?.mode==='calendar'?Math.max(1,Math.ceil(gl.xmax/10)):(gl.xmax<=20?1:gl.xmax<=40?2:5);
+      const isCalendar=gl.timeline?.mode==='calendar';
+      const xStep=isCalendar?1:(gl.xmax<=20?1:gl.xmax<=40?2:5);
       // Every multiple-baseline tier gets its own horizontal axis and tick marks.
-      // Labels are printed only on the final (bottom) tier and are reduced automatically.
+      // In calendar mode, every observation keeps a two-row label: session above date.
+      // The date row rotates clockwise as the actual elapsed-time spacing becomes tighter.
       gl.tierLayouts.forEach((tg,ti)=>{
         const axisY=tg.top+tg.innerH;
         const isLast=ti===gl.tierLayouts.length-1;
         svg.appendChild(svgEl('line',{x1:layout.left,y1:axisY,x2:layout.left+tg.innerW,y2:axisY,stroke:'#111827','stroke-width':1.5}));
-        for(let ss=1;ss<=gl.xmax;ss+=xStep){
+        const tickSet=new Set();for(let ss=1;ss<=gl.xmax;ss+=xStep)tickSet.add(ss);tickSet.add(gl.xmax);
+        const numberingRef=graphNumberingReferenceSeries(gi);numberingRef?.phases?.forEach(ph=>tickSet.add(ph.startSession));
+        [...tickSet].filter(ss=>ss>=1&&ss<=gl.xmax).sort((a,b)=>a-b).forEach(ss=>{
           svg.appendChild(svgEl('line',{x1:tg.x(ss),y1:axisY,x2:tg.x(ss),y2:axisY+6,stroke:'#111827'}));
-          if(isLast){let lab=String(ss);if(gl.timeline?.mode==='calendar'){const iso=gl.timeline.dateMap.get(ss)?.iso||'';lab=gl.timeline.labelMode==='date'?shortDate(iso):gl.timeline.labelMode==='both'?`S${ss} ${shortDate(iso)}`:String(ss);}svg.appendChild(svgEl('text',{x:tg.x(ss),y:axisY+23,'text-anchor':'middle','font-size':gl.timeline?.mode==='calendar'?10.5:12,fill:'#111827'},lab));}
-        }
-        if(isLast&&gl.xmax>1&&(gl.xmax-1)%xStep!==0){const ss=gl.xmax;svg.appendChild(svgEl('line',{x1:tg.x(ss),y1:axisY,x2:tg.x(ss),y2:axisY+6,stroke:'#111827'}));if(gl.timeline?.mode==='calendar'){const iso=gl.timeline.dateMap.get(ss)?.iso||'',lab=gl.timeline.labelMode==='date'?shortDate(iso):gl.timeline.labelMode==='both'?`S${ss} ${shortDate(iso)}`:String(ss);svg.appendChild(svgEl('text',{x:tg.x(ss),y:axisY+23,'text-anchor':'middle','font-size':10.5,fill:'#111827'},lab));}}
+          if(!isLast)return;const shown=displayedSessionNumber(gi,ss);
+          if(isCalendar){
+            const item=gl.timeline.dateMap.get(ss),iso=item?.iso||'',x=tg.x(ss),angle=gl.timeline.dateAngle||0;
+            svg.appendChild(svgEl('text',{x,y:axisY+20,'text-anchor':'middle','font-size':10.5,'font-weight':600,fill:'#111827'},String(shown)));
+            const sessionDescription=shown===ss?`Session ${ss}`:`Displayed session ${shown} (underlying session ${ss})`;
+            const attrs={x,y:axisY+36,'text-anchor':angle?'start':'middle','font-size':10.5,fill:item?.overridden?'#1f4e79':'#111827','data-calendar-date-session':ss,'data-calendar-date-iso':iso,'data-calendar-date-graph':gi,'aria-label':`${sessionDescription}, ${iso}. Click to change date.`,role:'button',tabindex:'0'};
+            if(angle)attrs.transform=`rotate(${angle} ${x} ${axisY+36})`;
+            const dateEl=svgEl('text',attrs,shortDate(iso));dateEl.appendChild(svgEl('title',{},`${sessionDescription}: ${iso}. Click to change this observation's date.`));svg.appendChild(dateEl);
+          }else{
+            const attrs={x:tg.x(ss),y:axisY+23,'text-anchor':'middle','font-size':12,fill:'#111827'};if(shown!==ss)attrs['aria-label']=`Displayed session ${shown}; underlying session ${ss}`;
+            svg.appendChild(svgEl('text',attrs,String(shown)));
+          }
+        });
       });
-      svg.appendChild(svgEl('text',{x:layout.left+last.innerW/2,y:gl.xAxisY+47,'text-anchor':'middle','font-size':14,'font-weight':600,'data-direct-edit':'x-axis','data-graph-index':gi,'aria-label':`Double-click to edit Graph ${gi+1} X-axis label`},cfg.xLabel||'Session'));
+      svg.appendChild(svgEl('text',{x:layout.left+last.innerW/2,y:gl.bottom-9,'text-anchor':'middle','font-size':14,'font-weight':600,'data-direct-edit':'x-axis','data-graph-index':gi,'aria-label':`Double-click to edit Graph ${gi+1} X-axis label`},cfg.xLabel||'Session'));
       const yCenter=(gl.tierLayouts[0].top+gl.tierLayouts[gl.tierLayouts.length-1].top+gl.tierLayouts[gl.tierLayouts.length-1].innerH)/2;svg.appendChild(svgEl('text',{x:22,y:yCenter,'text-anchor':'middle','font-size':14,'font-weight':600,transform:`rotate(-90 22 ${yCenter})`,'data-direct-edit':'y-axis','data-graph-index':gi,'aria-label':`Double-click to edit Graph ${gi+1} Y-axis label`},cfg.yLabel||'Score'));
       if(gi<layout.groups.length-1)svg.appendChild(svgEl('line',{x1:layout.left,y1:gl.bottom+18,x2:layout.W-layout.right,y2:gl.bottom+18,stroke:'#d1d5db','stroke-width':1}));
     });
-    els.graphWrap.innerHTML='';els.graphWrap.appendChild(svg);updatePills();updateScalePreview();return true;
+    els.graphWrap.innerHTML='';els.graphWrap.appendChild(svg);updatePills();updateScalePreview();if(els.graphDataTableDrawer?.classList.contains('open'))renderGraphDataTable();return true;
   }
+  function startCalendarDateEdit(target){
+    if(!target||!state.parsed||timelineSettingsFromUi().mode!=='calendar')return;
+    const session=Number(target.dataset.calendarDateSession),currentIso=target.dataset.calendarDateIso||'';
+    if(!Number.isInteger(session)||session<1||!parseIsoDate(currentIso))return;
+    const wrap=els.graphWrap,wr=wrap.getBoundingClientRect(),tr=target.getBoundingClientRect();
+    wrap.querySelector('.calendar-date-editor')?.remove();
+    const input=document.createElement('input');input.type='date';input.className='graph-inline-editor calendar-date-editor';const gi=Number(target.dataset.calendarDateGraph);const shown=Number.isInteger(gi)?displayedSessionNumber(gi,session):session;input.setAttribute('aria-label',`Change date for displayed session ${shown}${shown!==session?` (underlying session ${session})`:''}`);input.title='Choose a new calendar date for this observation. This changes its plotted calendar position but not its underlying session identity or displayed phase-numbering rule.';input.value=currentIso;
+    input.style.left=`${Math.max(4,tr.left-wr.left+wrap.scrollLeft-6)}px`;input.style.top=`${Math.max(4,tr.top-wr.top+wrap.scrollTop-3)}px`;
+    wrap.appendChild(input);input.focus();try{input.showPicker?.();}catch{}
+    let finished=false;
+    const finish=(commit=true)=>{
+      if(finished)return;finished=true;const iso=input.value;input.remove();
+      if(!commit||!parseIsoDate(iso)){renderGraph();return;}
+      const prior=JSON.parse(JSON.stringify(state.timeline?.dateOverrides||{}));
+      try{
+        if(session===1){
+          if(els.firstSessionDateInput)els.firstSessionDateInput.value=iso;
+          state.timeline.dateOverrides={};
+          saveTimelineControls();
+          status(`Session 1 date changed to ${shortDate(iso)}; recurring dates were regenerated from the new start date.`,'ok');
+        }else{
+          const overrides=normalizeDateOverrides(state.timeline?.dateOverrides),t0=timelineSettingsFromUi(),count=Math.max(1,state.parsed.maxSessions||1);
+          const baseMap=generateSessionDateMap(t0.firstSessionDate,t0.weekdays,count,{});
+          if(baseMap.get(session)?.iso===iso)delete overrides[String(session)];else overrides[String(session)]=iso;
+          state.timeline.dateOverrides=overrides;
+          const t=timelineSettingsFromUi();generateSessionDateMap(t.firstSessionDate,t.weekdays,count,overrides);
+          saveTimelineControls();
+          status(`Session ${session} date changed to ${shortDate(iso)}${overrides[String(session)]?' as a one-session exception':' (recurring schedule restored)'}.`,'ok');
+        }
+        renderGraph();
+      }catch(e){state.timeline.dateOverrides=prior;renderGraph();status(e.message,'error');}
+    };
+    input.addEventListener('change',()=>finish(true),{once:true});
+    input.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();finish(false);}else if(e.key==='Enter'){e.preventDefault();finish(true);}});
+    input.addEventListener('blur',()=>setTimeout(()=>finish(true),0),{once:true});
+  }
+
   function startDirectGraphLabelEdit(target){
     if(!target||!state.parsed)return;
     const type=target.dataset.directEdit;
@@ -2031,14 +2284,54 @@ title: Reading Fluency</div>
     }
     return `<figure class="report-figure">${clone.outerHTML}<figcaption>Figure. ${escapeHtml(caption)}.</figcaption></figure><p><br></p>`;
   }
+  function dataTableRows(graphChoice='0',seriesChoice='all',phaseChoice='all'){
+    if(!state.parsed)return [];
+    const gi=Number(graphChoice||0),g=state.parsed.graphs[gi];if(!g)return [];
+    const selectedSeries=seriesChoice==='all'?g.seriesIndexes:[Number(seriesChoice)];
+    let dateMap=new Map();if(timelineSettingsFromUi().mode==='calendar'){try{dateMap=timelineGeometry().dateMap;}catch{dateMap=new Map();}}
+    const phaseFilter=phaseChoice==='all'?null:Number(phaseChoice);
+    const rows=[];selectedSeries.forEach(si=>{const ser=state.parsed.series[si];if(!ser)return;ser.points.forEach(p=>{if(Number.isInteger(phaseFilter)&&p.phaseIndex!==phaseFilter)return;rows.push({series:ser.label,seriesIndex:si,underlyingSession:p.session,displayedSession:displayedSessionNumber(gi,p.session),date:dateMap.get(p.session)?.iso||'',phase:phaseName(si,p.phaseIndex),phaseIndex:p.phaseIndex,score:p.score,status:state.ghosted.has(p.key)?'Ghosted':'Active'});});});
+    return rows;
+  }
+  function dataTableHtml(graphChoice='0',seriesChoice='all',phaseChoice='all',className='graph-data-table'){
+    const rows=dataTableRows(graphChoice,seriesChoice,phaseChoice);if(!rows.length)return '';
+    const showDate=rows.some(r=>r.date),showUnderlying=rows.some(r=>r.displayedSession!==r.underlyingSession);
+    const head=['Series','Session',...(showUnderlying?['Underlying']:[]),...(showDate?['Date']:[]),'Phase','Score','Status'];
+    const body=rows.map(r=>`<tr><td>${escapeHtml(r.series)}</td><td class="num">${r.displayedSession}</td>${showUnderlying?`<td class="num">${r.underlyingSession}</td>`:''}${showDate?`<td>${escapeHtml(r.date)}</td>`:''}<td>${escapeHtml(r.phase)}</td><td class="num">${escapeHtml(fmt(r.score,6))}</td><td>${r.status}</td></tr>`).join('');
+    return `<table class="${className}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>`;
+  }
+  function updateGraphDataTableSelectors(){
+    if(!els.graphTableGraphSelect||!state.parsed)return;
+    const priorGraph=els.graphTableGraphSelect.value,priorSeries=els.graphTableSeriesSelect.value,priorPhase=els.graphTablePhaseSelect.value;
+    els.graphTableGraphSelect.innerHTML='';state.parsed.graphs.forEach((g,gi)=>{const o=document.createElement('option');o.value=String(gi);o.textContent=`Graph ${gi+1} — ${state.graphSettings[gi]?.label||`Graph ${gi+1}`}`;els.graphTableGraphSelect.appendChild(o);});
+    els.graphTableGraphSelect.value=[...els.graphTableGraphSelect.options].some(o=>o.value===priorGraph)?priorGraph:'0';
+    updateGraphDataTableSeriesOptions(priorSeries,priorPhase);
+  }
+  function updateGraphDataTableSeriesOptions(preserveSeries='',preservePhase='all'){
+    if(!state.parsed||!els.graphTableSeriesSelect)return;const gi=Number(els.graphTableGraphSelect.value||0),g=state.parsed.graphs[gi];
+    els.graphTableSeriesSelect.innerHTML='<option value="all">All series in graph</option>';
+    g?.seriesIndexes?.forEach(si=>{const o=document.createElement('option');o.value=String(si);o.textContent=state.parsed.series[si].label;els.graphTableSeriesSelect.appendChild(o);});
+    els.graphTableSeriesSelect.value=[...els.graphTableSeriesSelect.options].some(o=>o.value===String(preserveSeries))?String(preserveSeries):'all';
+    updateGraphDataTablePhaseOptions(preservePhase);
+  }
+  function updateGraphDataTablePhaseOptions(preserve='all'){
+    if(!state.parsed||!els.graphTablePhaseSelect)return;const gi=Number(els.graphTableGraphSelect.value||0),g=state.parsed.graphs[gi],seriesChoice=els.graphTableSeriesSelect.value;
+    const sis=seriesChoice==='all'?(g?.seriesIndexes||[]):[Number(seriesChoice)];let maxPhases=0;sis.forEach(si=>{maxPhases=Math.max(maxPhases,state.parsed.series[si]?.phases?.length||0);});
+    els.graphTablePhaseSelect.innerHTML='<option value="all">All phases</option>';const names=graphPhaseNames(gi,maxPhases);for(let pi=0;pi<maxPhases;pi++){const o=document.createElement('option');o.value=String(pi);o.textContent=`${pi+1}. ${names[pi]||`Phase ${pi+1}`}`;els.graphTablePhaseSelect.appendChild(o);}
+    els.graphTablePhaseSelect.value=[...els.graphTablePhaseSelect.options].some(o=>o.value===String(preserve))?String(preserve):'all';renderGraphDataTable();
+  }
+  function renderGraphDataTable(){
+    if(!els.graphDataTableWrap)return;if(!state.parsed){els.graphDataTableWrap.innerHTML='<div class="graph-data-table-empty">Load data to view a table.</div>';return;}
+    const html=dataTableHtml(els.graphTableGraphSelect.value,els.graphTableSeriesSelect.value,els.graphTablePhaseSelect.value);els.graphDataTableWrap.innerHTML=html||'<div class="graph-data-table-empty">No observations match the current table selection.</div>';
+  }
+  function insertGraphTableIntoReport(){
+    const html=dataTableHtml(els.graphTableGraphSelect.value,els.graphTableSeriesSelect.value,els.graphTablePhaseSelect.value,'');if(!html)throw new Error('No observations match the current table selection.');insertReportHtml(`${html}<p><br></p>`);
+  }
   function reportDataTableHtml(graphChoice=els.reportTableGraphSelect.value,seriesChoice=els.reportTableSeriesSelect.value){
     if(!state.parsed)throw new Error('Load valid data before inserting a data table.');
     const gi=Number(graphChoice||0),g=state.parsed.graphs[gi];if(!g)throw new Error('Choose a graph for the data table.');
-    const seriesIndexes=seriesChoice==='all'?g.seriesIndexes:[Number(seriesChoice)];
-    const rows=[];seriesIndexes.forEach(si=>{const ser=state.parsed.series[si];if(!ser)return;ser.points.forEach(p=>rows.push({series:ser.label,session:p.session,phase:phaseName(si,p.phaseIndex),score:p.score,status:p.ghosted?'Ghosted':'Active'}));});
-    if(!rows.length)throw new Error('No data are available for that table.');
-    const body=rows.map(r=>`<tr><td>${escapeHtml(r.series)}</td><td>${r.session}</td><td>${escapeHtml(r.phase)}</td><td>${escapeHtml(fmt(r.score,6))}</td><td>${r.status}</td></tr>`).join('');
-    return `<table><thead><tr><th>Series</th><th>Session</th><th>Phase</th><th>Score</th><th>Status</th></tr></thead><tbody>${body}</tbody></table><p><br></p>`;
+    const html=dataTableHtml(String(gi),seriesChoice,'all','');if(!html)throw new Error('No data are available for that table.');
+    return `${html}<p><br></p>`;
   }
   function reportAnalysisResultsHtml(){
     if(!state.results.length)throw new Error('Run an analysis before inserting analysis results.');
@@ -2096,7 +2389,7 @@ title: Reading Fluency</div>
   function popupStyles(){return `
     *{box-sizing:border-box}html,body{margin:0;background:#edf1f4;color:#111827;font-family:Arial,Helvetica,sans-serif;height:100%}body{display:flex;flex-direction:column}
     header{height:48px;background:#fff;border-bottom:1px solid #d7dde5;display:flex;align-items:center;justify-content:space-between;padding:0 12px;flex:0 0 auto}header strong{font-size:15px}.tools{background:#fff;border-bottom:1px solid #d7dde5;padding:8px 10px;display:flex;flex-direction:column;gap:6px;flex:0 0 auto}.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.group{display:flex;gap:5px;align-items:center;padding-right:8px;border-right:1px solid #dfe4ea;flex-wrap:wrap}.group:last-child{border-right:0}button,select{font:inherit;border:1px solid #b9c4d1;background:#fff;color:#111827;padding:6px 8px;border-radius:7px;cursor:pointer;font-weight:600}button.primary{background:#1f4e79;color:white;border-color:#1f4e79}select{min-width:110px}.wide{min-width:170px;max-width:270px}.status{font-size:11px;color:#667085;margin-left:auto}.paper-wrap{padding:18px;overflow:auto;flex:1 1 auto;display:flex;justify-content:center}.editor{width:min(8.5in,100%);min-height:10in;background:#fff;border:1px solid #cfd6de;box-shadow:0 5px 18px rgba(15,23,42,.10);padding:.68in .72in;line-height:1.48;font-size:12pt;outline:none}.editor h1{font-size:20pt;margin:0 0 14px}.editor h2{font-size:15pt;margin:18px 0 8px}.editor p{margin:0 0 9px}.editor ul,.editor ol{margin:4px 0 10px 24px}.editor img,.editor svg{max-width:100%;height:auto}.editor table{width:100%;border-collapse:collapse;margin:12px 0 16px;font-size:10.5pt}.editor th,.editor td{border:1px solid #aeb7c2;padding:5px 6px;text-align:left;vertical-align:top}.editor th{background:#f1f4f6}.previewing .edit-tools{display:none}`;}
-  function popupMarkup(){return `<!doctype html><html><head><meta charset="utf-8"><title>SCGraph2 Report</title><style>${popupStyles()}</style></head><body><header><strong>SCGraph2 Report</strong><div><span id="popupReportStatus" class="status"></span> <button id="popupCloseBtn">Close</button></div></header><div class="tools"><div class="row edit-tools"><div class="group"><select id="popupFormatSelect"><option value="p">Normal</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option></select><button data-popup-command="bold"><strong>B</strong></button><button data-popup-command="italic"><em>I</em></button><button data-popup-command="insertUnorderedList">• List</button><button data-popup-command="insertOrderedList">1. List</button><button data-popup-command="undo">↶</button><button data-popup-command="redo">↷</button></div><div class="group"><button id="popupTemplateBtn">Insert Template</button><button id="popupNotesBtn">Insert Notes</button><button id="popupDividerBtn">Divider</button></div></div><div class="row edit-tools"><div class="group"><select id="popupGraphSelect" class="wide"></select><button id="popupGraphBtn">Insert Graph</button></div><div class="group"><select id="popupTableGraphSelect" class="wide"></select><select id="popupTableSeriesSelect" class="wide"></select><button id="popupTableBtn">Insert Data Table</button></div><div class="group"><button id="popupResultsBtn">Insert Analysis Results</button></div></div><div class="row"><button id="popupPreviewBtn">Preview</button><button id="popupPdfBtn" class="primary">Save as PDF</button><span class="status">Autosaved locally</span></div></div><div class="paper-wrap"><article id="popupReportEditor" class="editor" contenteditable="true" spellcheck="true"></article></div></body></html>`;}
+  function popupMarkup(){return `<!doctype html><html><head><meta charset="utf-8"><title>SCGraph2 Report</title><style>${popupStyles()}</style></head><body><header><strong>SCGraph2 Report</strong><div><span id="popupReportStatus" class="status"></span> <button id="popupCloseBtn">Close</button></div></header><div class="tools"><div class="row edit-tools"><div class="group"><select id="popupFormatSelect"><option value="p">Normal</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option></select><button data-popup-command="bold"><strong>B</strong></button><button data-popup-command="italic"><em>I</em></button><button data-popup-command="insertUnorderedList">• List</button><button data-popup-command="insertOrderedList">1. List</button><button data-popup-command="undo">↶</button><button data-popup-command="redo">↷</button></div><div class="group"><button id="popupTemplateBtn">Insert Template</button><button id="popupDividerBtn">Divider</button></div></div><div class="row edit-tools"><div class="group"><select id="popupGraphSelect" class="wide"></select><button id="popupGraphBtn">Insert Graph</button></div><div class="group"><select id="popupTableGraphSelect" class="wide"></select><select id="popupTableSeriesSelect" class="wide"></select><button id="popupTableBtn">Insert Data Table</button></div><div class="group"><button id="popupResultsBtn">Insert Analysis Results</button></div></div><div class="row"><button id="popupPreviewBtn">Preview</button><button id="popupPdfBtn" class="primary">Save as PDF</button><span class="status">Autosaved locally</span></div></div><div class="paper-wrap"><article id="popupReportEditor" class="editor" contenteditable="true" spellcheck="true"></article></div></body></html>`;}
   function populatePopupTableSeries(gi,select,preferred='all'){
     if(!select||!state.parsed)return;const g=state.parsed.graphs[Number(gi)||0];select.innerHTML='<option value="all">All series in graph</option>';if(g)g.seriesIndexes.forEach(si=>{const o=reportPopup.document.createElement('option');o.value=String(si);o.textContent=state.parsed.series[si].label;select.appendChild(o);});select.value=[...select.options].some(o=>o.value===preferred)?preferred:'all';
   }
@@ -2110,7 +2403,6 @@ title: Reading Fluency</div>
     d.getElementById('popupFormatSelect').addEventListener('change',ev=>executeReportCommand('formatBlock',ev.target.value,e));
     ['keyup','mouseup','focus'].forEach(ev=>e.addEventListener(ev,()=>{lastReportEditor=e;saveReportSelection(e);}));e.addEventListener('input',()=>{lastReportEditor=e;saveReportSelection(e);syncReportEditors(e);});e.addEventListener('paste',ev=>handleReportPaste(ev,e));
     d.getElementById('popupTemplateBtn').addEventListener('click',()=>insertReportHtml(reportTemplateHtml(),e));
-    d.getElementById('popupNotesBtn').addEventListener('click',()=>{const n=els.notesInput.value.trim();if(!n){status('There are no Notes / context to insert.','error');return;}insertReportHtml(`<h2>Notes / Context</h2><p>${escapeHtml(n).replace(/\n/g,'<br>')}</p>`,e);});
     d.getElementById('popupDividerBtn').addEventListener('click',()=>insertReportHtml('<hr><p><br></p>',e));
     d.getElementById('popupGraphBtn').addEventListener('click',()=>{try{insertReportHtml(reportGraphSnapshotHtml(d.getElementById('popupGraphSelect').value),e);status('Graph snapshot inserted into the report.','ok');}catch(err){status(err.message,'error');}});
     d.getElementById('popupTableGraphSelect').addEventListener('change',ev=>populatePopupTableSeries(ev.target.value,d.getElementById('popupTableSeriesSelect'),'all'));
@@ -2461,31 +2753,31 @@ title: Reading Fluency</div>
       state.parsed=parseData(els.dataInput.value);
       if(typeof state.parsed.cleanedSource==='string'&&state.parsed.cleanedSource!==els.dataInput.value)els.dataInput.value=state.parsed.cleanedSource;
       state.sourceText=els.dataInput.value;state.direction=els.directionSelect.value;state.ghosted=new Set(state.parsed.ghostedKeys||[]);syncGraphSettingsAfterParse(priorGraphSettings);state.goalLines=normalizeGoalLinesAfterParse(priorGoalLines);state.overlays=[];state.results=[];renderResults();
-      updateGraphEditOptions(Math.min(priorControlGraph,state.parsed.graphs.length-1));updateAnalysisGraphOptions(Math.min(priorAnalysisGraph,state.parsed.graphs.length-1));updateAnalysisSeriesOptions(priorSeriesLabel,selectedAnalysisGraph());updateGoalControls(priorGoalSeriesLabel);updateReportSelectors();
-      renderGraph();
-      const notes=[];
-      if(state.parsed.inlineLabelCount)notes.push(`${state.parsed.inlineLabelCount} inline phase label${state.parsed.inlineLabelCount===1?'':'s'} parsed`);
-      if(state.parsed.removedGoalCount)notes.push(`${state.parsed.removedGoalCount} legacy goal directive${state.parsed.removedGoalCount===1?'':'s'} removed`);
-      if(state.parsed.inferredPhaseLayoutCount)notes.push(`phase boundaries inferred for ${state.parsed.inferredPhaseLayoutCount} companion series`);
-      if(state.parsed.autoSplitCount)notes.push(`incompatible phase lengths separated into ${state.parsed.graphs.length} graphs`);
-      status(notes.length?`Data loaded: ${notes.join('; ')}.`:'Data loaded. Would you like to adjust the graph, perform an analysis, or add material to the report?','ok');
+      updateGraphEditOptions(Math.min(priorControlGraph,state.parsed.graphs.length-1));updateAnalysisGraphOptions(Math.min(priorAnalysisGraph,state.parsed.graphs.length-1));updateAnalysisSeriesOptions(priorSeriesLabel,selectedAnalysisGraph());updateGoalControls(priorGoalSeriesLabel);updateReportSelectors();updateGraphDataTableSelectors();
+      renderGraph();renderGraphDataTable();
+      const loadMessages=[];
+      if(state.parsed.inlineLabelCount)loadMessages.push(`${state.parsed.inlineLabelCount} inline phase label${state.parsed.inlineLabelCount===1?'':'s'} parsed`);
+      if(state.parsed.removedGoalCount)loadMessages.push(`${state.parsed.removedGoalCount} legacy goal directive${state.parsed.removedGoalCount===1?'':'s'} removed`);
+      if(state.parsed.inferredPhaseLayoutCount)loadMessages.push(`phase boundaries inferred for ${state.parsed.inferredPhaseLayoutCount} companion series`);
+      if(state.parsed.autoSplitCount)loadMessages.push(`incompatible phase lengths separated into ${state.parsed.graphs.length} graphs`);
+      status(loadMessages.length?`Data loaded: ${loadMessages.join('; ')}.`:'Data loaded. Would you like to adjust the graph, perform an analysis, or add material to the report?','ok');
     }catch(e){status(e.message,'error');}
   }
   function reset(){
-    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=true;loadTimelineControls({mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]});els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.notesInput.value='';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
+    if(els.graphDataTableDrawer)els.graphDataTableDrawer.classList.remove('open');if(els.toggleDataTableBtn){els.toggleDataTableBtn.setAttribute('aria-expanded','false');els.toggleDataTableBtn.textContent='Show Data Table';}
+    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=true;loadTimelineControls({mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]});els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
   }
   function collectState(){
     saveSelectedGraphControls(false);
     const modules=[...document.querySelectorAll('details.module')];
     return {
       format:'SCGraph2-state',
-      version:31,
+      version:36,
       savedAt:new Date().toISOString(),
       data:{
         source:els.dataInput.value,
         phaseNames:els.phaseNamesData.value,
-        direction:els.directionSelect.value,
-        notes:els.notesInput.value
+        direction:els.directionSelect.value
       },
       graph:{
         title:els.titleInput.value,
@@ -2719,14 +3011,14 @@ title: Reading Fluency</div>
     if(!Number.isFinite(Number(payload.version))||Number(payload.version)<1)throw new Error('The SCGraph2 state version is missing or invalid.');
     const d=payload.data||{},g=payload.graph||{},a=payload.analysis||{},r=payload.report||{},ui=payload.interface||{};
     if(typeof d.source!=='string'||!d.source.trim())throw new Error('The saved state does not contain valid source data.');
-    els.dataInput.value=d.source;els.phaseNamesData.value=typeof d.phaseNames==='string'?d.phaseNames:'';els.phaseLabelInput.value=typeof g.phaseLabels==='string'?g.phaseLabels:els.phaseNamesData.value;els.directionSelect.value=d.direction==='decrease'?'decrease':'increase';els.notesInput.value=typeof d.notes==='string'?d.notes:'';
+    els.dataInput.value=d.source;els.phaseNamesData.value=typeof d.phaseNames==='string'?d.phaseNames:'';els.phaseLabelInput.value=typeof g.phaseLabels==='string'?g.phaseLabels:els.phaseNamesData.value;els.directionSelect.value=d.direction==='decrease'?'decrease':'increase';
     els.titleInput.value=typeof g.title==='string'?g.title:'Performance Scores Over Sessions';els.xLabelInput.value=typeof g.xLabel==='string'?g.xLabel:'Session';els.markerSizeInput.value=g.markerSize??5;els.lineWidthInput.value=g.lineWidth??2;els.gridCheck.checked=!!g.grid;els.legendCheck.checked=g.legend!==false;els.phaseLabelsCheck.checked=g.showPhaseLabels!==false;els.showGhostCheck.checked=g.showGhosts!==false;els.graphCommand.value=typeof g.graphCommand==='string'?g.graphCommand:'';
     // Parse first, then restore state objects whose indexes depend on the parsed data.
     state.parsed=parseData(els.dataInput.value);state.sourceText=els.dataInput.value;state.direction=els.directionSelect.value;state.ghosted=new Set(state.parsed.ghostedKeys||[]);
     const savedGraphSettings=Array.isArray(g.graphSettings)?g.graphSettings:[];syncGraphSettingsAfterParse(savedGraphSettings);
     if(!savedGraphSettings.length)state.graphSettings=state.graphSettings.map((cfg,gi)=>normalizeGraphSetting({...cfg,xLabel:typeof g.xLabel==='string'?g.xLabel:'Session',phaseLabels:typeof g.phaseLabels==='string'?g.phaseLabels:''},gi));
     state.goalLines=normalizeGoalLinesAfterParse(Array.isArray(g.goalLines)?g.goalLines:[]);
-    loadTimelineControls(g.timeline||{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]});updateGraphEditOptions(Number.isInteger(Number(g.selectedGraphIndex))?Number(g.selectedGraphIndex):0);loadSelectedGraphControls();updateGoalControls();
+    loadTimelineControls(g.timeline||{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[],dateOverrides:{}});updateGraphEditOptions(Number.isInteger(Number(g.selectedGraphIndex))?Number(g.selectedGraphIndex):0);loadSelectedGraphControls();updateGoalControls();
     els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';els.alphaInput.value=a.alpha??0.05;els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';if(els.tauVizSelect)els.tauVizSelect.value=['both','cloud','points','raw','corrected','off'].includes(a.tauVisualization)?a.tauVisualization:'both';if(els.tauLegendCheck)els.tauLegendCheck.checked=a.tauLegendVisible!==false;
     updateAnalysisGraphOptions(Number.isInteger(Number(a.selectedGraphIndex))?Number(a.selectedGraphIndex):0,a.selectedSeriesLabel||'');
     if(a.selectedSeriesLabel)updateAnalysisSeriesOptions(a.selectedSeriesLabel,selectedAnalysisGraph());
@@ -2974,9 +3266,14 @@ title: Reading Fluency</div>
   document.addEventListener('selectionchange',()=>{if(document.activeElement===els.reportEditor)saveReportSelection(els.reportEditor);});
   els.reportEditor.addEventListener('paste',e=>handleReportPaste(e,els.reportEditor));
   $('insertReportTemplateBtn').addEventListener('click',()=>insertReportHtml(reportTemplateHtml()));
-  $('insertReportNotesBtn').addEventListener('click',()=>{const n=els.notesInput.value.trim();if(!n){status('There are no Notes / context to insert.','error');return;}insertReportHtml(`<h2>Notes / Context</h2><p>${escapeHtml(n).replace(/\n/g,'<br>')}</p>`);});
   $('insertReportDividerBtn').addEventListener('click',()=>insertReportHtml('<hr><p><br></p>'));
   $('insertReportGraphBtn').addEventListener('click',()=>{try{insertReportHtml(reportGraphSnapshotHtml());status('Graph snapshot inserted into the report.','ok');}catch(e){status(e.message,'error');}});
+  if(els.toggleDataTableBtn)els.toggleDataTableBtn.addEventListener('click',()=>{const open=!els.graphDataTableDrawer.classList.contains('open');els.graphDataTableDrawer.classList.toggle('open',open);els.toggleDataTableBtn.setAttribute('aria-expanded',open?'true':'false');els.toggleDataTableBtn.textContent=open?'Hide Data Table':'Show Data Table';if(open)renderGraphDataTable();});
+  if(els.graphTableGraphSelect)els.graphTableGraphSelect.addEventListener('change',()=>updateGraphDataTableSeriesOptions('', 'all'));
+  if(els.graphTableSeriesSelect)els.graphTableSeriesSelect.addEventListener('change',()=>updateGraphDataTablePhaseOptions('all'));
+  if(els.graphTablePhaseSelect)els.graphTablePhaseSelect.addEventListener('change',renderGraphDataTable);
+  if(els.insertGraphTableReportBtn)els.insertGraphTableReportBtn.addEventListener('click',()=>{try{insertGraphTableIntoReport();status('Selected data table inserted into the Report workspace.','ok');}catch(e){status(e.message,'error');}});
+
   els.reportTableGraphSelect.addEventListener('change',updateReportTableSeriesOptions);
   $('insertReportTableBtn').addEventListener('click',()=>{try{insertReportHtml(reportDataTableHtml());status('Data table inserted into the report.','ok');}catch(e){status(e.message,'error');}});
   $('insertReportResultsBtn').addEventListener('click',()=>{try{insertReportHtml(reportAnalysisResultsHtml());status('Analysis results inserted into the report.','ok');}catch(e){status(e.message,'error');}});
@@ -3037,10 +3334,14 @@ title: Reading Fluency</div>
   if(els.lineDashSelect)els.lineDashSelect.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
   if(els.lineColorInput)els.lineColorInput.addEventListener('input',()=>{saveSelectedSeriesStyleControls();renderGraph();});
   if(els.showConnectingLineCheck)els.showConnectingLineCheck.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
-  [els.xScaleModeSelect,els.minSessionsSelect,els.customMinSessionsInput,els.xAxisLabelModeSelect].filter(Boolean).forEach(el=>el.addEventListener('change',()=>{saveTimelineControls();renderGraph();}));
-  if(els.firstSessionDateInput)els.firstSessionDateInput.addEventListener('change',()=>{saveTimelineControls();renderGraph();});
-  document.querySelectorAll('[data-calendar-weekday]').forEach(el=>el.addEventListener('change',()=>{saveTimelineControls();renderGraph();}));
+  [els.minSessionsSelect,els.customMinSessionsInput].filter(Boolean).forEach(el=>el.addEventListener('change',()=>{saveTimelineControls();renderGraph();}));
+  if(els.phaseNumberingList){els.phaseNumberingList.addEventListener('change',e=>{if(e.target?.matches?.('[data-phase-numbering-index]'))savePhaseNumberingControls(true);});els.phaseNumberingList.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target?.matches?.('[data-phase-numbering-index]')){e.preventDefault();savePhaseNumberingControls(true);}});}
+  if(els.xScaleModeSelect)els.xScaleModeSelect.addEventListener('change',()=>{state.timeline.dateOverrides={};saveTimelineControls();renderGraph();});
+  if(els.firstSessionDateInput)els.firstSessionDateInput.addEventListener('change',()=>{state.timeline.dateOverrides={};saveTimelineControls();renderGraph();});
+  document.querySelectorAll('[data-calendar-weekday]').forEach(el=>el.addEventListener('click',()=>{if(el.disabled)return;const on=el.getAttribute('aria-pressed')==='true';el.setAttribute('aria-pressed',on?'false':'true');state.timeline.dateOverrides={};saveTimelineControls();renderGraph();}));
   els.graphEditSelect.addEventListener('change',loadSelectedGraphControls);
+  els.graphWrap.addEventListener('click',e=>{const t=e.target.closest?.('[data-calendar-date-session]');if(t){e.preventDefault();e.stopPropagation();startCalendarDateEdit(t);}});
+  els.graphWrap.addEventListener('keydown',e=>{const t=e.target.closest?.('[data-calendar-date-session]');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();e.stopPropagation();startCalendarDateEdit(t);}});
   els.graphWrap.addEventListener('dblclick',e=>{const t=e.target.closest?.('[data-direct-edit]');if(t){e.preventDefault();e.stopPropagation();startDirectGraphLabelEdit(t);}});
   [els.graphLabelInput,els.yLabelInput,els.yMinInput,els.yMaxInput,els.yTickInput,els.knownMinInput,els.knownMaxInput].forEach(el=>el.addEventListener('change',()=>saveSelectedGraphControls()));
   els.yAutoCheck.addEventListener('change',()=>{updateScaleControlStates();saveSelectedGraphControls();});

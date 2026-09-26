@@ -1,32 +1,22 @@
-# SCGraph2
+# SCGraph2 2.2.8
 
-Standalone single-file HTML application for teaching and conducting single-case graphing and analysis.
+Standalone single-file application for single-case graphing and analysis.
 
-## Version 2.2.2
+## 2.2.8 change
 
-### Calendar-time workflow
+The former **Notes / context** feature has been removed so the **Report — Student Report Workspace** is the single narrative/documentation workspace.
 
-Proportional calendar time now uses a recurring clinical schedule rather than requiring a date for every observation.
+Removed from the application:
 
-1. Choose **Proportional calendar time** under **Graph Controls → X-Axis / Session Timeline**.
-2. Enter the **First session date**. This date is used exactly for Session 1.
-3. Check the recurring **Session days** (Monday through Sunday).
-4. SCGraph2 assigns each subsequent observation to the next checked weekday and spaces observations by actual elapsed calendar days.
+- Notes / context field in Data Input
+- Add Table to Notes action
+- Insert Notes action in both in-page and pop-out Report toolbars
+- Notes persistence in newly saved SCGraph2 JSON state files
+- Help/Start Up references to the removed Notes workflow
 
-The first session date is independent of the recurring weekday selection. SCGraph2 does not silently add a weekday to the schedule.
+The selective graph data table remains available and can be inserted directly into the Report workspace. Existing SCGraph2 state files remain loadable; any legacy `data.notes` field is ignored.
 
-Calendar-time display changes only graph geometry. Statistical analyses remain based on session order. Phase boundaries are positioned midway in elapsed time between the adjacent sessions. Timeline settings are persisted in SCGraph2 JSON state files.
+## Files
 
-### Other 2.2 features retained
-
-- Per-series connecting-line visibility
-- Per-series line color and dash style
-- Level, IQR Level, Trend, and IQR Trend display extension into adjacent phases without recomputation
-- Decimal/fractional numerical input
-- Configurable minimum sequential-session span
-- Graph Controls/Analysis viewport-aware right panel
-- JSON save/load, SVG/PNG export, report workspace, and existing analysis methods
-
-## Run
-
-Open `SCGraph2.html` or `index.html` directly in a modern browser. No server is required for core graphing functionality.
+- `SCGraph2.html` — standalone application
+- `index.html` — identical GitHub Pages entry point
