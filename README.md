@@ -1,22 +1,20 @@
-# SCGraph2 2.2.8
+# SCGraph2 2.2.13
 
-Standalone single-file application for single-case graphing and analysis.
+Standalone single-file HTML application for single-case graphing and analysis.
 
-## 2.2.8 change
+## Revision 2.2.13
 
-The former **Notes / context** feature has been removed so the **Report — Student Report Workspace** is the single narrative/documentation workspace.
+Adds Trend/IQR Trend projection beyond observed data with three modes:
 
-Removed from the application:
+- **Observed data only** — stop at the last active observed point.
+- **To end of X-axis** — project the fitted trend and IQR band across the current displayed session range.
+- **To goal** — project the source-phase Theil–Sen trend forward until it intersects a selected applicable goal line, extend the X-axis when necessary, and mark the projected intersection.
 
-- Notes / context field in Data Input
-- Add Table to Notes action
-- Insert Notes action in both in-page and pop-out Report toolbars
-- Notes persistence in newly saved SCGraph2 JSON state files
-- Help/Start Up references to the removed Notes workflow
+The projection changes display only. The trend and IQR band continue to be calculated from observed source-phase data. Goal-dependent projections are invalidated automatically if their goal is edited or removed.
 
-The selective graph data table remains available and can be inserted directly into the Report workspace. Existing SCGraph2 state files remain loadable; any legacy `data.notes` field is ignored.
+Help, Start Up guidance, tooltips, saved-state persistence, and result text were updated for the new projection modes.
 
 ## Files
 
+- `index.html` — GitHub Pages entry point
 - `SCGraph2.html` — standalone application
-- `index.html` — identical GitHub Pages entry point
