@@ -373,7 +373,7 @@
 </head>
 <body>
 <header>
-  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.13</span></div>
+  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.10</span></div>
   <div class="header-actions">
     <button id="startUpBtn" class="small">Start Up</button>
     <button id="helpBtn" class="small">Help</button>
@@ -420,7 +420,7 @@
       <div class="module-body data-pane-body">
         <div class="data-scroll-content">
           <div class="field"><label for="dataInput">Single-case data</label><textarea id="dataInput" class="mono">Sniffing: 2,4,5,2|6,7,4,5</textarea>
-            <div class="hint">Format: <span class="kbd">Series Label: 1,2,3|4,5,6</span>. Use <span class="kbd">|</span> for a phase boundary. Plain adjacent series are plotted together. Put <span class="kbd">+</span> alone on a line between series to create stacked multiple-baseline tiers sharing one Session axis; put <span class="kbd">-</span> alone on a line to start a separate graph (up to 3 graph panels). Ghost a value with parentheses, e.g. <span class="kbd">1,2,(3)|4,5,6</span>. Use contiguous commas for missing sessions: <span class="kbd">2,4,,6</span> leaves Session 3 empty; each additional comma skips one more session. In Plot Appearance, choose whether each series' connecting line breaks at or bridges across these missing sessions.</div>
+            <div class="hint">Format: <span class="kbd">Series Label: 1,2,3|4,5,6</span>. Use <span class="kbd">|</span> for a phase boundary. Plain adjacent series are plotted together. Put <span class="kbd">+</span> alone on a line between series to create stacked multiple-baseline tiers sharing one Session axis; put <span class="kbd">-</span> alone on a line to start a separate graph (up to 3 graph panels). Ghost a value with parentheses, e.g. <span class="kbd">1,2,(3)|4,5,6</span>.</div>
           </div>
           <div class="grid2">
             <div class="field"><label for="phaseNamesData">Default phase names</label><input id="phaseNamesData" type="text" placeholder="Baseline, Intervention"></div>
@@ -543,10 +543,9 @@
               <div class="field"><label for="lineColorInput">Line color</label><input id="lineColorInput" type="color" value="#111827"></div>
             </div>
             <div class="checks" style="margin-top:3px">
-              <label title="Show or hide the connecting line for this series. Markers remain visible when the line is hidden."><input type="checkbox" id="showConnectingLineCheck" checked> Show connecting line</label>
-              <label title="When checked, comma-defined missing sessions interrupt this series' connecting line. When unchecked, the line bridges across missing sessions. Ghosted observations still break the line."><input type="checkbox" id="breakAtMissingCheck" checked> Break line at missing sessions</label>
+              <label><input type="checkbox" id="showConnectingLineCheck" checked> Show connecting line</label>
             </div>
-            <div class="hint">Choose a series within the selected graph, then assign its dash, color, and connecting-line behavior. Missing comma slots can either break the line or be bridged; ghosted observations always break the active connecting line.</div>
+            <div class="hint">Choose a series within the selected graph, then assign a line dash, color, and whether its connecting line is shown. Markers remain visible when the line is hidden.</div>
             <div class="checks">
               <label><input type="checkbox" id="gridCheck"> Light gridlines</label>
               <label><input type="checkbox" id="legendCheck" checked> Legend when needed</label>
@@ -641,12 +640,7 @@
               <div class="field"><label for="visualSourcePhaseSelect">Calculate from</label><select id="visualSourcePhaseSelect" title="Choose the phase whose observations are used to calculate the visual-analysis statistic. Destination-phase observations are never included in that calculation."></select></div>
               <div class="field"><label for="visualDisplayThroughSelect">Display through</label><select id="visualDisplayThroughSelect" title="Choose the last adjacent phase over which the calculated visual-analysis element is displayed. Trend and IQR Trend projections continue across the full displayed destination phase, including empty future session positions."></select></div>
             </div>
-            <div class="hint" style="margin-top:-6px;margin-bottom:10px">When Display through is later than Calculate from, Level and IQR Level are calculated only from the source phase and displayed unchanged through the selected adjacent phase(s). Trend and IQR Trend use the projection mode below to determine how far the fitted source-phase trajectory is displayed beyond the observed data.</div>
-            <div class="grid2 analysis-targets" style="margin-bottom:10px">
-              <div class="field"><label for="trendProjectionSelect">Trend projection</label><select id="trendProjectionSelect" title="Choose how far Trend and IQR Trend extend beyond the observed source-phase data. This changes display only; the Theil–Sen trend is still calculated solely from observed source-phase values."><option value="observed">Observed data only</option><option value="axis">To end of X-axis</option><option value="goal">To goal</option></select></div>
-              <div class="field" id="projectionGoalField" style="display:none"><label for="projectionGoalSelect">Projection goal</label><select id="projectionGoalSelect" title="Choose the goal line the fitted Trend or IQR Trend should project toward. Only goal lines that apply to the selected series and source phase are listed."></select></div>
-            </div>
-            <div id="trendProjectionHint" class="hint" style="margin-top:-6px;margin-bottom:10px">Observed data only stops the fitted trend at the last active observation. To end of X-axis projects it across the current displayed session range. To goal projects forward to the selected goal-line intersection and expands the X-axis when needed.</div>
+            <div class="hint" style="margin-top:-6px;margin-bottom:10px">When Display through is later than Calculate from, Level, IQR Level, Trend, and IQR Trend are calculated only from the source phase and projected unchanged through the selected adjacent phase(s). Trend and IQR Trend continue across the full displayed destination phase—even beyond the last observed point—so the projected trajectory can be inspected against future session positions.</div>
             <div class="quick-grid">
               <button data-analysis="Level" data-analysis-scope="visual">Level — selected phase(s)</button>
               <button data-analysis="Trend" data-analysis-scope="visual">Trend — selected phase(s)</button>
@@ -716,9 +710,8 @@
   </div>
   <div class="help-body">
     <h3>1. Enter the data</h3>
-    <p>Enter one labeled series per line. Use <strong>|</strong> for phase changes and parentheses to ghost an observation without changing its session position. Use two or more contiguous commas to represent missing sessions; each empty position advances the session timeline without creating a score. Under <strong>Plot Appearance</strong>, <strong>Break line at missing sessions</strong> controls whether the selected series is interrupted or visually bridged across those empty sessions.</p>
-    <div class="help-example">Accuracy: 2,4,,3|7,,,9</div>
-    <p>In this example, the first double comma skips one session, while the triple comma skips two sessions.</p>
+    <p>Enter one labeled series per line. Use <strong>|</strong> for phase changes and parentheses to ghost an observation without changing its session position.</p>
+    <div class="help-example">Accuracy: 2,4,(5),3|7,8,9</div>
 
     <h3>2. Choose the graph layout in the data stream</h3>
     <ul>
@@ -742,7 +735,7 @@ Accuracy: 40,45,50|70,78,85</div>
     <p>Under <strong>Graph Controls → Goal Lines</strong>, choose the series/tier, phase span, and Y value. A goal line extends across the full displayed width of its selected phase range, including empty future session positions in the final destination phase. Goal lines are retained independently of analysis overlays and are saved in the JSON state.</p>
 
     <h3>5. Run an analysis</h3>
-    <p><strong>Visual Analysis Span and Trend projection:</strong> Level and IQR Level use <strong>Calculate from</strong> and <strong>Display through</strong> to control their visual span. Trend and IQR Trend add a separate <strong>Trend projection</strong> choice: <strong>Observed data only</strong>, <strong>To end of X-axis</strong>, or <strong>To goal</strong>. To goal uses only the observed source-phase data to fit the Theil–Sen trend, projects that fitted line forward to the selected applicable goal line, marks the projected intersection, and expands the X-axis when needed. The IQR Trend band follows the same projection span. No projected values are added to the analysis dataset.</p>
+    <p><strong>Visual Analysis Span:</strong> for Level, IQR Level, Trend, and IQR Trend, choose a source phase under <strong>Calculate from</strong> and a later adjacent endpoint under <strong>Display through</strong>. SCGraph2 computes the statistic only from the source phase and extends the unchanged analytic element through the requested phase. <strong>Trend and IQR Trend projections span the full displayed destination phase, including session positions beyond the last observation.</strong> This allows students to project the source-phase trajectory forward and compare later performance with that projection. Destination-phase observations are not used to recompute the projected trend.</p>
     <p>At the <strong>top of the Analysis panel</strong>, choose <strong>Graph to analyze</strong> first and then <strong>Series to analyze</strong>. The two selectors appear above the analysis buttons so the current target remains visible before you turn analyses on or off. Visual analyses include Level, Trend, IQR variants, and Trend + 0.3 IQR. Quantitative analyses include PND, Mann–Whitney, Trend + 0.3 IQR binomial, and Tau-U. Tau-U uses the Parker-style S-statistic correction (S_AB − S_A)/(nA×nB). Its data-anchored teaching visualization is session-dependent: intervention points are colored by the cumulative effect, solid outer rings show each point's raw A→B contribution, and—only when baseline correction is actually applied—dashed gray B rings show the remaining baseline correction S_A/(nA×j). The detailed Tau-U legend reports baseline τ and S_A, whether correction was applied, the Auto criterion when relevant, and explicitly explains why waning gray rings are absent when no correction occurs. Its explanatory rows are vertically separated so the lower direction key remains readable.</p>
 
     <h3>6. Choose a save location, then save or export</h3>
@@ -770,8 +763,8 @@ Accuracy: 40,45,50|70,78,85</div>
     <p>The <strong>Data Input</strong> module always appears immediately below the <strong>Graph</strong> and collapses to its summary bar when closed. On wide screens, <strong>Graph Controls</strong> and <strong>Analysis</strong> share the right-hand column dynamically: when both are open they divide the available vertical space equally; when one is closed, the other expands into the remaining space. On narrower screens they move below Data Input. The <strong>Report</strong> workspace is attached beneath Data Input in the left column, and the header <strong>Show Report</strong> button lifts that same accordion into an overlay over the left panel at exactly the same width. Every module remains independently collapsible, and each open module body scrolls internally when its contents exceed the available panel height.</p>
 
     <h3>Data entry</h3>
-    <p>Enter one series per line using <strong>Label: values</strong>. Commas separate session positions and a vertical bar creates a phase boundary. Session numbers continue across phases. A run of contiguous commas creates missing session positions: two commas skip one session, three commas skip two, and so on. Missing sessions advance the X axis and calendar timeline but do not create a score and are excluded from analyses. By default they break the selected series' connecting line; turn off <strong>Break line at missing sessions</strong> in Plot Appearance to bridge the line across those empty sessions.</p>
-    <div class="help-example">Sniffing: 2,4,,5,2|6,7,,,4,5</div>
+    <p>Enter one series per line using <strong>Label: values</strong>. Commas separate observations and a vertical bar creates a phase boundary. Session numbers continue across phases.</p>
+    <div class="help-example">Sniffing: 2,4,5,2|6,7,4,5</div>
     <p>Plain adjacent series lines are overlaid only when their phase lengths match exactly. If one series supplies explicit <span class="kbd">|</span> boundaries and a companion series supplies none, SCGraph2 first infers those boundary locations for the companion series without inventing observations. If the resulting phase lengths differ, the series are automatically separated into independent graphs (up to three panels). Multiple-baseline tiers joined with <strong>+</strong> may still use different timing across tiers. Legacy <span class="kbd">label(...)</span> directives are parsed as phase labels and <span class="kbd">G(...)</span> goal directives are removed from the data stream.</p>
 
     <h3>Multiple graphs and multiple-baseline layouts</h3>
@@ -794,7 +787,7 @@ Student C: 1,2,2,3,3,4,4|7,8,9</div>
     <p><strong>Auto-scale methods:</strong> <strong>Single-case — unbounded ≥ 0</strong> starts at 0 and extends the upper axis to the next readable 1–2–5 major tick beyond the highest displayed data or goal value. <strong>Single-case — known bounds</strong> uses the full measurement range you enter in Known minimum/maximum. <strong>Single-case — allow negative values</strong> extends one readable major tick beyond both the lowest and highest displayed values. <strong>Original SCGraph heuristic</strong> preserves the earlier rule: start at 0 for nonnegative data (or pad below a negative minimum by about 5%) and add about 8% headroom above the maximum. Ghosted observations remain part of display scaling, and the single-case modes also include goal-line values so goals remain visible.</p>
 
     <h3>Data table and point tooltips</h3>
-    <p>Use <strong>Show Data Table</strong> in the Graph toolbar to open a compact drawer beneath the graph. The graph itself keeps its full width. Filter the table by graph, series, and phase; calendar dates are included automatically when proportional calendar time is active, and displayed session numbers follow any phase-specific renumbering. If displayed and underlying session numbers differ, both are shown. Missing comma-defined session positions appear in the table with a blank score and <strong>Missing</strong> status.</p>
+    <p>Use <strong>Show Data Table</strong> in the Graph toolbar to open a compact drawer beneath the graph. The graph itself keeps its full width. Filter the table by graph, series, and phase; calendar dates are included automatically when proportional calendar time is active, and displayed session numbers follow any phase-specific renumbering. If displayed and underlying session numbers differ, both are shown.</p>
     <p><strong>Insert Table in Report</strong> places the currently selected table into the Report workspace. Hover over any plotted observation marker to see the point's series, displayed session, underlying session when different, date when available, phase, score, and active/ghosted status. These inspection tools do not alter the data or analyses.</p>
 
     <h3>Analyzing one series when several are graphed</h3>
@@ -811,12 +804,11 @@ Student C: 1,2,2,3,3,4,4|7,8,9</div>
     <div class="help-example">Sniffing: 2,4,(5),2|6,7,4,5</div>
     <p>Here, Session 3 remains at Session 3 but is displayed in gray, omitted from active connecting lines, and excluded from visual and quantitative calculations. Parentheses do not consume or change session numbers. Remove the parentheses to restore the point, or use <strong>Un-ghost all points</strong>.</p>
 
-    <h3>Selected-phase analyses</h3><p>The Analysis pane includes a multi-select <strong>Phase(s) to analyze</strong> control. Level and IQR Level can be displayed through adjacent phases without recomputing the source statistic. Trend and IQR Trend use the <strong>Trend projection</strong> control: <strong>Observed data only</strong> stops at the last active source-phase observation; <strong>To end of X-axis</strong> projects through the current displayed session range; and <strong>To goal</strong> projects the source-phase Theil–Sen trend forward until it intersects a selected applicable goal line. When To goal is used, SCGraph2 expands the X-axis as needed, marks the projected intersection, and extends the IQR Trend band over the same future span. A flat trend, a trend moving such that the goal was already crossed within observed data, or an extremely distant intersection is reported rather than extrapolated indefinitely. PND, Mann–Whitney, Trend + 0.3 IQR, and Tau-U require exactly two selected phases, which may be nonadjacent (for example Phase 1 vs Phase 3).</p><h3>Phase boundaries and graph conventions</h3>
+    <h3>Selected-phase analyses</h3><p>The Analysis pane includes a multi-select <strong>Phase(s) to analyze</strong> control. Level, IQR Level, Trend, and IQR Trend can be applied to one or several selected phases at once; each overlay is confined to its own phase. Trend IQR overlays are shaded the same way as level IQR overlays. PND, Mann–Whitney, Trend + 0.3 IQR, and Tau-U require exactly two selected phases, which may be nonadjacent (for example Phase 1 vs Phase 3).</p><h3>Phase boundaries and graph conventions</h3>
     <ul>
       <li>Each <span class="kbd">|</span> creates a thin solid vertical phase line halfway between the adjoining sessions.</li>
       <li>Observations are connected only within a phase; lines never cross a phase boundary.</li>
       <li>Ghosted observations break the active connecting line rather than being bridged.</li>
-      <li>Missing sessions created by contiguous commas advance session/date spacing but contribute no score to analyses. By default they break the connecting line; for any selected series, turn off <strong>Break line at missing sessions</strong> in Plot Appearance to bridge across them. Ghosted observations still break the active line.</li>
       <li>Phase names can be entered in the Data Input or Graph Controls module.</li>
     </ul>
 
@@ -906,9 +898,9 @@ title: Reading Fluency</div>
   const els = {
     dataInput:$('dataInput'), phaseNamesData:$('phaseNamesData'), directionSelect:$('directionSelect'),
     titleInput:$('titleInput'), xLabelInput:$('xLabelInput'), graphEditSelect:$('graphEditSelect'), graphLabelInput:$('graphLabelInput'), yLabelInput:$('yLabelInput'), yMinInput:$('yMinInput'), yMaxInput:$('yMaxInput'), yTickInput:$('yTickInput'), yAutoCheck:$('yAutoCheck'), yAutoModeSelect:$('yAutoModeSelect'), knownMinInput:$('knownMinInput'), knownMaxInput:$('knownMaxInput'), scalePreview:$('scalePreview'),
-    markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), lineStyleSeriesSelect:$('lineStyleSeriesSelect'), lineDashSelect:$('lineDashSelect'), lineColorInput:$('lineColorInput'), showConnectingLineCheck:$('showConnectingLineCheck'), breakAtMissingCheck:$('breakAtMissingCheck'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
+    markerSizeInput:$('markerSizeInput'), lineWidthInput:$('lineWidthInput'), lineStyleSeriesSelect:$('lineStyleSeriesSelect'), lineDashSelect:$('lineDashSelect'), lineColorInput:$('lineColorInput'), showConnectingLineCheck:$('showConnectingLineCheck'), phaseLabelInput:$('phaseLabelInput'), gridCheck:$('gridCheck'), legendCheck:$('legendCheck'),
     xScaleModeSelect:$('xScaleModeSelect'), minSessionsSelect:$('minSessionsSelect'), minSessionsField:$('minSessionsField'), customMinSessionsInput:$('customMinSessionsInput'), customMinSessionsField:$('customMinSessionsField'), xAxisLabelModeSelect:$('xAxisLabelModeSelect'), xAxisLabelModeField:$('xAxisLabelModeField'), firstSessionDateInput:$('firstSessionDateInput'), calendarScheduleField:$('calendarScheduleField'), calendarWeekdayChecks:$('calendarWeekdayChecks'), phaseNumberingList:$('phaseNumberingList'), phaseNumberingHint:$('phaseNumberingHint'), timelinePreview:$('timelinePreview'),
-    phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), analysisPhaseSelect:$('analysisPhaseSelect'), visualSourcePhaseSelect:$('visualSourcePhaseSelect'), visualDisplayThroughSelect:$('visualDisplayThroughSelect'), trendProjectionSelect:$('trendProjectionSelect'), projectionGoalSelect:$('projectionGoalSelect'), projectionGoalField:$('projectionGoalField'), trendProjectionHint:$('trendProjectionHint'), alphaInput:$('alphaInput'),
+    phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), analysisPhaseSelect:$('analysisPhaseSelect'), visualSourcePhaseSelect:$('visualSourcePhaseSelect'), visualDisplayThroughSelect:$('visualDisplayThroughSelect'), alphaInput:$('alphaInput'),
     goalSeriesSelect:$('goalSeriesSelect'), goalStartPhaseSelect:$('goalStartPhaseSelect'), goalEndPhaseSelect:$('goalEndPhaseSelect'), goalValueInput:$('goalValueInput'), goalLineList:$('goalLineList'),
     tauCorrectionSelect:$('tauCorrectionSelect'), tauVizSelect:$('tauVizSelect'), tauLegendCheck:$('tauLegendCheck'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill'),
     toggleDataTableBtn:$('toggleDataTableBtn'), graphDataTableDrawer:$('graphDataTableDrawer'), graphTableGraphSelect:$('graphTableGraphSelect'), graphTableSeriesSelect:$('graphTableSeriesSelect'), graphTablePhaseSelect:$('graphTablePhaseSelect'), graphDataTableWrap:$('graphDataTableWrap'), insertGraphTableReportBtn:$('insertGraphTableReportBtn'),
@@ -928,7 +920,7 @@ title: Reading Fluency</div>
       if(v&&typeof v==='object'){
         const dashStyle=Object.prototype.hasOwnProperty.call(dataDashOptions,String(v.dashStyle||''))?String(v.dashStyle):'solid';
         const color=validHexColor(v.color||'','#111827');
-        out[String(k)]={dashStyle,color,showLine:v.showLine!==false,breakAtMissing:v.breakAtMissing!==false};
+        out[String(k)]={dashStyle,color,showLine:v.showLine!==false};
       }
     });
     return out;
@@ -939,7 +931,7 @@ title: Reading Fluency</div>
     const custom=cfg.seriesLineStyles?.[String(si)]||{};
     const stroke=validHexColor(custom.color||base.stroke,base.stroke);
     const dashStyle=Object.prototype.hasOwnProperty.call(dataDashOptions,String(custom.dashStyle||''))?String(custom.dashStyle):'solid';
-    return {...base,stroke,dashStyle,dashArray:dataDashOptions[dashStyle]||'',showLine:custom.showLine!==false,breakAtMissing:custom.breakAtMissing!==false};
+    return {...base,stroke,dashStyle,dashArray:dataDashOptions[dashStyle]||'',showLine:custom.showLine!==false};
   }
   const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
   const fmt=(v,d=3)=> Number.isFinite(v) ? Number(v.toFixed(d)).toString() : 'NA';
@@ -995,29 +987,23 @@ title: Reading Fluency</div>
           if(!globalInlineLabels[pi])globalInlineLabels[pi]=phaseLabel;
         }
         chunk=chunk.replace(/\blabel\s*\([^)]*\)/gi,' ');
-        // Preserve empty comma-delimited positions as missing sessions. A run of
-        // two commas between observations represents one missing session; three
-        // commas represent two missing sessions, etc. Leading/trailing delimiter
-        // empties are ignored to preserve the earlier forgiving input behavior.
-        const rawTokens=chunk.split(',').map(v=>v.trim());
-        const slots=rawTokens.map((token,idx)=>({token,missing:token===''&&idx>0&&idx<rawTokens.length-1}));
-        if(!slots.some(slot=>slot.token!==''))throw new Error(`No data in ${label}, phase ${pi+1}.`);
-        const start=session;const missingSessions=[];
-        slots.forEach(slot=>{
-          if(slot.token===''){
-            if(slot.missing){missingSessions.push(session);session++;}
-            return;
-          }
-          const token=slot.token;let ghost=false,numericText=token;const wrapped=token.match(/^\(\s*(.*?)\s*\)$/);
+        const tokens=chunk.split(',').map(v=>v.trim()).filter(v=>v!=='');
+        if(!tokens.length)throw new Error(`No data in ${label}, phase ${pi+1}.`);
+        const values=tokens.map(token=>{
+          let ghost=false,numericText=token;const wrapped=token.match(/^\(\s*(.*?)\s*\)$/);
           if(wrapped){ghost=true;numericText=wrapped[1];}
           else if(token.includes('(')||token.includes(')'))throw new Error(`Invalid ghost notation “${token}” in ${label}, phase ${pi+1}. Put one number entirely inside parentheses, e.g. (5).`);
           const value=Number(numericText);
           if(!Number.isFinite(value))throw new Error(`Invalid number “${token}” in ${label}, phase ${pi+1}.`);
-          const key=`${si}:${session}`;
-          points.push({seriesIndex:si,phaseIndex:pi,session,score:value,key,ghosted:ghost});
-          if(ghost)ghostedKeys.push(key);session++;
+          return {value,ghost};
         });
-        phases.push({phaseIndex:pi,startSession:start,endSession:session-1,missingSessions});
+        const start=session;
+        values.forEach(item=>{
+          const key=`${si}:${session}`;
+          points.push({seriesIndex:si,phaseIndex:pi,session,score:item.value,key,ghosted:item.ghost});
+          if(item.ghost)ghostedKeys.push(key);session++;
+        });
+        phases.push({phaseIndex:pi,startSession:start,endSession:session-1});
       });
       const boundaries=[];for(let i=0;i<phases.length-1;i++)boundaries.push(phases[i].endSession+.5);
       const ser={label,points,phases,boundaries,maxSessions:session-1,graphIndex,tierIndex,sourceLineIndex:lineIndex,inlinePhaseLabels};
@@ -1323,7 +1309,6 @@ title: Reading Fluency</div>
     els.lineDashSelect.value=st.dashStyle||'solid';
     els.lineColorInput.value=validHexColor(st.stroke,seriesStyles[si%seriesStyles.length].stroke);
     if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=st.showLine!==false;
-    if(els.breakAtMissingCheck){els.breakAtMissingCheck.checked=st.breakAtMissing!==false;els.breakAtMissingCheck.disabled=st.showLine===false;}
   }
   function saveSelectedSeriesStyleControls(){
     if(!state.parsed||!els.lineStyleSeriesSelect||!els.lineDashSelect||!els.lineColorInput)return;
@@ -1335,9 +1320,8 @@ title: Reading Fluency</div>
     const base=seriesStyles[si%seriesStyles.length]||seriesStyles[0];
     const color=validHexColor(els.lineColorInput.value,base.stroke);
     const showLine=els.showConnectingLineCheck?els.showConnectingLineCheck.checked:true;
-    const breakAtMissing=els.breakAtMissingCheck?els.breakAtMissingCheck.checked:true;
-    if(dashStyle==='solid' && color.toLowerCase()===String(base.stroke).toLowerCase() && showLine && breakAtMissing) delete styles[String(si)];
-    else styles[String(si)]={dashStyle,color,showLine,breakAtMissing};
+    if(dashStyle==='solid' && color.toLowerCase()===String(base.stroke).toLowerCase() && showLine) delete styles[String(si)];
+    else styles[String(si)]={dashStyle,color,showLine};
     state.graphSettings[gi]=normalizeGraphSetting({...prior,seriesLineStyles:styles},gi);
   }
   function graphScale(gi){
@@ -1432,34 +1416,9 @@ title: Reading Fluency</div>
     updateVisualSpanOptions();
   }
   function updateVisualSpanOptions(source=null,through=null){
-    if(!els.visualSourcePhaseSelect||!els.visualDisplayThroughSelect||!state.parsed)return;const si=selectedAnalysisSeries();els.visualSourcePhaseSelect.innerHTML='';els.visualDisplayThroughSelect.innerHTML='';if(si<0)return;const ser=state.parsed.series[si],names=graphPhaseNames(ser.graphIndex,ser.phases.length),selected=selectedAnalysisPhases();const src=source!==null?Number(source):(Number.isInteger(Number(els.visualSourcePhaseSelect.value))?Number(els.visualSourcePhaseSelect.value):(selected[0]??0));names.forEach((name,pi)=>{const a=document.createElement('option');a.value=String(pi);a.textContent=`${pi+1}. ${name}`;els.visualSourcePhaseSelect.appendChild(a);const b=a.cloneNode(true);els.visualDisplayThroughSelect.appendChild(b);});els.visualSourcePhaseSelect.value=String(clamp(src,0,names.length-1));const min=Number(els.visualSourcePhaseSelect.value)||0;[...els.visualDisplayThroughSelect.options].forEach(o=>o.disabled=Number(o.value)<min);let dest=through!==null?Number(through):(Number.isInteger(Number(els.visualDisplayThroughSelect.value))?Number(els.visualDisplayThroughSelect.value):min);if(dest<min)dest=min;els.visualDisplayThroughSelect.value=String(clamp(dest,min,names.length-1));updateTrendProjectionControls();
+    if(!els.visualSourcePhaseSelect||!els.visualDisplayThroughSelect||!state.parsed)return;const si=selectedAnalysisSeries();els.visualSourcePhaseSelect.innerHTML='';els.visualDisplayThroughSelect.innerHTML='';if(si<0)return;const ser=state.parsed.series[si],names=graphPhaseNames(ser.graphIndex,ser.phases.length),selected=selectedAnalysisPhases();const src=source!==null?Number(source):(Number.isInteger(Number(els.visualSourcePhaseSelect.value))?Number(els.visualSourcePhaseSelect.value):(selected[0]??0));names.forEach((name,pi)=>{const a=document.createElement('option');a.value=String(pi);a.textContent=`${pi+1}. ${name}`;els.visualSourcePhaseSelect.appendChild(a);const b=a.cloneNode(true);els.visualDisplayThroughSelect.appendChild(b);});els.visualSourcePhaseSelect.value=String(clamp(src,0,names.length-1));const min=Number(els.visualSourcePhaseSelect.value)||0;[...els.visualDisplayThroughSelect.options].forEach(o=>o.disabled=Number(o.value)<min);let dest=through!==null?Number(through):(Number.isInteger(Number(els.visualDisplayThroughSelect.value))?Number(els.visualDisplayThroughSelect.value):min);if(dest<min)dest=min;els.visualDisplayThroughSelect.value=String(clamp(dest,min,names.length-1));
   }
   function visualSpanSelection(){const source=Number(els.visualSourcePhaseSelect?.value),through=Number(els.visualDisplayThroughSelect?.value);return {source:Number.isInteger(source)?source:0,through:Number.isInteger(through)?through:(Number.isInteger(source)?source:0)};}
-  function applicableProjectionGoals(seriesIndex=null,phaseIndex=null){
-    if(!state.parsed)return [];
-    const si=Number.isInteger(Number(seriesIndex))?Number(seriesIndex):selectedAnalysisSeries();
-    const ph=Number.isInteger(Number(phaseIndex))?Number(phaseIndex):visualSpanSelection().source;
-    if(si<0||!Number.isInteger(ph))return [];
-    return (state.goalLines||[]).filter(g=>g.seriesIndex===si&&g.startPhase<=ph&&g.endPhase>=ph&&Number.isFinite(Number(g.y)));
-  }
-  function updateTrendProjectionControls(preserveGoalId=''){
-    if(!els.trendProjectionSelect||!els.projectionGoalSelect)return;
-    const mode=['observed','axis','goal'].includes(els.trendProjectionSelect.value)?els.trendProjectionSelect.value:'observed';
-    const prior=preserveGoalId||els.projectionGoalSelect.value||'';
-    const goals=applicableProjectionGoals();
-    els.projectionGoalSelect.innerHTML='';
-    goals.forEach(g=>{const o=document.createElement('option');o.value=g.id;o.textContent=`Goal ${fmt(g.y,3)} · ${phaseName(g.seriesIndex,g.startPhase)}${g.endPhase>g.startPhase?` → ${phaseName(g.seriesIndex,g.endPhase)}`:''}`;els.projectionGoalSelect.appendChild(o);});
-    if(goals.some(g=>g.id===prior))els.projectionGoalSelect.value=prior;else if(goals.length)els.projectionGoalSelect.value=goals[0].id;
-    if(els.projectionGoalField)els.projectionGoalField.style.display=mode==='goal'?'':'none';
-    els.projectionGoalSelect.disabled=mode!=='goal'||!goals.length;
-    if(els.trendProjectionHint){
-      if(mode==='goal')els.trendProjectionHint.textContent=goals.length?'To goal projects the fitted center trend to the selected goal-line intersection. The IQR band follows the same future span; the X-axis expands automatically when needed.':'To goal requires a goal line that applies to the selected series and source phase.';
-      else if(mode==='axis')els.trendProjectionHint.textContent='To end of X-axis projects the fitted center trend and IQR band from the source phase through the current displayed session range.';
-      else els.trendProjectionHint.textContent='Observed data only stops the fitted center trend and IQR band at the last active observation in the source phase.';
-    }
-  }
-  function selectedTrendProjection(){return ['observed','axis','goal'].includes(els.trendProjectionSelect?.value)?els.trendProjectionSelect.value:'observed';}
-  function selectedProjectionGoal(){const id=els.projectionGoalSelect?.value||'';return applicableProjectionGoals().find(g=>g.id===id)||null;}
   function analysisCommandForButton(button){
     const phases=selectedAnalysisPhases(),kind=button.dataset.analysis||'';
     if(button.dataset.analysisScope==='compare'){
@@ -1483,7 +1442,7 @@ title: Reading Fluency</div>
     const fillPhaseSelect=(select)=>{select.innerHTML='';names.forEach((name,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=`${i+1}. ${name}`;select.appendChild(o);});};
     fillPhaseSelect(els.goalStartPhaseSelect);fillPhaseSelect(els.goalEndPhaseSelect);
     els.goalStartPhaseSelect.value='0';els.goalEndPhaseSelect.value='0';
-    renderGoalLineList();updateTrendProjectionControls();
+    renderGoalLineList();
   }
   function normalizeGoalLinesAfterParse(previous=[]){
     if(!state.parsed)return [];
@@ -1508,21 +1467,6 @@ title: Reading Fluency</div>
     if(goal.endPhase===ser.phases.length-1&&Number.isFinite(Number(displayXmax)))x2=Math.max(x2,Number(displayXmax));
     return {x1,x2};
   }
-  function invalidateGoalProjectionAnalyses(goalIds=null){
-    const ids=goalIds===null?null:new Set((Array.isArray(goalIds)?goalIds:[goalIds]).map(String));
-    const analysisIds=new Set();
-    state.overlays.forEach(o=>{
-      if(o.projectionMode!=='goal')return;
-      const gid=String(o.projectionGoalId||'');
-      if(ids===null||ids.has(gid)){if(o.analysisId)analysisIds.add(o.analysisId);}
-    });
-    state.overlays=state.overlays.filter(o=>{
-      if(o.projectionMode!=='goal')return true;
-      const gid=String(o.projectionGoalId||'');
-      return !(ids===null||ids.has(gid));
-    });
-    if(analysisIds.size)state.results=state.results.filter(r=>!analysisIds.has(r.analysisId));
-  }
   function addOrUpdateGoalLine(){
     try{
       if(!state.parsed)throw new Error('Load valid data first.');
@@ -1531,9 +1475,9 @@ title: Reading Fluency</div>
       if(!Number.isInteger(sp)||!Number.isInteger(ep)||sp<0||ep<sp||ep>=state.parsed.series[si].phases.length)throw new Error('The through phase must be the same as or later than the start phase and must exist in the selected series.');
       if(!Number.isFinite(y))throw new Error('Enter a numerical goal value on the Y axis.');
       const existing=state.goalLines.find(g=>g.seriesIndex===si&&g.startPhase===sp&&g.endPhase===ep);
-      if(existing){invalidateGoalProjectionAnalyses(existing.id);existing.y=y;existing.seriesLabel=state.parsed.series[si].label;}
+      if(existing){existing.y=y;existing.seriesLabel=state.parsed.series[si].label;}
       else state.goalLines.push({id:`goal-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,seriesIndex:si,seriesLabel:state.parsed.series[si].label,startPhase:sp,endPhase:ep,y});
-      renderGoalLineList();renderResults();updateTrendProjectionControls();renderGraph();
+      renderGoalLineList();renderGraph();
       const names=graphPhaseNames(state.parsed.series[si].graphIndex,state.parsed.series[si].phases.length);status(`Goal line ${existing?'updated':'added'} for ${state.parsed.series[si].label}: ${names[sp]}${ep>sp?` through ${names[ep]}`:''} at Y = ${fmt(y,3)}.`,'ok');
     }catch(e){status(e.message,'error');}
   }
@@ -1674,29 +1618,24 @@ title: Reading Fluency</div>
     return 90;
   }
   function calendarAxisBand(angle){return angle<=0?70:angle<=20?76:angle<=35?82:angle<=50?90:angle<=65?98:108;}
-  function projectionRequestedXmax(){
-    let xmax=Math.max(1,state.parsed?.maxSessions||1);
-    (state.overlays||[]).forEach(o=>{if(Number.isFinite(Number(o.projectionDisplayXmax)))xmax=Math.max(xmax,Number(o.projectionDisplayXmax));});
-    return Math.max(1,Math.ceil(xmax));
-  }
   function timelineGeometry(){
-    const t=timelineSettingsFromUi(),actualMax=Math.max(1,state.parsed?.maxSessions||1),projectionMax=projectionRequestedXmax(),left=96,right=38,W=1000,innerW=W-left-right;
+    const t=timelineSettingsFromUi(),actualMax=Math.max(1,state.parsed?.maxSessions||1),left=96,right=38,W=1000,innerW=W-left-right;
     if(t.mode!=='calendar'){
-      const requested=t.minSessions==='auto'?actualMax:(t.minSessions==='custom'?t.customMinSessions:Number(t.minSessions)||15),xmax=Math.max(actualMax,requested,projectionMax);
+      const requested=t.minSessions==='auto'?actualMax:(t.minSessions==='custom'?t.customMinSessions:Number(t.minSessions)||15),xmax=Math.max(actualMax,requested);
       return {mode:'sequential',xmax,labelMode:'session',x:s=>left+((s-1)/(Math.max(1,xmax-1)))*innerW,dateMap:new Map(),dateAngle:0};
     }
-    const xmax=Math.max(actualMax,projectionMax),dateMap=generateSessionDateMap(t.firstSessionDate,t.weekdays,xmax,t.dateOverrides);
-    const first=dateMap.get(1).ms,last=dateMap.get(xmax).ms,span=Math.max(DAY_MS,last-first);
+    const dateMap=generateSessionDateMap(t.firstSessionDate,t.weekdays,actualMax,t.dateOverrides);
+    const first=dateMap.get(1).ms,last=dateMap.get(actualMax).ms,span=Math.max(DAY_MS,last-first);
     const sessionMs=s=>{
       if(Number.isInteger(s)&&dateMap.has(s))return dateMap.get(s).ms;
       const lo=Math.floor(s),hi=Math.ceil(s);
-      if(lo>=1&&hi<=xmax&&dateMap.has(lo)&&dateMap.has(hi)){if(lo===hi)return dateMap.get(lo).ms;return dateMap.get(lo).ms+(s-lo)*(dateMap.get(hi).ms-dateMap.get(lo).ms);}
+      if(lo>=1&&hi<=actualMax&&dateMap.has(lo)&&dateMap.has(hi)){if(lo===hi)return dateMap.get(lo).ms;return dateMap.get(lo).ms+(s-lo)*(dateMap.get(hi).ms-dateMap.get(lo).ms);}
       if(s<1){const step=actualMax>1?dateMap.get(2).ms-first:DAY_MS;return first+(s-1)*step;}
-      const step=xmax>1?last-dateMap.get(xmax-1).ms:DAY_MS;return last+(s-xmax)*step;
+      const step=actualMax>1?last-dateMap.get(actualMax-1).ms:DAY_MS;return last+(s-actualMax)*step;
     };
     const x=s=>left+((sessionMs(s)-first)/span)*innerW;
-    const dateAngle=calendarDateLabelAngle(dateMap,xmax,x);
-    return {mode:'calendar',xmax,labelMode:'both',dateMap,x,dateAngle};
+    const dateAngle=calendarDateLabelAngle(dateMap,actualMax,x);
+    return {mode:'calendar',xmax:actualMax,labelMode:'both',dateMap,x,dateAngle};
   }
   function shortDate(iso){const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${Number(m[2])}/${Number(m[3])}`:iso;}
   function graphMetrics(){
@@ -1730,21 +1669,7 @@ title: Reading Fluency</div>
         const tierOverlays=state.overlays.filter(o=>tier.seriesIndexes.includes(o.seriesIndex));
         tierOverlays.filter(o=>o.type!=='tauPointViz').forEach(o=>drawOverlay(svg,tg,o));
         tier.seriesIndexes.forEach(si=>{const ser=state.parsed.series[si],st=seriesStyleFor(gi,si),lw=Number(els.lineWidthInput.value)||2,r=Number(els.markerSizeInput.value)||5;
-          if(st.showLine!==false)ser.phases.forEach(ph=>{
-            const phasePoints=ser.points.filter(p=>p.phaseIndex===ph.phaseIndex).sort((a,b)=>a.session-b.session);
-            const pts=phasePoints.filter(p=>!state.ghosted.has(p.key));
-            const ghostSessions=new Set(phasePoints.filter(p=>state.ghosted.has(p.key)).map(p=>p.session));
-            for(let i=0;i<pts.length-1;i++){
-              const a=pts[i],b=pts[i+1];
-              let connect=b.session===a.session+1;
-              if(!connect && st.breakAtMissing===false){
-                let ghostBetween=false;
-                for(let ss=a.session+1;ss<b.session;ss++){if(ghostSessions.has(ss)){ghostBetween=true;break;}}
-                connect=!ghostBetween;
-              }
-              if(connect)svg.appendChild(svgEl('line',{x1:tg.x(a.session),y1:tg.y(a.score),x2:tg.x(b.session),y2:tg.y(b.score),stroke:st.stroke,'stroke-width':lw,fill:'none',...(st.dashArray?{'stroke-dasharray':st.dashArray}:{})}));
-            }
-          });
+          if(st.showLine!==false)ser.phases.forEach(ph=>{const pts=ser.points.filter(p=>p.phaseIndex===ph.phaseIndex&&!state.ghosted.has(p.key));for(let i=0;i<pts.length-1;i++)if(pts[i+1].session===pts[i].session+1)svg.appendChild(svgEl('line',{x1:tg.x(pts[i].session),y1:tg.y(pts[i].score),x2:tg.x(pts[i+1].session),y2:tg.y(pts[i+1].score),stroke:st.stroke,'stroke-width':lw,fill:'none',...(st.dashArray?{'stroke-dasharray':st.dashArray}:{})}));});
           ser.points.forEach(p=>{const ghost=state.ghosted.has(p.key);if(ghost&&!els.showGhostCheck.checked)return;drawMarker(svg,{x:tg.x(p.session),y:tg.y(p.score)},st,r,ghost,observationTooltip(si,p,gi,tg.timeline));});
         });
         // Tau-U is deliberately drawn last so its teaching visualization can never
@@ -1898,7 +1823,6 @@ title: Reading Fluency</div>
     const col=o.color||'#6b4f8a'; const dash=o.dash||'7 5';
     if(o.type==='hline') svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.y),x2:g.x(o.x2),y2:g.y(o.y),stroke:col,'stroke-width':2,'stroke-dasharray':dash}));
     if(o.type==='trend'){svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.slope*o.x1+o.intercept),x2:g.x(o.x2),y2:g.y(o.slope*o.x2+o.intercept),stroke:col,'stroke-width':2,'stroke-dasharray':dash}));}
-    if(o.type==='goalIntersection'){const x=g.x(o.x),y=g.y(o.y);svg.appendChild(svgEl('circle',{cx:x,cy:y,r:5,fill:'#fff',stroke:col,'stroke-width':2}));svg.appendChild(svgEl('text',{x:x+7,y:y-7,'font-size':10.5,'font-weight':700,fill:col},o.label||'Projected goal'));}
     if(o.type==='band'){
       const x1=g.x(o.x1),x2=g.x(o.x2), y1=g.y(o.high), y2=g.y(o.low); svg.appendChild(svgEl('rect',{x:x1,y:Math.min(y1,y2),width:x2-x1,height:Math.abs(y2-y1),fill:col,opacity:.10}));
       svg.appendChild(svgEl('line',{x1,x2,y1:g.y(o.low),y2:g.y(o.low),stroke:col,'stroke-width':1.4,'stroke-dasharray':'4 4'}));svg.appendChild(svgEl('line',{x1,x2,y1:g.y(o.high),y2:g.y(o.high),stroke:col,'stroke-width':1.4,'stroke-dasharray':'4 4'}));
@@ -2371,14 +2295,14 @@ title: Reading Fluency</div>
     const selectedSeries=seriesChoice==='all'?g.seriesIndexes:[Number(seriesChoice)];
     let dateMap=new Map();if(timelineSettingsFromUi().mode==='calendar'){try{dateMap=timelineGeometry().dateMap;}catch{dateMap=new Map();}}
     const phaseFilter=phaseChoice==='all'?null:Number(phaseChoice);
-    const rows=[];selectedSeries.forEach(si=>{const ser=state.parsed.series[si];if(!ser)return;const bySession=new Map(ser.points.map(p=>[p.session,p]));ser.phases.forEach(ph=>{if(Number.isInteger(phaseFilter)&&ph.phaseIndex!==phaseFilter)return;for(let ss=ph.startSession;ss<=ph.endSession;ss++){const p=bySession.get(ss),missing=!p;rows.push({series:ser.label,seriesIndex:si,underlyingSession:ss,displayedSession:displayedSessionNumber(gi,ss),date:dateMap.get(ss)?.iso||'',phase:phaseName(si,ph.phaseIndex),phaseIndex:ph.phaseIndex,score:missing?null:p.score,status:missing?'Missing':(state.ghosted.has(p.key)?'Ghosted':'Active')});}});});
+    const rows=[];selectedSeries.forEach(si=>{const ser=state.parsed.series[si];if(!ser)return;ser.points.forEach(p=>{if(Number.isInteger(phaseFilter)&&p.phaseIndex!==phaseFilter)return;rows.push({series:ser.label,seriesIndex:si,underlyingSession:p.session,displayedSession:displayedSessionNumber(gi,p.session),date:dateMap.get(p.session)?.iso||'',phase:phaseName(si,p.phaseIndex),phaseIndex:p.phaseIndex,score:p.score,status:state.ghosted.has(p.key)?'Ghosted':'Active'});});});
     return rows;
   }
   function dataTableHtml(graphChoice='0',seriesChoice='all',phaseChoice='all',className='graph-data-table'){
     const rows=dataTableRows(graphChoice,seriesChoice,phaseChoice);if(!rows.length)return '';
     const showDate=rows.some(r=>r.date),showUnderlying=rows.some(r=>r.displayedSession!==r.underlyingSession);
     const head=['Series','Session',...(showUnderlying?['Underlying']:[]),...(showDate?['Date']:[]),'Phase','Score','Status'];
-    const body=rows.map(r=>`<tr><td>${escapeHtml(r.series)}</td><td class="num">${r.displayedSession}</td>${showUnderlying?`<td class="num">${r.underlyingSession}</td>`:''}${showDate?`<td>${escapeHtml(r.date)}</td>`:''}<td>${escapeHtml(r.phase)}</td><td class="num">${r.status==='Missing'?'—':escapeHtml(fmt(r.score,6))}</td><td>${r.status}</td></tr>`).join('');
+    const body=rows.map(r=>`<tr><td>${escapeHtml(r.series)}</td><td class="num">${r.displayedSession}</td>${showUnderlying?`<td class="num">${r.underlyingSession}</td>`:''}${showDate?`<td>${escapeHtml(r.date)}</td>`:''}<td>${escapeHtml(r.phase)}</td><td class="num">${escapeHtml(fmt(r.score,6))}</td><td>${r.status}</td></tr>`).join('');
     return `<table class="${className}"><thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>`;
   }
   function updateGraphDataTableSelectors(){
@@ -2592,10 +2516,7 @@ title: Reading Fluency</div>
   }
 
   function analysisToggleKey(command,seriesIndex){
-    let key=`${seriesIndex}::${String(command||'').trim().replace(/\s+/g,' ').toLowerCase()}`;
-    const kind=String(command||'').trim().split(',')[0].trim().toLowerCase();
-    if(kind==='trend'||kind==='iqrtrend'||kind==='whiskertrend'){const mode=selectedTrendProjection();key+=`::projection=${mode}`;if(mode==='goal')key+=`::goal=${els.projectionGoalSelect?.value||''}`;}
-    return key;
+    return `${seriesIndex}::${String(command||'').trim().replace(/\s+/g,' ').toLowerCase()}`;
   }
   function analysisIsActive(key){
     return state.overlays.some(o=>o.analysisId===key)||state.results.some(r=>r.analysisId===key);
@@ -2608,7 +2529,7 @@ title: Reading Fluency</div>
       b.classList.toggle('analysis-active',active);
       b.setAttribute('aria-pressed',active?'true':'false');
       const kind=b.dataset.analysis||'';
-      const projectionTip=(kind==='Trend'||kind==='IQRTrend')?' Trend projection follows the selected mode: observed data only, to the end of the X-axis, or forward to a selected goal-line intersection.':'';
+      const projectionTip=(kind==='Trend'||kind==='IQRTrend')?' Trend projections extend across the full displayed destination phase, including empty future session positions.':'';
       b.title=active?'Click to remove this analysis':`Click to add this analysis.${projectionTip}`;
     });
   }
@@ -2637,16 +2558,6 @@ title: Reading Fluency</div>
     // the Theil–Sen slope/intercept are still calculated exclusively from the source phase.
     if(destIndex===ser.phases.length-1){try{x2=Math.max(x2,Number(timelineGeometry().xmax)||x2);}catch{}}
     return {x1:p.startSession,x2};
-  }
-  function goalProjectionForTrend(tr,pts,goal){
-    if(!goal||!Number.isFinite(Number(goal.y)))throw new Error('Choose a goal line for the trend projection.');
-    if(!Number.isFinite(tr?.slope)||!Number.isFinite(tr?.intercept))throw new Error('The fitted trend is unavailable for goal projection.');
-    if(Math.abs(tr.slope)<1e-12)throw new Error('The fitted trend is essentially flat, so it does not project to a future goal intersection.');
-    const lastObserved=Math.max(...pts.map(p=>p.session)),xGoal=(Number(goal.y)-tr.intercept)/tr.slope;
-    if(!Number.isFinite(xGoal))throw new Error('The goal intersection could not be calculated from the fitted trend.');
-    if(xGoal<=lastObserved+1e-9)throw new Error(`The fitted trend reaches or crosses Goal ${fmt(goal.y,3)} within the observed data; there is no future goal intersection to project.`);
-    if(xGoal-lastObserved>250)throw new Error(`The projected goal intersection is more than 250 future sessions beyond the observed data. Adjust the goal or inspect the trend before projecting that far.`);
-    return {xGoal,lastObserved,displayXmax:Math.ceil(xGoal)+1};
   }
   function parseSeriesFromCommand(command){
     let s=String(command||'').trim(), explicit=null;
@@ -2684,21 +2595,14 @@ title: Reading Fluency</div>
           addResult(`${displayKind(kind)} — ${ser.label} — ${phaseName(si,ph)}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId); renderGraph(); return;
         }
         const tr=theilSen(pts), angle=Math.atan(tr.slope)*180/Math.PI, dir=tr.slope>0?'increasing':tr.slope<0?'decreasing':'flat';
-        const projectionMode=selectedTrendProjection(),lastObserved=Math.max(...pts.map(p=>p.session));
-        let projectionSpan={x1:ser.phases[ph].startSession,x2:lastObserved},projectionDisplayXmax=null,goalProjection=null,projectionText=' Displayed only through the last active observation.';
-        if(projectionMode==='axis'){projectionSpan={x1:ser.phases[ph].startSession,x2:timelineGeometry().xmax};projectionText=` Projected to the current end of the X-axis at session ${fmt(projectionSpan.x2,0)}.`;}
-        else if(projectionMode==='goal'){const goal=selectedProjectionGoal();if(!goal)throw new Error('To goal requires a goal line that applies to the selected series and source phase.');goalProjection=goalProjectionForTrend(tr,pts,goal);projectionSpan={x1:ser.phases[ph].startSession,x2:goalProjection.xGoal};projectionDisplayXmax=goalProjection.displayXmax;projectionText=` Projected beyond the observed data to Goal ${fmt(goal.y,3)} at session ${fmt(goalProjection.xGoal,2)}.`;}
-        else if(through>ph){projectionSpan={x1:ser.phases[ph].startSession,x2:lastObserved};}
-        const projectionMeta={projectionMode,...(projectionDisplayXmax?{projectionDisplayXmax}:{}),...(goalProjection?{projectionGoalId:selectedProjectionGoal()?.id||'',projectionGoalY:selectedProjectionGoal()?.y,projectionX:goalProjection.xGoal}:{} )};
-        state.overlays.push({type:'trend',...projectionSpan,...tr,...projectionMeta,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
-        let lines=[`Theil–Sen slope = ${fmt(tr.slope,3)} per session (${dir}); angle = ${fmt(angle,1)}°. Calculated from observed ${phaseName(si,ph)} data only.${projectionText}`];
-        if(goalProjection){const lo=Math.floor(goalProjection.xGoal),hi=Math.ceil(goalProjection.xGoal);lines.push(lo===hi?`Projected goal intersection: Session ${lo}.`:`Projected goal intersection: Session ${fmt(goalProjection.xGoal,2)} (between Sessions ${lo} and ${hi}).`);state.overlays.push({type:'goalIntersection',x:goalProjection.xGoal,y:selectedProjectionGoal().y,label:`Goal @ S${fmt(goalProjection.xGoal,1)}`,...projectionMeta,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});}
+        state.overlays.push({type:'trend',...trendSpan,...tr,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
+        let lines=[`Theil–Sen slope = ${fmt(tr.slope,3)} per session (${dir}); angle = ${fmt(angle,1)}°.${spanNote}${trendSpanNote}`];
         if(kind==='iqrtrend'||kind==='whiskertrend'){
           const iqrStats=trendIQRMargin(pts,tr);
-          state.overlays.push({type:'trendBand',...projectionSpan,...tr,q1:iqrStats.q1,q3:iqrStats.q3,...projectionMeta,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
-          lines.push(`Residual Q1 = ${fmt(iqrStats.q1,3)}; Q3 = ${fmt(iqrStats.q3,3)}; residual IQR = ${fmt(iqrStats.iqr,3)}. The band follows the same projection span as the center trend.`);
+          state.overlays.push({type:'trendBand',...trendSpan,...tr,q1:iqrStats.q1,q3:iqrStats.q3,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
+          lines.push(`Residual Q1 = ${fmt(iqrStats.q1,3)}; Q3 = ${fmt(iqrStats.q3,3)}; residual IQR = ${fmt(iqrStats.iqr,3)}.`);
         }
-        addResult(`${displayKind(kind)} — ${ser.label} — ${phaseName(si,ph)}`,lines,`Series ${si+1}; n=${pts.length}; projection=${projectionMode}`,analysisId); renderGraph(); return;
+        addResult(`${displayKind(kind)} — ${ser.label} — ${phaseName(si,ph)}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId); renderGraph(); return;
       }
       const pA=phaseIndex(parts[1]||'1',si),pB=phaseIndex(parts[2]||'2',si); if(pA<0||pB<0)throw new Error('Comparison phase not found.'); const a=activeScores(pA,si),b=activeScores(pB,si),dir=state.direction,alpha=Number(els.alphaInput.value)||.05;
       if(!a.length||!b.length)throw new Error(`Both phases need active observations for ${ser.label}.`);
@@ -2829,8 +2733,7 @@ title: Reading Fluency</div>
   function transformGhostInData(session,makeGhost,seriesIdx){
     if(!Number.isInteger(session)||session<1)throw new Error('Give a valid session number.');const ser=state.parsed?.series?.[seriesIdx];if(!ser)throw new Error('Series not found.');
     const lines=els.dataInput.value.split(/\n/),lineIndex=ser.sourceLineIndex,line=lines[lineIndex];if(line===undefined)throw new Error('Source series line not found.');const colon=line.indexOf(':');if(colon<0)throw new Error('Source series line is invalid.');
-    const prefix=line.slice(0,colon+1),raw=line.slice(colon+1);let counter=0,found=false,missingTarget=false;const rebuilt=raw.split('|').map(chunk=>{const toks=chunk.split(',');return toks.map((token,idx)=>{const trimmed=token.trim(),isMissing=trimmed===''&&idx>0&&idx<toks.length-1;if(trimmed===''&&!isMissing)return token;counter++;if(counter!==session)return token;if(isMissing){missingTarget=true;return token;}found=true;const lead=(token.match(/^\s*/)||[''])[0],trail=(token.match(/\s*$/)||[''])[0];let core=trimmed,wrapped=core.match(/^\(\s*(.*?)\s*\)$/);core=wrapped?wrapped[1].trim():core;return lead+(makeGhost?`(${core})`:core)+trail;}).join(',');}).join('|');
-    if(missingTarget)throw new Error(`Session ${session} in ${ser.label} is a missing-data slot and has no observation to ${makeGhost?'ghost':'restore'}.`);
+    const prefix=line.slice(0,colon+1),raw=line.slice(colon+1);let counter=0,found=false;const rebuilt=raw.split('|').map(chunk=>chunk.split(',').map(token=>{if(!token.trim())return token;counter++;if(counter!==session)return token;found=true;const lead=(token.match(/^\s*/)||[''])[0],trail=(token.match(/\s*$/)||[''])[0];let core=token.trim(),wrapped=core.match(/^\(\s*(.*?)\s*\)$/);core=wrapped?wrapped[1].trim():core;return lead+(makeGhost?`(${core})`:core)+trail;}).join(',')).join('|');
     if(!found)throw new Error(`Session ${session} not found in ${ser.label}.`);lines[lineIndex]=prefix+rebuilt;els.dataInput.value=lines.join('\n');loadData();
   }
   function ghostSession(session,seriesIdx){const label=state.parsed.series[seriesIdx].label;transformGhostInData(session,true,seriesIdx);status(`${label}, Session ${session} is now parenthesized and ghosted in the data stream.`,'ok');}
@@ -2879,14 +2782,14 @@ title: Reading Fluency</div>
   }
   function reset(){
     if(els.graphDataTableDrawer)els.graphDataTableDrawer.classList.remove('open');if(els.toggleDataTableBtn){els.toggleDataTableBtn.setAttribute('aria-expanded','false');els.toggleDataTableBtn.textContent='Show Data Table';}
-    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=true;if(els.breakAtMissingCheck){els.breakAtMissingCheck.checked=true;els.breakAtMissingCheck.disabled=false;}loadTimelineControls({mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]});els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.analysisCommand.value='T-U, 1, 2';if(els.trendProjectionSelect)els.trendProjectionSelect.value='observed';updateTrendProjectionControls();els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
+    els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=true;loadTimelineControls({mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]});els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
   }
   function collectState(){
     saveSelectedGraphControls(false);
     const modules=[...document.querySelectorAll('details.module')];
     return {
       format:'SCGraph2-state',
-      version:40,
+      version:37,
       savedAt:new Date().toISOString(),
       data:{
         source:els.dataInput.value,
@@ -2926,8 +2829,6 @@ title: Reading Fluency</div>
         tauLegendVisible:els.tauLegendCheck?.checked!==false,
         visualSourcePhase:Number(els.visualSourcePhaseSelect?.value)||0,
         visualDisplayThrough:Number(els.visualDisplayThroughSelect?.value)||0,
-        trendProjection:selectedTrendProjection(),
-        projectionGoalId:els.projectionGoalSelect?.value||'',
         overlays:JSON.parse(JSON.stringify(state.overlays||[])),
         results:JSON.parse(JSON.stringify(state.results||[]))
       },
@@ -3138,7 +3039,7 @@ title: Reading Fluency</div>
     els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';els.alphaInput.value=a.alpha??0.05;els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';if(els.tauVizSelect)els.tauVizSelect.value=['both','cloud','points','raw','corrected','off'].includes(a.tauVisualization)?a.tauVisualization:'both';if(els.tauLegendCheck)els.tauLegendCheck.checked=a.tauLegendVisible!==false;
     updateAnalysisGraphOptions(Number.isInteger(Number(a.selectedGraphIndex))?Number(a.selectedGraphIndex):0,a.selectedSeriesLabel||'');
     if(a.selectedSeriesLabel)updateAnalysisSeriesOptions(a.selectedSeriesLabel,selectedAnalysisGraph());
-    updateAnalysisPhaseOptions(Array.isArray(a.selectedPhases)?a.selectedPhases:[]);updateVisualSpanOptions(Number.isInteger(Number(a.visualSourcePhase))?Number(a.visualSourcePhase):null,Number.isInteger(Number(a.visualDisplayThrough))?Number(a.visualDisplayThrough):null);if(els.trendProjectionSelect)els.trendProjectionSelect.value=['observed','axis','goal'].includes(a.trendProjection)?a.trendProjection:'observed';updateTrendProjectionControls(typeof a.projectionGoalId==='string'?a.projectionGoalId:'');
+    updateAnalysisPhaseOptions(Array.isArray(a.selectedPhases)?a.selectedPhases:[]);updateVisualSpanOptions(Number.isInteger(Number(a.visualSourcePhase))?Number(a.visualSourcePhase):null,Number.isInteger(Number(a.visualDisplayThrough))?Number(a.visualDisplayThrough):null);
     state.overlays=Array.isArray(a.overlays)?JSON.parse(JSON.stringify(a.overlays)):[];state.results=Array.isArray(a.results)?JSON.parse(JSON.stringify(a.results)):[];
     if(els.reportEditor)els.reportEditor.innerHTML=sanitizeReportHtml(typeof r.html==='string'?r.html:'');setReportPreview(false);syncReportEditors(els.reportEditor);updateReportSelectors();
     const modules=[...document.querySelectorAll('details.module')];
@@ -3271,17 +3172,15 @@ title: Reading Fluency</div>
     }catch(e){status(e.message,'error');}
   });});
   els.analysisGraphSelect.addEventListener('change',()=>{const gi=selectedAnalysisGraph();updateAnalysisSeriesOptions('',gi);updateAnalysisToggleButtons();status(gi>=0?`Analysis graph set to ${state.graphSettings[gi]?.label||`Graph ${gi+1}`}.`:'Choose the graph you want to analyze.','ok');});
-  els.analysisSeriesSelect.addEventListener('change',()=>{const si=selectedAnalysisSeries();updateAnalysisPhaseOptions();updateTrendProjectionControls();updateAnalysisToggleButtons();status(si>=0?`Analysis series set to ${state.parsed.series[si].label}.`:'Choose the series you want to analyze.','ok');});
+  els.analysisSeriesSelect.addEventListener('change',()=>{const si=selectedAnalysisSeries();updateAnalysisPhaseOptions();updateAnalysisToggleButtons();status(si>=0?`Analysis series set to ${state.parsed.series[si].label}.`:'Choose the series you want to analyze.','ok');});
   if(els.analysisPhaseSelect)els.analysisPhaseSelect.addEventListener('change',()=>{const p=selectedAnalysisPhases();if(p.length===1)updateVisualSpanOptions(p[0],p[0]);updateAnalysisToggleButtons();});
-  if(els.visualSourcePhaseSelect)els.visualSourcePhaseSelect.addEventListener('change',()=>{updateVisualSpanOptions(Number(els.visualSourcePhaseSelect.value),Number(els.visualSourcePhaseSelect.value));updateTrendProjectionControls();updateAnalysisToggleButtons();});
+  if(els.visualSourcePhaseSelect)els.visualSourcePhaseSelect.addEventListener('change',()=>{updateVisualSpanOptions(Number(els.visualSourcePhaseSelect.value),Number(els.visualSourcePhaseSelect.value));updateAnalysisToggleButtons();});
   if(els.visualDisplayThroughSelect)els.visualDisplayThroughSelect.addEventListener('change',updateAnalysisToggleButtons);
-  if(els.trendProjectionSelect)els.trendProjectionSelect.addEventListener('change',()=>{updateTrendProjectionControls();updateAnalysisToggleButtons();});
-  if(els.projectionGoalSelect)els.projectionGoalSelect.addEventListener('change',updateAnalysisToggleButtons);
   $('addGoalLineBtn').addEventListener('click',addOrUpdateGoalLine);
-  $('clearGoalLinesBtn').addEventListener('click',()=>{invalidateGoalProjectionAnalyses(null);state.goalLines=[];renderGoalLineList();renderResults();updateTrendProjectionControls();renderGraph();status('Goal lines cleared. Goal-dependent trend projections were removed.','ok');});
+  $('clearGoalLinesBtn').addEventListener('click',()=>{state.goalLines=[];renderGoalLineList();renderGraph();status('Goal lines cleared.','ok');});
   els.goalSeriesSelect.addEventListener('change',()=>{const si=Number(els.goalSeriesSelect.value);if(state.parsed&&Number.isInteger(si)&&state.parsed.series[si])updateGoalControls(state.parsed.series[si].label);});
   els.goalStartPhaseSelect.addEventListener('change',()=>{if(Number(els.goalEndPhaseSelect.value)<Number(els.goalStartPhaseSelect.value))els.goalEndPhaseSelect.value=els.goalStartPhaseSelect.value;});
-  els.goalLineList.addEventListener('click',e=>{const b=e.target.closest('[data-remove-goal]');if(!b)return;const id=b.dataset.removeGoal;invalidateGoalProjectionAnalyses(id);state.goalLines=state.goalLines.filter(g=>g.id!==id);renderGoalLineList();renderResults();updateTrendProjectionControls();renderGraph();status('Goal line removed. Any dependent trend projection was removed with it.','ok');});
+  els.goalLineList.addEventListener('click',e=>{const b=e.target.closest('[data-remove-goal]');if(!b)return;state.goalLines=state.goalLines.filter(g=>g.id!==b.dataset.removeGoal);renderGoalLineList();renderGraph();status('Goal line removed.','ok');});
   $('clearOverlaysBtn').addEventListener('click',()=>{state.overlays=[];state.results=[];renderResults();renderGraph();updateAnalysisToggleButtons();status('Analysis overlays cleared. Goal lines were retained.','ok');});
   $('restoreGhostsBtn').addEventListener('click',()=>{els.dataInput.value=els.dataInput.value.replace(/\(\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*\)/g,'$1');loadData();status('All parenthesized observations restored in the data stream.','ok');});
   const startUpDialog=$('startUpDialog');
@@ -3451,8 +3350,7 @@ title: Reading Fluency</div>
   if(els.lineStyleSeriesSelect)els.lineStyleSeriesSelect.addEventListener('change',loadSelectedSeriesStyleControls);
   if(els.lineDashSelect)els.lineDashSelect.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
   if(els.lineColorInput)els.lineColorInput.addEventListener('input',()=>{saveSelectedSeriesStyleControls();renderGraph();});
-  if(els.showConnectingLineCheck)els.showConnectingLineCheck.addEventListener('change',()=>{if(els.breakAtMissingCheck)els.breakAtMissingCheck.disabled=!els.showConnectingLineCheck.checked;saveSelectedSeriesStyleControls();renderGraph();});
-  if(els.breakAtMissingCheck)els.breakAtMissingCheck.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
+  if(els.showConnectingLineCheck)els.showConnectingLineCheck.addEventListener('change',()=>{saveSelectedSeriesStyleControls();renderGraph();});
   [els.minSessionsSelect,els.customMinSessionsInput].filter(Boolean).forEach(el=>el.addEventListener('change',()=>{saveTimelineControls();renderGraph();}));
   if(els.phaseNumberingList){els.phaseNumberingList.addEventListener('change',e=>{if(e.target?.matches?.('[data-phase-numbering-index]'))savePhaseNumberingControls(true);});els.phaseNumberingList.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target?.matches?.('[data-phase-numbering-index]')){e.preventDefault();savePhaseNumberingControls(true);}});}
   if(els.xScaleModeSelect)els.xScaleModeSelect.addEventListener('change',()=>{state.timeline.dateOverrides={};saveTimelineControls();renderGraph();});

@@ -1,20 +1,14 @@
-# SCGraph2 2.2.13
+# SCGraph2 2.2.10
 
-Standalone single-file HTML application for single-case graphing and analysis.
+Standalone single-file HTML app for single-case graphing and analysis.
 
-## Revision 2.2.13
+## This revision
 
-Adds Trend/IQR Trend projection beyond observed data with three modes:
+- Goal lines now span the full displayed width of their selected phase range.
+- When a goal reaches the final displayed phase, it continues across unused/future session positions rather than stopping at the last observation.
+- Goal-line Help, Start Up guidance, hints, and tooltips were updated to describe the behavior.
+- Existing goal-line values, phase selection, JSON persistence, analyses, calendar timeline, data table, report workspace, and other SCGraph2 features are preserved.
 
-- **Observed data only** — stop at the last active observed point.
-- **To end of X-axis** — project the fitted trend and IQR band across the current displayed session range.
-- **To goal** — project the source-phase Theil–Sen trend forward until it intersects a selected applicable goal line, extend the X-axis when necessary, and mark the projected intersection.
+## GitHub Pages
 
-The projection changes display only. The trend and IQR band continue to be calculated from observed source-phase data. Goal-dependent projections are invalidated automatically if their goal is edited or removed.
-
-Help, Start Up guidance, tooltips, saved-state persistence, and result text were updated for the new projection modes.
-
-## Files
-
-- `index.html` — GitHub Pages entry point
-- `SCGraph2.html` — standalone application
+`index.html` and `SCGraph2.html` are identical. Upload the contents of this folder to a GitHub Pages repository and use `index.html` as the entry point.
