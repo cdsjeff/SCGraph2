@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SCGraph2 — Single-Case Graphing & Analysis</title>
+<title>SCGraph2 2.2.29 — Single-Case Graphing & Analysis</title>
 <style>
   :root{
     --bg:#f4f6f8; --panel:#ffffff; --ink:#111827; --muted:#5f6b7a; --line:#d7dde5;
@@ -223,6 +223,7 @@
   .quick-grid button.analysis-active:hover{background:#163d61}.quick-grid button.analysis-active::after{content:'  ✓';font-weight:800}
   #results{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow:auto;padding-right:2px}
   .result{border:1px solid #dce2e8;border-left:4px solid var(--accent2);border-radius:9px;padding:9px 10px;background:#fff}.result h3{font-size:13px;margin:0 0 5px}.result p{font-size:12px;color:#45515f;line-height:1.4;margin:3px 0}.result .meta{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#334155}
+  .results-format{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;margin:0 0 9px}.result .result-caution{margin-top:9px;padding:7px 8px;border-left:3px solid #b7791f;background:#fff8e8;color:#744b13;border-radius:3px}.result .result-context{font-family:inherit;color:#64748b;margin-bottom:8px}
   .pill{display:inline-flex;align-items:center;border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:3px 7px;font-size:11px;color:#475569;margin-right:5px}
   .empty{color:#7b8794;font-size:12px;padding:6px 0}
   .divider{height:1px;background:#e5e7eb;margin:10px 0}
@@ -373,7 +374,7 @@
 </head>
 <body>
 <header>
-  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.10</span></div>
+  <div class="brand"><h1>SCGraph2</h1><span>Single-Case Graphing & Analysis · 2.2.29</span></div>
   <div class="header-actions">
     <button id="startUpBtn" class="small">Start Up</button>
     <button id="helpBtn" class="small">Help</button>
@@ -420,7 +421,7 @@
       <div class="module-body data-pane-body">
         <div class="data-scroll-content">
           <div class="field"><label for="dataInput">Single-case data</label><textarea id="dataInput" class="mono">Sniffing: 2,4,5,2|6,7,4,5</textarea>
-            <div class="hint">Format: <span class="kbd">Series Label: 1,2,3|4,5,6</span>. Use <span class="kbd">|</span> for a phase boundary. Plain adjacent series are plotted together. Put <span class="kbd">+</span> alone on a line between series to create stacked multiple-baseline tiers sharing one Session axis; put <span class="kbd">-</span> alone on a line to start a separate graph (up to 3 graph panels). Ghost a value with parentheses, e.g. <span class="kbd">1,2,(3)|4,5,6</span>.</div>
+            <div class="hint">Format: <span class="kbd">Series Label: 1,2,3|4,5,6</span>. Use <span class="kbd">|</span> for a phase boundary. Empty comma-separated fields count as missing sessions: <span class="kbd">1,2,,4</span> places 4 at Session 4, with Session 3 blank; <span class="kbd">1,,,4</span> leaves Sessions 2 and 3 blank. Leading and trailing empty fields also count. Missing sessions have no marker or score, and lines do not bridge them. Plain adjacent series are plotted together. Put <span class="kbd">+</span> alone on a line between series to create stacked multiple-baseline tiers sharing one Session axis; put <span class="kbd">-</span> alone on a line to start a separate graph (up to 3 graph panels). Ghost a value with parentheses, e.g. <span class="kbd">1,2,(3)|4,5,6</span>.</div>
           </div>
           <div class="grid2">
             <div class="field"><label for="phaseNamesData">Default phase names</label><input id="phaseNamesData" type="text" placeholder="Baseline, Intervention"></div>
@@ -653,26 +654,45 @@
         <details class="subpane" data-subpane="quantitative-analysis">
           <summary>Comparative / Quantitative Analysis</summary>
           <div class="subpane-body">
+            <div class="hint" style="margin-bottom:8px">Every quantitative run reloads pending data edits, clears prior analysis overlays and results, and redraws the data before displaying the new analysis. P-value comparisons default to the selected improvement direction and one-sided alpha. An optional two-sided alternative is available specifically for Tau-U. PND and overlap categories are descriptive, not alpha tests. Click an active quantitative button to run it again.</div>
             <div class="quick-grid">
               <button data-analysis="PND" data-analysis-scope="compare">PND — selected pair</button>
               <button data-analysis="M-W" data-analysis-scope="compare">Mann–Whitney — selected pair</button>
               <button data-analysis="TrendBinomial" data-analysis-scope="compare">Trend + 0.3 IQR — selected pair</button>
               <button data-analysis="T-U" data-analysis-scope="compare">Tau-U — selected pair</button>
             </div>
+            <div class="hint" style="margin-top:8px">Mann–Whitney uses A score levels/ranks with a fixed horizontal A-median reference, without trend correction. Its one-sided pairwise non-overlap bands (NAP): favorable comparisons count 1, ties count 0.5. Display cutoffs: below 70% dark, 70–&lt;90% light, ≥90% unshaded. These descriptive bands are separate from the test's p value; NAP 50% means neither phase dominates.</div>
             <div class="field"><label>Series-specific command syntax</label><div class="help-example" style="margin:0">T-U, series=Accuracy, 1, 2</div><div class="hint">The selected Graph scopes <span class="kbd">series=2</span> and series-label commands to that graph.</div></div>
             <div class="field"><label for="analysisCommand">Analysis command or request</label>
               <div class="row grow"><input id="analysisCommand" type="text" value="T-U, 1, 2"><button id="runAnalysisBtn" class="primary">Run</button></div>
               <div class="hint">Compact commands and natural language both work: <span class="kbd">Level, 1, 3</span> draws separate level lines in phases 1 and 3; <span class="kbd">T-U, series=Accuracy, 1, 3</span> compares phases 1 and 3 even when phase 2 lies between them; <span class="kbd">TrendBinomial, 1, 3</span> works the same way. The phase selector above provides the same control without typing commands. Ghosting is stored directly in the data stream with parentheses.</div>
             </div>
             <div class="grid2">
-              <div class="field"><label for="alphaInput">Alpha</label><input id="alphaInput" type="number" min="0.001" max="0.5" step="0.001" value="0.05"></div>
+              <div class="field"><label for="alphaInput">Alpha (one-sided by default)</label><input id="alphaInput" type="number" min="0.001" max="0.5" step="0.001" value="0.05"></div>
               <div class="field"><label for="tauCorrectionSelect">Tau-U baseline correction</label><select id="tauCorrectionSelect"><option value="auto">Auto when baseline improvement τ ≥ .20</option><option value="yes">Always correct</option><option value="no">Do not correct</option></select></div>
+            </div>
+            <div class="field" style="margin:2px 0 8px">
+              <label for="tauAlternativeSelect">Tau-U statistical alternative</label>
+              <select id="tauAlternativeSelect">
+                <option value="one-sided" selected>One-sided — improvement direction (default)</option>
+                <option value="two-sided">Two-sided — either direction</option>
+              </select>
+              <div class="hint">One-sided tests improvement in the selected higher/lower direction. Two-sided tests a difference in either direction. Run Tau-U after changing the choice. This choice controls the reported p value; the overlap shading remains directional. When baseline correction is applied, the uncorrected contrast's p value is labelled as reference only.</div>
+            </div>
+            <div class="field" style="margin:2px 0 8px">
+              <label for="tauLengthModeSelect">Phase lengths for Tau-U bands</label>
+              <select id="tauLengthModeSelect">
+                <option value="sessions" selected>Full A:B phase lengths — include blank sessions</option>
+                <option value="observed">Observed phase lengths only — original display</option>
+              </select>
+              <div class="hint">Run Tau-U after changing this choice. Phase weighting uses the full relative A:B lengths. Shorter A phases have less lasting correction influence; longer A phases retain more. As B accumulates sessions its contrast outweighs the fixed A contribution. Missing and ghosted positions also count toward these lengths. It changes baseline-correction weighting in the gray bands; standard Tau-U and point/ring statistics still use active observations. No scores are imputed. With correction off or zero baseline trend, phase weighting has no effect.</div>
             </div>
             <div class="field" style="margin:2px 0 8px">
               <label for="tauVizSelect">Tau-U visualization</label>
               <select id="tauVizSelect">
-                <option value="both" selected>Cloud + points — recommended</option>
-                <option value="cloud">Cloud only — waning baseline influence</option>
+                <option value="both" selected>One-sided Tau-U bands + points — recommended</option>
+                <option value="cloud">One-sided Tau-U bands only</option>
+                <option value="influence">Legacy cloud — waning baseline influence</option>
                 <option value="points">Points only — raw ring + corrected point</option>
                 <option value="raw">Raw point contributions only</option>
                 <option value="corrected">Corrected points only</option>
@@ -681,9 +701,10 @@
             </div>
             <div class="checks" style="margin:0 0 8px">
               <label><input type="checkbox" id="tauLegendCheck" checked> Show detailed Tau-U legend</label>
+              <label><input type="checkbox" id="tauIQRCheck" checked> Show A trend + residual IQR when corrected</label>
             </div>
             <div class="hint" style="margin-top:-3px;margin-bottom:8px">
-              The visualization is session-dependent. The blue cloud is a baseline-explainable influence field, not a probability distribution. For higher-is-better outcomes, it extends mainly downward from the projected Phase A trajectory because values at or below that trajectory do not exceed what the preexisting improvement can account for; for lower-is-better outcomes, the direction reverses. A smaller fading margin extends beyond the trajectory in the improvement direction to reflect baseline variability. The field also fades horizontally as S_A/(nA×j) wanes across B.
+              Each quantitative Run replaces the previous analysis display and results with a fresh data plot and the new analysis. Pending data edits are loaded automatically. One-sided conditional Tau-U score bands: at each B position, hypothetical scores are compared with A and combined with actual earlier B observations. One-sided improvement index (signed Tau-U × 100): below 50 = no difference (dark); 50–&lt;70 = negligible difference (dark); 70–&lt;90 = noticeable difference (light); 90 and above = distinct difference (unshaded). Negative values remain dark and indicate an opposite-direction contrast, not improvement or equivalence. Choose the phase-length basis above: 'Full A:B phase lengths' uses complete A and B session spans for the custom band correction; 'Observed phase lengths only' retains the original calculation. No scores are imputed. Calendar time does not affect either mode. These bands need not be symmetric around a trend or narrow continuously. In observed-data mode each actual score matches cumulative statistical Tau-U. In session-weighted mode the gray bands are a custom display index; points/rings and the reported standard Tau-U remain based on active observations. The gray bands are Tau-U categories, not an IQR. When correction is applied, a separate teal envelope follows the projected A trend, bounded by Q1 and Q3 of A residuals. Its width reflects baseline variability and is not forced to fade. Use the checkbox above to show/hide it. The bands are not confidence intervals. PND shading is unchanged.
             </div>
           </div>
         </details>
@@ -691,6 +712,7 @@
         <details class="subpane" data-subpane="analysis-results">
           <summary>Results</summary>
           <div class="subpane-body">
+            <label class="results-format"><input id="detailedResultsCheck" type="checkbox"> Show detailed results</label>
             <div id="results"><div class="empty">Run an analysis to see results and interpretation.</div></div>
           </div>
         </details>
@@ -804,7 +826,8 @@ Student C: 1,2,2,3,3,4,4|7,8,9</div>
     <div class="help-example">Sniffing: 2,4,(5),2|6,7,4,5</div>
     <p>Here, Session 3 remains at Session 3 but is displayed in gray, omitted from active connecting lines, and excluded from visual and quantitative calculations. Parentheses do not consume or change session numbers. Remove the parentheses to restore the point, or use <strong>Un-ghost all points</strong>.</p>
 
-    <h3>Selected-phase analyses</h3><p>The Analysis pane includes a multi-select <strong>Phase(s) to analyze</strong> control. Level, IQR Level, Trend, and IQR Trend can be applied to one or several selected phases at once; each overlay is confined to its own phase. Trend IQR overlays are shaded the same way as level IQR overlays. PND, Mann–Whitney, Trend + 0.3 IQR, and Tau-U require exactly two selected phases, which may be nonadjacent (for example Phase 1 vs Phase 3).</p><h3>Phase boundaries and graph conventions</h3>
+    <h3>Simple and detailed results</h3><p>Results default to short Comparison, Note, and Alert summaries. Select <strong>Show detailed results</strong> in Results for the full calculations, shading definitions, and session-by-session explanations. The choice changes the text immediately without rerunning the analysis or changing the graph, and is saved in the session. Insert Analysis Results uses the selected format. Rerun analyses from older sessions to generate the new summaries; their original detailed output remains available. If any analyzed phase has fewer than five observed data points, a caution appears in both formats and in inserted report results. Blank and ghosted sessions do not count as observed data points. PND interpretation is descriptive; uncorrected Tau percentages describe net pairwise non-overlap, rather than the percentage of individual points. Baseline-corrected Tau-U does not receive an invented p-value or a significance decision based on its uncorrected p-value.</p>
+    <h3>Mann–Whitney overlap bands</h3><p>Mann–Whitney runs draw directional non-overlap-of-all-pairs (NAP) bands across the selected B phase, using the fixed raw A score distribution. The horizontal dashed reference is the A median. No A-phase trend correction or projection is used; reordering the same A scores leaves the result and shading unchanged. Tied A–B pairs receive half weight. The bands combine actual earlier B observations with hypothetical score ranges; missing and ghosted positions add no comparisons. The requested display cutoffs are used descriptively and do not define p values or standard NAP interpretation thresholds. A 50% NAP is neutral; values below 50% favor the opposite direction. The reported Mann–Whitney p value is one-sided in the selected improvement direction. Basis: <a href="https://doi.org/10.1016/j.beth.2008.10.006" target="_blank" rel="noopener">Parker and Vannest (2009)</a>.</p><h3>Tau-U statistical alternative</h3><p>Tau-U defaults to a one-sided test for improvement in the selected higher/lower score direction. The statistical-alternative selector offers an optional two-sided test for a difference in either direction. It is saved in the session; older sessions without this setting use one-sided. Reset restores one-sided. The choice changes p-value calculation and interpretation, while directional score bands retain the selected improvement direction. If baseline correction is applied, the reported uncorrected p value is reference only.</p><h3>Practical distinction shading</h3><p>PND shades the non-improvement side of the A criterion through the adjacent phase and reports the four distinction categories. Tau-U bands show hypothetical B score ranges yielding each category, conditional on actual earlier B observations. Signed improvement index below 50 = no difference (dark); 50–&lt;70 = negligible difference (dark); 70–&lt;90 = noticeable difference (light); 90 and above = distinct difference (unshaded). Negative values remain dark and indicate an opposite-direction contrast, not improvement or equivalence. The phase-length selector defaults to 'Full A:B phase lengths', a custom display correction τ_A × (A session length − 1)/(2 × B session position). The original observed-data calculation remains selectable. Neither mode invents missing scores. Standard Tau-U and point/ring values always use active observations; session-weighted gray bands are explicitly labelled as a custom index. Run Tau-U after changing the choice. See Results for the exact calculation. Bands are not confidence intervals and need not center on the projected trend. Rerun older saved analyses to generate score bands.</p><h3>Selected-phase analyses</h3><p>The Analysis pane includes a multi-select <strong>Phase(s) to analyze</strong> control. Level, IQR Level, Trend, and IQR Trend can be applied to one or several selected phases at once; each overlay is confined to its own phase. Trend IQR overlays are shaded the same way as level IQR overlays. PND, Mann–Whitney, Trend + 0.3 IQR, and Tau-U require exactly two selected phases, which may be nonadjacent (for example Phase 1 vs Phase 3).</p><h3>Phase boundaries and graph conventions</h3>
     <ul>
       <li>Each <span class="kbd">|</span> creates a thin solid vertical phase line halfway between the adjoining sessions.</li>
       <li>Observations are connected only within a phase; lines never cross a phase boundary.</li>
@@ -833,7 +856,7 @@ whisker-Level, 1</div>
 M-W, 1, 2
 TrendBinomial, 1, 2
 T-U, 1, 2</div>
-    <p>The first phase is the control/comparison phase and the second is the treatment/comparison phase. <strong>TrendBinomial</strong> (the “Trend + 0.3 IQR” button) fits the Theil–Sen trend in the first phase, computes its residual IQR, projects parallel bounds at trend ± 0.30 × IQR, and tests how many second-phase observations cross the improvement-side boundary. Counts above, below, and within the envelope are reported. The legacy command <span class="kbd">binomial, 1, 2</span> remains accepted as an alias. Ghosted observations are excluded. Use the improvement-direction control when lower values represent improvement.</p>
+    <p>The first phase is the control/comparison phase and the second is the treatment/comparison phase. <strong>TrendBinomial</strong> (the “Trend + 0.3 IQR” button) fits the Theil–Sen trend in the first phase, computes its residual IQR, projects parallel bounds at trend ± 0.30 × IQR, and tests how many second-phase observations cross the improvement-side boundary. Counts above, below, and within the envelope are reported. In the comparison phase, gray shading appears only below the projected central trend line for an increase, or above it for a decrease. The ±0.30 IQR lines remain visible and are used for counting successes. The whole-phase one-sided binomial p value is reported in Results; shading is a directional reference and does not change according to cumulative p values. The legacy command <span class="kbd">binomial, 1, 2</span> remains accepted as an alias. Ghosted observations are excluded. Use the improvement-direction control when lower values represent improvement.</p>
 
     <h3>Natural-language graph commands</h3>
     <div class="help-example">place level lines in both phases
@@ -902,7 +925,7 @@ title: Reading Fluency</div>
     xScaleModeSelect:$('xScaleModeSelect'), minSessionsSelect:$('minSessionsSelect'), minSessionsField:$('minSessionsField'), customMinSessionsInput:$('customMinSessionsInput'), customMinSessionsField:$('customMinSessionsField'), xAxisLabelModeSelect:$('xAxisLabelModeSelect'), xAxisLabelModeField:$('xAxisLabelModeField'), firstSessionDateInput:$('firstSessionDateInput'), calendarScheduleField:$('calendarScheduleField'), calendarWeekdayChecks:$('calendarWeekdayChecks'), phaseNumberingList:$('phaseNumberingList'), phaseNumberingHint:$('phaseNumberingHint'), timelinePreview:$('timelinePreview'),
     phaseLabelsCheck:$('phaseLabelsCheck'), showGhostCheck:$('showGhostCheck'), graphCommand:$('graphCommand'), analysisCommand:$('analysisCommand'), analysisGraphSelect:$('analysisGraphSelect'), analysisSeriesSelect:$('analysisSeriesSelect'), analysisPhaseSelect:$('analysisPhaseSelect'), visualSourcePhaseSelect:$('visualSourcePhaseSelect'), visualDisplayThroughSelect:$('visualDisplayThroughSelect'), alphaInput:$('alphaInput'),
     goalSeriesSelect:$('goalSeriesSelect'), goalStartPhaseSelect:$('goalStartPhaseSelect'), goalEndPhaseSelect:$('goalEndPhaseSelect'), goalValueInput:$('goalValueInput'), goalLineList:$('goalLineList'),
-    tauCorrectionSelect:$('tauCorrectionSelect'), tauVizSelect:$('tauVizSelect'), tauLegendCheck:$('tauLegendCheck'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill'),
+    tauCorrectionSelect:$('tauCorrectionSelect'), tauAlternativeSelect:$('tauAlternativeSelect'), tauLengthModeSelect:$('tauLengthModeSelect'), tauVizSelect:$('tauVizSelect'), tauLegendCheck:$('tauLegendCheck'), tauIQRCheck:$('tauIQRCheck'), detailedResultsCheck:$('detailedResultsCheck'), graphWrap:$('graphWrap'), results:$('results'), status:$('status'), seriesPill:$('seriesPill'), phasePill:$('phasePill'), activePill:$('activePill'),
     toggleDataTableBtn:$('toggleDataTableBtn'), graphDataTableDrawer:$('graphDataTableDrawer'), graphTableGraphSelect:$('graphTableGraphSelect'), graphTableSeriesSelect:$('graphTableSeriesSelect'), graphTablePhaseSelect:$('graphTablePhaseSelect'), graphDataTableWrap:$('graphDataTableWrap'), insertGraphTableReportBtn:$('insertGraphTableReportBtn'),
     reportModule:$('reportModule'), reportEditor:$('reportEditor'), reportFormatSelect:$('reportFormatSelect'), reportGraphSelect:$('reportGraphSelect'), reportTableGraphSelect:$('reportTableGraphSelect'), reportTableSeriesSelect:$('reportTableSeriesSelect'), reportStatus:$('reportStatus'), reportSummaryStatus:$('reportSummaryStatus')
   };
@@ -987,18 +1010,20 @@ title: Reading Fluency</div>
           if(!globalInlineLabels[pi])globalInlineLabels[pi]=phaseLabel;
         }
         chunk=chunk.replace(/\blabel\s*\([^)]*\)/gi,' ');
-        const tokens=chunk.split(',').map(v=>v.trim()).filter(v=>v!=='');
+        const tokens=chunk.split(',').map(v=>v.trim()); // Empty fields occupy session positions.
         if(!tokens.length)throw new Error(`No data in ${label}, phase ${pi+1}.`);
         const values=tokens.map(token=>{
+          if(token==='')return null;
           let ghost=false,numericText=token;const wrapped=token.match(/^\(\s*(.*?)\s*\)$/);
           if(wrapped){ghost=true;numericText=wrapped[1];}
           else if(token.includes('(')||token.includes(')'))throw new Error(`Invalid ghost notation “${token}” in ${label}, phase ${pi+1}. Put one number entirely inside parentheses, e.g. (5).`);
           const value=Number(numericText);
-          if(!Number.isFinite(value))throw new Error(`Invalid number “${token}” in ${label}, phase ${pi+1}.`);
+          if(!numericText.trim()||!Number.isFinite(value))throw new Error(`Invalid number “${token}” in ${label}, phase ${pi+1}.`);
           return {value,ghost};
         });
         const start=session;
         values.forEach(item=>{
+          if(item===null){session++;return;}
           const key=`${si}:${session}`;
           points.push({seriesIndex:si,phaseIndex:pi,session,score:item.value,key,ghosted:item.ghost});
           if(item.ghost)ghostedKeys.push(key);session++;
@@ -1646,11 +1671,14 @@ title: Reading Fluency</div>
       const timeline=timelineGeometry(),xBand=timeline.mode==='calendar'?calendarAxisBand(timeline.dateAngle):58;group.tiers.forEach((tier,ti)=>{const top=cursor+phaseBand,innerW=W-left-right,innerH=plotH,xmax=timeline.xmax;const x=timeline.x,y=v=>top+innerH-((v-ymin)/(ymax-ymin))*innerH;tierLayouts.push({tier,top,innerW,innerH,xmax,x,y,ymin,ymax,ticks,cfg,timeline,m:{left,right,top,bottom:0},W});cursor=top+plotH+(ti<group.tiers.length-1?tierGap:0);});
       const first=tierLayouts[0],last=tierLayouts[tierLayouts.length-1],xAxisY=last.top+last.innerH;cursor=xAxisY+xBand;groups.push({group,groupTop,tierLayouts,xAxisY,x:first.x,xmax:first.xmax,innerW:first.innerW,bottom:cursor,cfg,ymin,ymax,ticks,timeline:first.timeline});if(gi<state.parsed.graphs.length-1)cursor+=groupGap;
     });
-    return {W,H:cursor+18,left,right,groups};
+    const legendBase=cursor+18,legendCount=els.tauLegendCheck?.checked!==false&&(els.tauVizSelect?.value||'both')!=='off'?state.overlays.filter(o=>o.type==='tauPointViz').length:0;
+    groups.forEach(gl=>gl.tierLayouts.forEach(tg=>{tg.tauLegendBase=legendBase;}));
+    return {W,H:legendBase+legendCount*228,left,right,groups};
   }
 
   function renderGraph(){
     if(!state.parsed)return;syncPhaseNameInputs();state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);
+    ensureTauBaselineReferences();
     let layout;try{layout=graphMetrics();}catch(e){els.graphWrap.innerHTML=`<div style="padding:24px;color:#a63b32;font-weight:700">${escapeHtml(e.message)}</div>`;status(e.message,'error');return false;}const svg=svgEl('svg',{viewBox:`0 0 ${layout.W} ${layout.H}`,role:'img','aria-label':'APA-style single-case graph'});svg.appendChild(svgEl('rect',{x:0,y:0,width:layout.W,height:layout.H,fill:'#fff'}));
     const title=els.titleInput.value.trim()||'Performance Scores Over Sessions';svg.appendChild(svgEl('text',{x:layout.W/2,y:29,'text-anchor':'middle','font-size':19,'font-weight':700,fill:'#111827','data-direct-edit':'figure-title','aria-label':'Double-click to edit overall figure title'},title));
     layout.groups.forEach((gl,gi)=>{
@@ -1659,6 +1687,7 @@ title: Reading Fluency</div>
       svg.appendChild(svgEl('text',{x:layout.left+gl.innerW/2,y:gl.groupTop+17,'text-anchor':'middle','font-size':14,'font-weight':700,fill:'#374151','data-direct-edit':'graph-title','data-graph-index':gi,'aria-label':`Double-click to edit Graph ${gi+1} title`},cfg.label||`Graph ${gi+1}`));
       gl.tierLayouts.forEach(tg=>{
         const tier=tg.tier,refSer=state.parsed.series[tier.seriesIndexes[0]];
+        state.overlays.filter(o=>tier.seriesIndexes.includes(o.seriesIndex)&&['pndShade','tauDistinction','trendBinomialShade','mannWhitneyOverlap'].includes(o.type)).forEach(o=>drawDistinctionBackground(svg,tg,o));
         if(els.gridCheck.checked)gl.ticks.forEach(v=>svg.appendChild(svgEl('line',{x1:layout.left,y1:tg.y(v),x2:layout.left+tg.innerW,y2:tg.y(v),stroke:'#e5e7eb','stroke-width':1}))); 
         svg.appendChild(svgEl('line',{x1:layout.left,y1:tg.top,x2:layout.left,y2:tg.top+tg.innerH,stroke:'#111827','stroke-width':1.5}));
         gl.ticks.forEach(v=>{svg.appendChild(svgEl('line',{x1:layout.left-6,y1:tg.y(v),x2:layout.left,y2:tg.y(v),stroke:'#111827'}));svg.appendChild(svgEl('text',{x:layout.left-10,y:tg.y(v)+4,'text-anchor':'end','font-size':11,fill:'#111827'},fmt(v,2)));});
@@ -1819,7 +1848,205 @@ title: Reading Fluency</div>
     }
   }
 
+  function practicalDistinction(value){
+    if(!Number.isFinite(value))return {label:'Unavailable',opacity:0};
+    return value>=90?{label:'Distinct difference',opacity:0}:value>=70?{label:'Noticeable difference',opacity:.16}:value>=50?{label:'Negligible difference',opacity:.42}:{label:'No difference',opacity:.42};
+  }
+  function phaseDisplaySpan(ser,index){
+    const ph=ser.phases[index];
+    return {x1:index>0?(ser.phases[index-1].endSession+ph.startSession)/2:ph.startSession,
+      x2:index<ser.phases.length-1?(ph.endSession+ser.phases[index+1].startSession)/2:ph.endSession+.5};
+  }
+  function tauBandPhaseBasis(pointsA,phaseA,sA,correct,mode){
+    const nA=pointsA.length,observedPairs=nA*(nA-1)/2;
+    const lengthA=Math.max(1,phaseA?phaseA.endSession-phaseA.startSession+1:nA);
+    const baselineTau=observedPairs?sA/observedPairs:0;
+    const sessions=mode==='sessions';
+    // Custom session weighting: apply observed rank-trend strength to the pair
+    // opportunities of the complete A phase. This is not imputation or standard Tau-U.
+    const weightedSA=sessions?baselineTau*lengthA*(lengthA-1)/2:sA;
+    return {mode:sessions?'sessions':'observed',nA,lengthA,observedPairs,baselineTau,
+      numerator:correct?weightedSA:0,referenceCount:sessions?lengthA:nA,correct};
+  }
+  function tauBandCorrection(basis,candidateCount,slot){
+    const bCount=basis.mode==='sessions'?slot:candidateCount;
+    return basis.correct&&basis.referenceCount&&bCount?basis.numerator/(basis.referenceCount*bCount):0;
+  }
+  // Hypothetical score bands. Prior observations are real; candidate scores are never committed.
+  // Raw comparisons always use observations. The selectable phase-length basis controls correction weighting.
+  function tauSessionShading(pointsA,pointsB,phaseB,direction,sA,correct,options={}){
+    const basis=tauBandPhaseBasis(pointsA,options.phaseA,sA,correct,options.mode||'observed');
+    const bySession=new Map(pointsB.map(p=>[p.session,p]));
+    const nA=pointsA.length,levels=[...new Set(pointsA.map(p=>p.score))].sort((a,b)=>a-b);
+    const segments=[];let priorS=0,nPrior=0;
+    for(let session=phaseB.startSession;session<=phaseB.endSession;session++){
+      const slot=session-phaseB.startSession+1;
+      const correction=tauBandCorrection(basis,nPrior+1,slot);
+      const candidateValue=score=>nA?(priorS+pointsA.reduce((sum,a)=>sum+tauPairSign(score,a.score,direction),0))/(nA*(nPrior+1))-correction:null;
+      const cells=[];
+      // Rank contrast is constant between baseline scores; retain exact equality cases separately.
+      for(let i=0;i<=levels.length;i++){
+        const low=i?levels[i-1]:null,high=i<levels.length?levels[i]:null;
+        const candidateS=(direction==='decrease'?-1:1)*(2*pointsA.filter(p=>i>0&&p.score<=levels[i-1]).length-nA);
+        const value=nA?(priorS+candidateS)/(nA*(nPrior+1))-correction:null;
+        cells.push({low,high,value});
+      }
+      const ties=levels.map(score=>({score,value:candidateValue(score)}));
+      const point=bySession.get(session);
+      segments.push({session,slot,nPrior,correction,lengthMode:basis.mode,phaseASessions:basis.lengthA,missing:!point,x1:session-.5,x2:session+.5,
+        cells,ties,observedValue:point?candidateValue(point.score):null});
+      if(point){priorS+=pointsA.reduce((sum,a)=>sum+tauPairSign(point.score,a.score,direction),0);nPrior++;}
+    }
+    return segments;
+  }
+  function drawTrendBinomialShade(svg,g,o){
+    const left=g.m.left,right=left+g.innerW,top=g.top,bottom=top+g.innerH;
+    const x1=Math.max(left,g.x(o.x1)),x2=Math.min(right,g.x(o.x2));if(x2<=x1)return;
+    // Match the actual drawn trend segment, including proportional calendar axes.
+    const existing=state.overlays.find(r=>r.type==='trend'&&r.seriesIndex===o.seriesIndex&&r.analysisId===o.analysisId);
+    const source=o.trendX1??existing?.x1??o.x1,end=o.trendX2??existing?.x2??o.x2;
+    const tx1=g.x(source),tx2=g.x(end),ty1=g.y(o.slope*source+o.intercept),ty2=g.y(o.slope*end+o.intercept);
+    const trendY=x=>Math.abs(tx2-tx1)<1e-12?ty1:ty1+(x-tx1)/(tx2-tx1)*(ty2-ty1);
+    // Intersect the plot rectangle with the requested side of the trend line.
+    // Starting with the rectangle also handles a trend that crosses an axis limit.
+    const rectangle=[[x1,top],[x2,top],[x2,bottom],[x1,bottom]],polygon=[];
+    const side=p=>o.direction==='decrease'?trendY(p[0])-p[1]:p[1]-trendY(p[0]);
+    let previous=rectangle.at(-1),previousSide=side(previous);
+    for(const point of rectangle){
+      const pointSide=side(point);
+      if((previousSide>=0)!==(pointSide>=0)){
+        const t=previousSide/(previousSide-pointSide);
+        polygon.push([previous[0]+t*(point[0]-previous[0]),previous[1]+t*(point[1]-previous[1])]);
+      }
+      if(pointSide>=0)polygon.push(point);
+      previous=point;previousSide=pointSide;
+    }
+    if(polygon.length<3)return;
+    const area=svgEl('polygon',{points:polygon.map(p=>p.join(',')).join(' '),fill:'#64748b',opacity:.24,
+      'data-binomial-shading':o.direction==='decrease'?'above-trend':'below-trend','pointer-events':'none'});
+    area.appendChild(svgEl('title',{},`Shaded ${o.direction==='decrease'?'above':'below'} the projected A trend: non-improvement side for ${o.direction==='decrease'?'lower':'higher'} scores = improvement. The ±0.30 IQR bounds and one-sided binomial p value are reported separately.`));svg.appendChild(area);
+  }
+
+  function mannWhitneyOverlapRegions(pointsA,pointsB,phaseB,direction){
+    const nA=pointsA.length,levels=[...new Set(pointsA.map(p=>p.score))].sort((a,b)=>a-b);
+    const bySession=new Map(pointsB.map(p=>[p.session,p])),segments=[];
+    const favorableU=score=>pointsA.reduce((sum,a)=>sum+(score===a.score?.5:(direction==='decrease'?score<a.score:score>a.score)?1:0),0);
+    let priorU=0,nPrior=0;
+    for(let session=phaseB.startSession;session<=phaseB.endSession;session++){
+      const denom=nA*(nPrior+1),cells=[];
+      for(let i=0;i<=levels.length;i++){
+        const less=pointsA.filter(p=>i>0&&p.score<=levels[i-1]).length;
+        const candidateU=direction==='decrease'?nA-less:less;
+        cells.push({low:i?levels[i-1]:null,high:i<levels.length?levels[i]:null,value:denom?(priorU+candidateU)/denom:null});
+      }
+      const ties=levels.map(score=>({score,value:denom?(priorU+favorableU(score))/denom:null}));
+      const point=bySession.get(session);
+      segments.push({session,slot:session-phaseB.startSession+1,x1:session-.5,x2:session+.5,nPrior,priorU,missing:!point,cells,ties,
+        observedValue:point&&denom?(priorU+favorableU(point.score))/denom:null});
+      if(point){priorU+=favorableU(point.score);nPrior++;}
+    }
+    return segments;
+  }
+
+  function drawDistinctionBackground(svg,g,o){
+    if(o.type==='trendBinomialShade'){drawTrendBinomialShade(svg,g,o);return;}
+    const left=g.m.left,right=left+g.innerW;
+    const x1=Math.max(left,g.x(o.x1)),x2=Math.min(right,g.x(o.x2));
+    if(x2<=x1)return;
+    if(o.type==='pndShade'){
+      const cy=Math.max(g.top,Math.min(g.top+g.innerH,g.y(o.y)));
+      const top=o.direction==='decrease'?g.top:cy;
+      const bottom=o.direction==='decrease'?cy:g.top+g.innerH;
+      const rect=svgEl('rect',{x:x1,y:top,width:x2-x1,height:bottom-top,fill:'#64748b',opacity:.22,'data-pnd-shading':'criterion','pointer-events':'none'});
+      rect.appendChild(svgEl('title',{},`PND criterion ${fmt(o.y,3)}: shaded ${o.direction==='decrease'?'above':'below'} criterion; ties are not non-overlap.`));svg.appendChild(rect);
+    }else{
+      const isMW=o.type==='mannWhitneyOverlap';
+      const mode=isMW?'both':els.tauVizSelect?.value||'both';if(mode!=='both'&&mode!=='cloud')return;
+      const segments=Array.isArray(o.segments)?o.segments:[];
+      segments.forEach(segment=>{
+        const sx1=Math.max(x1,g.x(segment.x1)),sx2=Math.min(x2,g.x(segment.x2));
+        if(sx2<=sx1)return;
+        const cells=segment.cells||[{low:null,high:null,value:segment.value??o.finalTau}];
+        const describe=value=>{
+          const band=practicalDistinction((value)*100);
+          if(isMW)return `${band.label} (descriptive display class); cumulative directional pairwise non-overlap NAP ${fmt(value*100,1)}%. B position ${segment.slot}; ${segment.nPrior} earlier active B observations plus one hypothetical score; favorable comparison=1, tie=0.5, unfavorable=0. At 50% neither phase dominates; below 50% favors the opposite direction. This is not a p value or confidence interval.`;
+          return `${band.label}; hypothetical signed index ${fmt(value,3)} (one-sided index ${fmt((value)*100,1)}). B position ${segment.slot}; ${segment.nPrior??'stored'} prior active B observations plus one hypothetical observation; ${segment.lengthMode==='sessions'?`CUSTOM phase weighting (A=${segment.phaseASessions} sessions, B position=${segment.slot})`:'observed-data weighting'}; baseline correction ${fmt(segment.correction,3)}. Missing positions add no observation. This is a conditional score band, not a confidence interval.`;
+        };
+        cells.forEach(cell=>{
+          if(cell.value===null||!Number.isFinite(cell.value))return;
+          const low=Math.max(g.ymin,cell.low===null?g.ymin:cell.low),high=Math.min(g.ymax,cell.high===null?g.ymax:cell.high);
+          if(high<=low)return;
+          const band=practicalDistinction((cell.value)*100);
+          const rect=svgEl('rect',{x:sx1,y:g.y(high),width:sx2-sx1,height:g.y(low)-g.y(high),fill:'#475569',opacity:band.opacity,
+            [isMW?'data-mw-overlap':'data-tau-distinction']:band.label,'data-b-slot':segment.slot??'',
+            'data-shading-index':(cell.value)*100,'data-missing-session':segment.missing?'true':'false','pointer-events':'none'});
+          rect.appendChild(svgEl('title',{},describe(cell.value)));svg.appendChild(rect);
+        });
+        // Equality at a baseline score is a separate rank outcome, not interpolated.
+        (segment.ties||[]).forEach(tie=>{
+          if(tie.score<g.ymin||tie.score>g.ymax)return;
+          const band=practicalDistinction((tie.value)*100);
+          const line=svgEl('line',{x1:sx1,x2:sx2,y1:g.y(tie.score),y2:g.y(tie.score),stroke:band.opacity?'#475569':'#fff',
+            'stroke-opacity':band.opacity||1,'stroke-width':1,[isMW?'data-mw-band-tie':'data-tau-band-tie']:band.label,'pointer-events':'none'});
+          line.appendChild(svgEl('title',{},`Candidate score exactly ${fmt(tie.score,3)}: ${describe(tie.value)}`));svg.appendChild(line);
+        });
+      });
+      if(isMW)svg.appendChild(svgEl('text',{x:g.m.left+8,y:g.top+16,'font-size':10,fill:'#475569','font-weight':600,'data-mw-band-label':'true'},'Gray: A-level rank overlap (NAP); dashed line: A median'));
+    }
+  }
+
+  function tauBaselineReference(o){
+    if(!o.correct||!Array.isArray(o.pointsA)||o.pointsA.length<2)return null;
+    const tr=theilSen(o.pointsA),stats=trendIQRMargin(o.pointsA,tr);
+    return {type:'tauBaselineIQR',seriesIndex:o.seriesIndex,analysisId:o.analysisId,
+      x1:o.phaseAStart,x2:o.phaseBEnd,...tr,q1:stats.q1,q3:stats.q3,iqr:stats.iqr};
+  }
+  function ensureTauBaselineReferences(){
+    // Reconstruct references for older saved corrected Tau-U analyses as well.
+    state.overlays.filter(o=>o.type==='tauPointViz'&&o.correct).forEach(o=>{
+      const exists=state.overlays.some(r=>r.type==='tauBaselineIQR'&&r.seriesIndex===o.seriesIndex&&r.analysisId===o.analysisId&&r.x1===o.phaseAStart&&r.x2===o.phaseBEnd);
+      if(!exists){const reference=tauBaselineReference(o);if(reference)state.overlays.push(reference);}
+    });
+  }
+  function drawTauBaselineIQR(svg,g,o){
+    if(els.tauIQRCheck?.checked===false||(els.tauVizSelect?.value||'both')==='off')return;
+    const left=g.m.left,right=left+g.innerW,top=g.top,bottom=top+g.innerH;
+    const sessions=[o.x1];for(let j=Math.floor(o.x1)+1;j<o.x2;j++)sessions.push(j);if(o.x2>o.x1)sessions.push(o.x2);
+    const clip=(points,axis,bound,keepAbove)=>{
+      if(!points.length)return [];const result=[];
+      let a=points.at(-1),aIn=keepAbove?a[axis]>=bound:a[axis]<=bound;
+      for(const b of points){const bIn=keepAbove?b[axis]>=bound:b[axis]<=bound;
+        if(aIn!==bIn){const t=(bound-a[axis])/(b[axis]-a[axis]);result.push([a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])]);}
+        if(bIn)result.push(b);a=b;aIn=bIn;
+      }return result;
+    };
+    const score=(session,offset)=>o.slope*session+o.intercept+offset;
+    let polygon=[...sessions.map(j=>[g.x(j),g.y(score(j,o.q3))]),...sessions.slice().reverse().map(j=>[g.x(j),g.y(score(j,o.q1))])];
+    for(const [axis,bound,keepAbove] of [[0,left,true],[0,right,false],[1,top,true],[1,bottom,false]])polygon=clip(polygon,axis,bound,keepAbove);
+    if(polygon.length>=3){const area=svgEl('polygon',{points:polygon.map(p=>p.join(',')).join(' '),fill:'#0f766e',opacity:.12,'data-tau-iqr':'residual-envelope','pointer-events':'none'});
+      area.appendChild(svgEl('title',{},`A trend + residual IQR: slope ${fmt(o.slope,3)} per session; residual Q1 ${fmt(o.q1,3)}, Q3 ${fmt(o.q3,3)}, IQR ${fmt(o.iqr,3)}. Descriptive reference, not Tau-U category thresholds.`));svg.appendChild(area);}
+    // Clip line segments numerically so SVG, PNG and report exports share the same geometry.
+    for(const [offset,role,dash] of [[o.q1,'q1','4 3'],[o.q3,'q3','4 3'],[0,'trend','']]){
+      for(let i=0;i<sessions.length-1;i++){
+        const a=[g.x(sessions[i]),g.y(score(sessions[i],offset))],b=[g.x(sessions[i+1]),g.y(score(sessions[i+1],offset))];
+        let lo=0,hi=1;for(const [axis,min,max] of [[0,left,right],[1,top,bottom]]){
+          const delta=b[axis]-a[axis];if(Math.abs(delta)<1e-12){if(a[axis]<min||a[axis]>max){hi=-1;break;}}
+          else{const t1=(min-a[axis])/delta,t2=(max-a[axis])/delta;lo=Math.max(lo,Math.min(t1,t2));hi=Math.min(hi,Math.max(t1,t2));}
+        }if(lo>hi)continue;
+        const line=svgEl('line',{x1:a[0]+lo*(b[0]-a[0]),y1:a[1]+lo*(b[1]-a[1]),x2:a[0]+hi*(b[0]-a[0]),y2:a[1]+hi*(b[1]-a[1]),stroke:'#0f766e','stroke-width':role==='trend'?2.1:1.5,...(dash?{'stroke-dasharray':dash}:{}),'data-tau-iqr':role,'pointer-events':'none'});
+        line.appendChild(svgEl('title',{},`Projected A ${role==='trend'?'Theil–Sen trend':role.toUpperCase()+' of residuals, added to trend'}.`));svg.appendChild(line);
+      }
+    }
+    svg.appendChild(svgEl('text',{x:left+8,y:top+32,'font-size':10,fill:'#0f766e','font-weight':600,'data-tau-iqr':'label','pointer-events':'none'},'Teal: A trend + residual IQR (descriptive)'));
+  }
+
   function drawOverlay(svg,g,o){
+    if(o.type==='tauBaselineIQR'){drawTauBaselineIQR(svg,g,o);return;}
+    if(o.type==='mannWhitneyLevel'){
+      const x1=Math.max(g.m.left,g.x(o.x1)),x2=Math.min(g.m.left+g.innerW,g.x(o.x2)),y=g.y(o.y);
+      if(x2>x1&&y>=g.top&&y<=g.top+g.innerH){const line=svgEl('line',{x1,x2,y1:y,y2:y,stroke:'#475569','stroke-width':1.5,'stroke-dasharray':'7 4','data-mw-level':'median','pointer-events':'none'});line.appendChild(svgEl('title',{},`Fixed A median = ${fmt(o.y,3)}. Mann–Whitney compares the raw A and B score ranks without baseline trend correction.`));svg.appendChild(line);}
+      return;
+    }
     const col=o.color||'#6b4f8a'; const dash=o.dash||'7 5';
     if(o.type==='hline') svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.y),x2:g.x(o.x2),y2:g.y(o.y),stroke:col,'stroke-width':2,'stroke-dasharray':dash}));
     if(o.type==='trend'){svg.appendChild(svgEl('line',{x1:g.x(o.x1),y1:g.y(o.slope*o.x1+o.intercept),x2:g.x(o.x2),y2:g.y(o.slope*o.x2+o.intercept),stroke:col,'stroke-width':2,'stroke-dasharray':dash}));}
@@ -1837,7 +2064,7 @@ title: Reading Fluency</div>
     }
     if(o.type==='tauInfluenceCloud'){
       const mode=els.tauVizSelect?.value||'both';
-      if((mode==='both'||mode==='cloud')&&o.correct&&Array.isArray(o.pointsB)&&o.pointsB.length){
+      if(mode==='influence'&&o.correct&&Array.isArray(o.pointsB)&&o.pointsB.length){
         const corrections=Array.isArray(o.correctionBySession)?o.correctionBySession:[];
         const firstAbs=Math.abs(corrections[0]||0);
         if(firstAbs>1e-12){
@@ -1945,7 +2172,7 @@ title: Reading Fluency</div>
               'stroke-dasharray':'3 4','data-tau-viz':'influence-cloud-center'
             }));
 
-            if(mode==='cloud'&&o.trendLine&&Number.isFinite(o.trendLine.slope)){
+            if(mode==='influence'&&o.trendLine&&Number.isFinite(o.trendLine.slope)){
               svg.appendChild(svgEl('line',{
                 x1:g.x(o.phaseAStart),y1:g.y(o.trendLine.slope*o.phaseAStart+o.trendLine.intercept),
                 x2:g.x(o.phaseBEnd),y2:g.y(o.trendLine.slope*o.phaseBEnd+o.trendLine.intercept),
@@ -2052,13 +2279,14 @@ title: Reading Fluency</div>
           // Detailed teaching legend at bottom-right. Its wording changes according
           // to whether baseline correction was actually applied and which view is active.
           const plotLeft=(g.m?.left??96),plotRight=plotLeft+g.innerW,plotBottom=g.top+g.innerH;
-          const boxW=Math.min(455,Math.max(390,g.innerW*.43));
+          const boxW=Math.min(820,g.innerW-16);
           // The detailed legend needs enough vertical space for three statistical
           // status lines, three symbol explanations, and the direction key.
           // Use one consistent height so corrected and uncorrected layouts never
           // collapse into the bottom key.
           const boxH=214;
-          const boxX=Math.max(plotLeft+8,plotRight-boxW-8),boxY=Math.max(g.top+8,plotBottom-boxH-10);
+          const legendIndex=state.overlays.filter(item=>item.type==='tauPointViz').indexOf(o);
+          const boxX=plotLeft+8,boxY=(g.tauLegendBase??(plotBottom+65))+Math.max(0,legendIndex)*228;
           svg.appendChild(svgEl('rect',{x:boxX,y:boxY,width:boxW,height:boxH,rx:6,fill:'#fff','fill-opacity':.96,stroke:'#c7ced6','stroke-width':1}));
           svg.appendChild(svgEl('text',{x:boxX+11,y:boxY+17,'font-size':11,'font-weight':700,fill:'#374151'},'How to read the Tau-U visualization'));
 
@@ -2082,6 +2310,10 @@ title: Reading Fluency</div>
             svg.appendChild(svgEl('text',{x:boxX+11,y:statusY+30,'font-size':9.1,'font-weight':600,fill:'#7c2d12'},
               'No diminishing gray B rings are expected because nothing is being subtracted.'));
           }
+
+          const tail=o.alternative==='two-sided'?'Two-sided':'One-sided';
+          svg.appendChild(svgEl('text',{x:boxX+11,y:statusY+45,'font-size':9.1,'font-weight':600,fill:'#374151'},
+            Number.isFinite(o.rawP)?`${tail} raw contrast p ≈ ${fmt(o.rawP,4)}${o.correct?' (reference only; not corrected Tau-U p)':''}`:`${tail} is the default; rerun Tau-U to refresh saved statistics.`));
 
           // Symbol explanations. Use fixed rows with generous spacing so the
           // explanatory text cannot collide with the direction key.
@@ -2111,9 +2343,9 @@ title: Reading Fluency</div>
               : 'Dashed gray B ring = shown only when baseline correction is actually applied'));
 
           const cloudY=infY+22;
-          svg.appendChild(svgEl('rect',{x:boxX+10,y:cloudY-7,width:17,height:11,rx:2,fill:'#60a5fa','fill-opacity':o.correct?.18:.035,stroke:'#60a5fa','stroke-width':.8,'stroke-opacity':.45}));
+          svg.appendChild(svgEl('rect',{x:boxX+10,y:cloudY-7,width:17,height:11,rx:2,fill:mode==='influence'?'#60a5fa':'#475569','fill-opacity':mode==='influence'?(o.correct?.18:.035):.42,stroke:'#60a5fa','stroke-width':.8,'stroke-opacity':.45}));
           svg.appendChild(svgEl('text',{x:boxX+31,y:cloudY+3,'font-size':9,fill:'#374151'},
-            o.correct?`Blue cloud = values Phase A can still account for; it extends mainly ${o.direction==='decrease'?'above':'below'} the projected baseline trend and fades over B`:'Blue cloud = not shown because no baseline correction is being carried into B'));
+            mode==='influence'?'Legacy cloud = waning baseline influence (not practical distinction)':`${o.bandLengthMode==='sessions'?`CUSTOM A:B length-weighted bands (A ${o.phaseASessions}, B ${o.phaseBSessions} slots); points = observed Tau-U`:'Observed-data Tau-U bands'}: <70 dark; 70–<90 light; 90+ unshaded.`));
 
           // Direction key gets its own final row with a clear gap below the cloud explanation.
           const keyY=cloudY+28;
@@ -2343,7 +2575,7 @@ title: Reading Fluency</div>
     const si=selectedAnalysisSeries();let results=si>=0?state.results.filter(r=>!r.analysisId||String(r.analysisId).startsWith(`${si}::`)):state.results.slice();
     if(!results.length)throw new Error('There are no active analysis results for the selected series.');
     const ser=si>=0&&state.parsed?state.parsed.series[si]:null;
-    return `<h2>Analysis Results${ser?` — ${escapeHtml(ser.label)}`:''}</h2>`+results.slice().reverse().map(r=>`<div><p><strong>${escapeHtml(r.title)}</strong>${r.meta?`<br><em>${escapeHtml(r.meta)}</em>`:''}</p><ul>${r.lines.map(line=>`<li>${escapeHtml(line)}</li>`).join('')}</ul></div>`).join('')+'<p><br></p>';
+    return `<h2>Analysis Results${ser?` — ${escapeHtml(ser.label)}`:''}</h2>`+results.slice().reverse().map(r=>resultHtml(r,true)).join('')+'<p><br></p>';
   }
   function reportTemplateHtml(){
     const date=new Date().toLocaleDateString();
@@ -2440,13 +2672,18 @@ title: Reading Fluency</div>
     const opposite=direction==='decrease'?above:below;
     return {above,below,within,successes,opposite,n:points.length};
   }
-  function mannWhitney(a,b){
+  function mannWhitney(a,b,direction='increase'){
     const combined=[...a.map(v=>({v,g:0})),...b.map(v=>({v,g:1}))].sort((x,y)=>x.v-y.v); let i=0;
     while(i<combined.length){let j=i+1;while(j<combined.length&&combined[j].v===combined[i].v)j++;const r=((i+1)+j)/2;for(let k=i;k<j;k++)combined[k].r=r;i=j;}
     const n1=a.length,n2=b.length, R2=combined.filter(x=>x.g===1).reduce((s,x)=>s+x.r,0),U2=R2-n2*(n2+1)/2,U1=n1*n2-U2,U=Math.min(U1,U2);
     // tie-corrected normal approximation
     const N=n1+n2; const counts={}; combined.forEach(x=>counts[x.v]=(counts[x.v]||0)+1); const tieSum=Object.values(counts).reduce((s,t)=>s+(t*t*t-t),0);
-    const mu=n1*n2/2, variance=n1*n2/12*((N+1)-(tieSum/(N*(N-1)||1))); const sd=Math.sqrt(Math.max(variance,0)); const z=sd?(Math.abs(U2-mu)-0.5)/sd:0; const p=2*(1-normalCDF(Math.abs(z))); return {U,U1,U2,z,p};
+    const mu=n1*n2/2, variance=n1*n2/12*((N+1)-(tieSum/(N*(N-1)||1))); const sd=Math.sqrt(Math.max(variance,0));
+    const directionalU=direction==='decrease'?U1:U2;
+    // Upper tail in the selected improvement direction, with tie and continuity corrections.
+    const z=sd?(directionalU-mu-.5)/sd:0;
+    const p=sd?Math.max(0,Math.min(1,1-normalCDF(z))):1;
+    return {U:directionalU,Umin:U,U1,U2,z,p,direction};
   }
   function erf(x){const sign=x<0?-1:1;x=Math.abs(x);const a1=.254829592,a2=-.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=.3275911,t=1/(1+p*x);const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);return sign*y;}
   const normalCDF=z=>.5*(1+erf(z/Math.sqrt(2)));
@@ -2454,7 +2691,8 @@ title: Reading Fluency</div>
   function comb(n,k){if(k<0||k>n)return 0;k=Math.min(k,n-k);let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return r;}
   function pairwiseDominance(a,b,direction){let favorable=0,unfavorable=0,ties=0;b.forEach(y=>a.forEach(x=>{if(y===x)ties++;else if(direction==='decrease'?(y<x):(y>x))favorable++;else unfavorable++;}));const pairs=a.length*b.length;return {favorable,unfavorable,ties,pairs,tau:pairs?(favorable-unfavorable)/pairs:NaN};}
   function kendallTrend(points,direction){let fav=0,unfav=0,ties=0;for(let i=0;i<points.length;i++)for(let j=i+1;j<points.length;j++){const d=points[j].score-points[i].score;if(d===0)ties++;else if(direction==='decrease'?(d<0):(d>0))fav++;else unfav++;}const pairs=fav+unfav+ties;return {tau:pairs?(fav-unfav)/pairs:0,fav,unfav,ties,pairs};}
-  function tauUTest(a,b,pointsA,direction,mode){
+  function tauUTest(a,b,pointsA,direction,mode,alternative='one-sided'){
+    alternative=alternative==='two-sided'?'two-sided':'one-sided';
     const raw=pairwiseDominance(a,b,direction),base=kendallTrend(pointsA,direction);
     const nA=a.length,nB=b.length;
     const sAB=raw.favorable-raw.unfavorable;
@@ -2470,8 +2708,11 @@ title: Reading Fluency</div>
     // Tau-U has not been established, so SCGraph2 does not manufacture a corrected p.
     const rawSE=Math.sqrt((nA+nB+1)/(3*nA*nB));
     const rawZ=rawSE?raw.tau/rawSE:0;
-    const rawP=2*(1-normalCDF(Math.abs(rawZ)));
-    return {...raw,rawTau:raw.tau,baselineTau:base.tau,sAB,sA,correct,correction,tau,rawSE,rawZ,rawP,p:correct?null:rawP};
+    // One-sided alternative: improvement in the selected direction (signed Z).
+    const rawPOneSided=Math.max(0,Math.min(1,1-normalCDF(rawZ)));
+    const rawPTwoSided=Math.max(0,Math.min(1,2*(1-normalCDF(Math.abs(rawZ)))));
+    const rawP=alternative==='two-sided'?rawPTwoSided:rawPOneSided;
+    return {...raw,rawTau:raw.tau,baselineTau:base.tau,sAB,sA,correct,correction,tau,rawSE,rawZ,rawP,rawPOneSided,rawPTwoSided,alternative,p:correct?null:rawP};
   }
 
   function tauPairSign(laterScore,earlierScore,direction){
@@ -2515,6 +2756,9 @@ title: Reading Fluency</div>
     return {rawLocalB,rawCumulative,correctionBySession,tauUCumulative,baselineLocal,cumulativeSAB};
   }
 
+  function isQuantitativeAnalysis(kind){
+    return ['pnd','m-w','mw','mann-whitney','mannwhitney','trendbinomial','trend-binomial','trend+0.3iqr','binomial','t-u','tu','tau-u','tauu'].includes(String(kind||'').toLowerCase());
+  }
   function analysisToggleKey(command,seriesIndex){
     return `${seriesIndex}::${String(command||'').trim().replace(/\s+/g,' ').toLowerCase()}`;
   }
@@ -2530,7 +2774,7 @@ title: Reading Fluency</div>
       b.setAttribute('aria-pressed',active?'true':'false');
       const kind=b.dataset.analysis||'';
       const projectionTip=(kind==='Trend'||kind==='IQRTrend')?' Trend projections extend across the full displayed destination phase, including empty future session positions.':'';
-      b.title=active?'Click to remove this analysis':`Click to add this analysis.${projectionTip}`;
+      b.title=isQuantitativeAnalysis(kind)?'Run again: clear the prior analysis display and redraw from the current data':active?'Click to remove this analysis':`Click to add this analysis.${projectionTip}`;
     });
   }
   function removeAnalysisById(key){
@@ -2540,12 +2784,68 @@ title: Reading Fluency</div>
     renderResults();renderGraph();updateAnalysisToggleButtons();
     return (beforeO-state.overlays.length)+(beforeR-state.results.length);
   }
-  function addResult(title,lines,meta='',analysisId=null){
-    state.results.unshift({title,lines,meta,...(analysisId?{analysisId}:{})}); renderResults();
+  function estimatedPText(p,approximate=true){
+    const label=approximate?'pEst':'p';
+    return p<.001?`${label} < 0.001`:`${label} ${approximate?'≈':'='} ${fmt(p,3)}`;
+  }
+  function statisticalChangeSummary(p,alpha,direction,alternative='one-sided'){
+    const change=alternative==='two-sided'?'change':direction==='decrease'?'decrease':'increase';
+    const evidence=p<alpha?`The data suggest a systematic ${change} between phases`:`The data do not show clear statistical evidence of a systematic ${change} between phases`;
+    return `Alert: ${evidence} (p ${p<alpha?'<':'≥'} ${fmt(alpha,3)}, ${alternative==='two-sided'?'2-tail':'1-tail'}).`;
+  }
+  function pndSimpleInterpretation(pct){
+    const range=pct>=90?'90% or higher':pct>=70?'70% to less than 90%':pct>=50?'50% to less than 70%':'below 50%';
+    const label=practicalDistinction(pct).label.toLowerCase();
+    return `The non-overlap percentage (${range}) suggests ${label==='no difference'?label:'a '+label} between the two data paths.`;
+  }
+  function resultPhaseCounts(r){
+    if(Array.isArray(r.phaseCounts))return r.phaseCounts;
+    // Older sessions did not save counts with results. Match their original
+    // series/phase titles to the restored data, without rerunning an analysis.
+    if(!state.parsed)return [];
+    for(let si=0;si<state.parsed.series.length;si++){
+      const ser=state.parsed.series[si],marker=` — ${ser.label} — `,at=String(r.title||'').indexOf(marker);
+      if(at<0)continue;
+      const names=String(r.title).slice(at+marker.length);
+      for(let pA=0;pA<ser.phases.length;pA++){
+        const nameA=phaseName(si,pA);
+        if(names===nameA)return [{name:nameA,n:activeScores(pA,si).length}];
+        for(let pB=0;pB<ser.phases.length;pB++){
+          const nameB=phaseName(si,pB);
+          if(names===`${nameA} vs ${nameB}`||names===`${nameA} → ${nameB}`)return [{name:nameA,n:activeScores(pA,si).length},{name:nameB,n:activeScores(pB,si).length}];
+        }
+      }
+    }
+    return [];
+  }
+  function resultCaution(r){
+    const small=resultPhaseCounts(r).filter(p=>Number.isFinite(p.n)&&p.n<5);
+    return small.length?`Fewer than 5 observed data points in ${small.map(p=>`${p.name} (n = ${p.n})`).join(' and ')}. Interpret statistical results with caution.`:'';
+  }
+  function resultView(r){
+    if(els.detailedResultsCheck?.checked)return {title:r.title,meta:r.meta,lines:r.lines,detailed:true};
+    if(r.simple)return {title:`Comparison: ${r.simple.comparison}`,meta:r.simple.meta,lines:r.simple.lines};
+    const legacyComparisons={'PND':'Percent Non-Overlapping Data','Mann–Whitney U':'Mann–Whitney','Trend + 0.30 IQR / binomial':'Trend + 0.3 IQR','Tau-U':'Tau-U'};
+    const kind=String(r.title||'').split(' — ')[0];
+    if(legacyComparisons[kind])return {title:`Comparison: ${legacyComparisons[kind]}`,meta:String(r.title).slice(kind.length+3),lines:['Note: Rerun this saved analysis for the simplified results, or select “Show detailed results” to read the saved output.']};
+    return {title:r.title,meta:r.meta,lines:r.lines};
+  }
+  function resultParagraphHtml(line){
+    const match=String(line).match(/^(Note|Alert|Practical distinction):\s*(.*)$/s);
+    return `<p>${match?`<strong>${escapeHtml(match[1])}:</strong> ${escapeHtml(match[2])}`:escapeHtml(line)}</p>`;
+  }
+  function resultHtml(r,forReport=false){
+    const view=resultView(r),caution=resultCaution(r);
+    const heading=forReport?`<p><strong>${escapeHtml(view.title)}</strong></p>`:`<h3>${escapeHtml(view.title)}</h3>`;
+    return `<div${forReport?'':' class="result"'}>${heading}${view.meta?`<p class="meta${view.detailed?'':' result-context'}">${escapeHtml(view.meta)}</p>`:''}${view.lines.map(resultParagraphHtml).join('')}${caution?`<p class="result-caution" role="note"><strong>Caution:</strong> ${escapeHtml(caution)}</p>`:''}</div>`;
+  }
+  function addResult(title,lines,meta='',analysisId=null,presentation={}){
+    const simple=Array.isArray(presentation.lines)?{comparison:presentation.comparison,meta:presentation.meta||'',lines:presentation.lines}:null;
+    state.results.unshift({title,lines,meta,...(analysisId?{analysisId}:{}),...(simple?{simple}:{}),...(presentation.phaseCounts?{phaseCounts:presentation.phaseCounts}:{})}); renderResults();
   }
   function renderResults(){
     if(!state.results.length){els.results.innerHTML='<div class="empty">Run an analysis to see results and interpretation.</div>';updateAnalysisToggleButtons();return;}
-    els.results.innerHTML=state.results.map(r=>`<div class="result"><h3>${escapeHtml(r.title)}</h3>${r.meta?`<p class="meta">${escapeHtml(r.meta)}</p>`:''}${r.lines.map(x=>`<p>${escapeHtml(x)}</p>`).join('')}</div>`).join('');
+    els.results.innerHTML=state.results.map(r=>resultHtml(r)).join('');
     updateAnalysisToggleButtons();
   }
   function phaseSpanFrom(phase,seriesIndex,throughPhase=phase){const ser=state.parsed.series[seriesIndex],p=ser.phases[phase],end=ser.phases[Math.max(phase,Math.min(throughPhase,ser.phases.length-1))];return {x1:p.startSession,x2:end.endSession};}
@@ -2579,6 +2879,9 @@ title: Reading Fluency</div>
       const seriesRef=extracted.seriesRef!==null?extracted.seriesRef:inheritedSeriesRef;
       if(natural.multi){ natural.commands.forEach(c=>runAnalysis(c,seriesRef,null)); return; }
       const parts=natural.command.split(',').map(s=>s.trim()).filter(Boolean), kind=parts[0].toLowerCase();
+      const isTauRun=['t-u','tu','tau-u','tauu'].includes(kind),isQuantitativeRun=isQuantitativeAnalysis(kind);
+      // Read pending data edits before resolving the series/phases for a quantitative run.
+      if(isQuantitativeRun&&els.dataInput.value!==state.sourceText&&!loadData())return;
       const si=requireAnalysisSeries(seriesRef), ser=state.parsed.series[si], overlayColor=seriesStyles[si%seriesStyles.length].stroke;
       const visualKinds=['level','iqrlevel','trend','iqrtrend','whiskertrend','whisker-level','whiskerlevel'];
       if(visualKinds.includes(kind)&&parts.length>2){
@@ -2592,7 +2895,7 @@ title: Reading Fluency</div>
         if(kind==='level'||kind==='iqrlevel'||kind==='whisker-level'||kind==='whiskerlevel'){
           const med=median(pts.map(p=>p.score)); state.overlays.push({type:'hline',...span,y:med,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})}); let lines=[`Median level = ${fmt(med,3)}.${spanNote}`];
           if(kind!=='level'){const res=pts.map(p=>p.score-med),q1=quantile(res,.25),q3=quantile(res,.75);state.overlays.push({type:'band',...span,low:med+q1,high:med+q3,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});lines.push(`Residual Q1 = ${fmt(q1,3)}; Q3 = ${fmt(q3,3)}.`);}
-          addResult(`${displayKind(kind)} — ${ser.label} — ${phaseName(si,ph)}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId); renderGraph(); return;
+          addResult(`${displayKind(kind)} — ${ser.label} — ${phaseName(si,ph)}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId,{comparison:displayKind(kind),meta:`${ser.label} — ${phaseName(si,ph)}`,lines,phaseCounts:[{name:phaseName(si,ph),n:pts.length}]}); renderGraph(); return;
         }
         const tr=theilSen(pts), angle=Math.atan(tr.slope)*180/Math.PI, dir=tr.slope>0?'increasing':tr.slope<0?'decreasing':'flat';
         state.overlays.push({type:'trend',...trendSpan,...tr,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
@@ -2602,34 +2905,73 @@ title: Reading Fluency</div>
           state.overlays.push({type:'trendBand',...trendSpan,...tr,q1:iqrStats.q1,q3:iqrStats.q3,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
           lines.push(`Residual Q1 = ${fmt(iqrStats.q1,3)}; Q3 = ${fmt(iqrStats.q3,3)}; residual IQR = ${fmt(iqrStats.iqr,3)}.`);
         }
-        addResult(`${displayKind(kind)} — ${ser.label} — ${phaseName(si,ph)}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId); renderGraph(); return;
+        addResult(`${displayKind(kind)} — ${ser.label} — ${phaseName(si,ph)}`,lines,`Series ${si+1}; n=${pts.length}`,analysisId,{comparison:displayKind(kind),meta:`${ser.label} — ${phaseName(si,ph)}`,lines,phaseCounts:[{name:phaseName(si,ph),n:pts.length}]}); renderGraph(); return;
       }
       const pA=phaseIndex(parts[1]||'1',si),pB=phaseIndex(parts[2]||'2',si); if(pA<0||pB<0)throw new Error('Comparison phase not found.'); const a=activeScores(pA,si),b=activeScores(pB,si),dir=state.direction,alpha=Number(els.alphaInput.value)||.05;
       if(!a.length||!b.length)throw new Error(`Both phases need active observations for ${ser.label}.`);
+      const resultContext={meta:`${ser.label} — ${phaseName(si,pA)} vs ${phaseName(si,pB)}`,phaseCounts:[{name:phaseName(si,pA),n:a.length},{name:phaseName(si,pB),n:b.length}]};
+      if(isQuantitativeRun){
+        // All quantitative analyses replace the previous display/results; draw the
+        // current data alone before adding the new analysis's own overlays.
+        state.overlays=[];state.results=[];renderResults();renderGraph();
+      }
       if(kind==='pnd'){
-        const criterion=dir==='decrease'?Math.min(...a):Math.max(...a),qual=b.filter(v=>dir==='decrease'?v<criterion:v>criterion).length,pct=qual/b.length*100;state.overlays.push({type:'criterion',x1:ser.phases[pA].startSession,x2:ser.maxSessions,y:criterion,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
-        let label=pct>=90?'Effective Treatment':pct>=70?'Questionable Treatment Effectiveness':pct>=50?'Unsuccessful Treatment':'No Difference Between Phases'; addResult(`PND — ${ser.label} — ${phaseName(si,pA)} vs ${phaseName(si,pB)}`,[`Criterion = ${fmt(criterion,3)}; ${qual}/${b.length} ${dir==='decrease'?'below':'above'} criterion.`,`PND = ${fmt(pct,1)}%. ${label}.`,`Direction used: ${dir==='decrease'?'lower':'higher'} scores indicate improvement.`],`Series ${si+1}`,analysisId);renderGraph();return;
+        const criterion=dir==='decrease'?Math.min(...a):Math.max(...a),qual=b.filter(v=>dir==='decrease'?v<criterion:v>criterion).length,pct=qual/b.length*100;
+        // Extend one adjacent phase only; a nonadjacent comparison does not shade intervening phases.
+        const adjacent=pB===pA-1?pB:Math.min(pA+1,ser.phases.length-1);
+        const spanA=phaseDisplaySpan(ser,pA),spanNext=phaseDisplaySpan(ser,adjacent);
+        const span={x1:Math.min(spanA.x1,spanNext.x1),x2:Math.max(spanA.x2,spanNext.x2)};
+        state.overlays.push({type:'pndShade',...span,y:criterion,direction:dir,seriesIndex:si,...(analysisId?{analysisId}:{})});
+        state.overlays.push({type:'criterion',...span,y:criterion,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
+        const label=practicalDistinction(pct).label;
+        addResult(`PND — ${ser.label} — ${phaseName(si,pA)} vs ${phaseName(si,pB)}`,[`Criterion = ${fmt(criterion,3)}; ${qual}/${b.length} strictly ${dir==='decrease'?'below':'above'} criterion (ties excluded from the non-overlap count).`,`PND = ${fmt(pct,1)}%. Practical significance: ${label}.`,`Levels of distinction: ≥90% distinct difference; 70–<90% noticeable difference; 50–<70% negligible difference; <50% no difference. These descriptive categories are not a statistical significance test.`,`Shading covers ${phaseName(si,pA)}${adjacent!==pA?' and adjacent '+phaseName(si,adjacent):''}, ${dir==='decrease'?'above':'below'} the criterion.`,`Direction used: ${dir==='decrease'?'lower':'higher'} scores indicate improvement.`],`Series ${si+1}`,analysisId,{...resultContext,comparison:'Percent Non-Overlapping Data',lines:[`Note: ${qual} of ${b.length} (${fmt(pct,1)}%) data points fall ${dir==='decrease'?'below the baseline minimum':'above the baseline maximum'} value (${fmt(criterion,3)}).`,pndSimpleInterpretation(pct)]});renderGraph();return;
       }
       if(kind==='m-w'||kind==='mw'||kind==='mann-whitney'||kind==='mannwhitney'){
-        const r=mannWhitney(a,b),sig=r.p<alpha; const non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length; addResult(`Mann–Whitney U — ${ser.label} — ${phaseName(si,pA)} vs ${phaseName(si,pB)}`,[`U = ${fmt(r.U,3)}, n₁ = ${a.length}, n₂ = ${b.length}, p ≈ ${fmt(r.p,4)}, α = ${fmt(alpha,3)}.`,sig?'The phase distributions differ significantly at the selected alpha level.':'The test is not significant at the selected alpha level; this does not demonstrate equivalence.',`Completely non-overlapping treatment observations = ${non}/${b.length} (${fmt(non/b.length*100,1)}%).`],`Series ${si+1}`,analysisId);return;
+        const r=mannWhitney(a,b,dir),sig=r.p<alpha,rank=pairwiseDominance(a,b,dir);
+        const favorableU=rank.favorable+.5*rank.ties,nap=favorableU/rank.pairs,pct=nap*100;
+        const non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length;
+        const ptsA=activePoints(pA,si),ptsB=activePoints(pB,si),regions=mannWhitneyOverlapRegions(ptsA,ptsB,ser.phases[pB],dir);
+        state.overlays.push({type:'mannWhitneyOverlap',...phaseDisplaySpan(ser,pB),direction:dir,segments:regions,seriesIndex:si,...(analysisId?{analysisId}:{})});
+        const levelA=median(a);state.overlays.push({type:'mannWhitneyLevel',x1:ser.phases[pA].startSession,x2:ser.phases[pB].endSession,y:levelA,seriesIndex:si,...(analysisId?{analysisId}:{})});
+        addResult(`Mann–Whitney U — ${ser.label} — ${phaseName(si,pA)} vs ${phaseName(si,pB)}`,[
+          `U in the selected improvement direction = ${fmt(r.U,3)}, n₁ = ${a.length}, n₂ = ${b.length}, approximate one-sided p ≈ ${fmt(r.p,4)}, α = ${fmt(alpha,3)}.`,
+          sig?'The one-sided rank contrast supports improvement in the selected direction at the selected alpha level.':'The one-sided rank contrast does not reach significance for improvement in the selected direction; this does not demonstrate equivalence.',
+          `Directional U = favorable pairs + 0.5 × ties = ${rank.favorable} + 0.5 × ${rank.ties} = ${fmt(favorableU,3)} across ${rank.pairs} A×B pairs. Pairwise non-overlap (NAP) = ${fmt(pct,1)}%; complementary opposite-direction share (also half-weighting ties) = ${fmt(100-pct,1)}%. This is not PND or the percentage of B observations outside A's range.`,
+          `A-level reference: median = ${fmt(levelA,3)} (horizontal dashed line). All comparisons use the raw A score levels/ranks, including their variability; no A-phase slope, detrending, or projected A trend enters Mann–Whitney or its bands. Rearranging the same A scores does not change the calculation or shading.`,
+          `Rank-comparison counts: ${rank.favorable} favorable, ${rank.unfavorable} unfavorable, ${rank.ties} tied. Direction: ${dir==='decrease'?'lower':'higher'} scores indicate improvement. NAP = 50% means neither phase has net pairwise dominance; below 50% favors the opposite direction.`,
+          `Gray score bands show cumulative pairwise non-overlap for hypothetical scores at each B session, given the actual earlier B observations. Formula: (earlier favorable U + candidate favorable comparisons + half candidate ties) / [active nA × (earlier active B count + 1)]. At an actual B score, this equals cumulative directional Mann–Whitney U divided by its pair count. Missing and ghosted positions add no observations.`,
+          `Descriptive display cutoffs: ≥90% distinct difference (unshaded); 70–<90% noticeable difference (light); 50–<70% negligible difference (dark); below 50% no improvement/opposite-direction dominance (dark). Final display class: ${pct<50?'No improvement / opposite-direction dominance':practicalDistinction(pct).label}. These are display categories using the requested cutoffs, not standard Mann–Whitney significance or NAP effect-size thresholds. In particular, a NAP of exactly 50% is neutral, irrespective of its display bin.`,
+          `Overlap bands are one-sided in the selected improvement direction; the reported test p value is also one-sided in that direction and is independent of shading intensity. Horizontal score boundaries come from fixed A score ranks; cumulative B evidence can change their shading over sessions. They do not follow A trend or an IQR projection.`,
+          `Observed cumulative NAP: ${regions.filter(o=>o.observedValue!==null).map(o=>`Session ${o.session}: ${fmt(o.observedValue*100,1)}%`).join('; ')}.`,
+          `Separately, completely non-overlapping treatment observations = ${non}/${b.length} (${fmt(non/b.length*100,1)}%).`
+        ],`Series ${si+1}`,analysisId,{...resultContext,comparison:'Mann–Whitney',lines:[`Note: Pairwise non-overlap is ${fmt(pct,1)}% in the improvement direction (ties count half). ${estimatedPText(r.p)} (1-tail).`,`Practical distinction: ${pct<50?'No improvement; the rank contrast favors the opposite direction':practicalDistinction(pct).label}.`,statisticalChangeSummary(r.p,alpha,dir)]});renderGraph();return;
       }
       if(kind==='trendbinomial'||kind==='trend-binomial'||kind==='trend+0.3iqr'||kind==='binomial'){
         const ptsA=activePoints(pA,si),tr=theilSen(ptsA),iqrStats=trendIQRMargin(ptsA,tr);
         state.overlays.push({type:'trend',x1:ser.phases[pA].startSession,x2:ser.maxSessions,...tr,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
         state.overlays.push({type:'trendMargin',x1:ser.phases[pA].startSession,x2:ser.maxSessions,...tr,margin:iqrStats.margin,color:overlayColor,seriesIndex:si,...(analysisId?{analysisId}:{})});
         const bPts=activePoints(pB,si),cls=classifyAgainstTrendMargin(bPts,tr,iqrStats.margin,dir),p=binomAtLeast(cls.successes,cls.n,.5),sig=p<alpha;
-        addResult(`Trend + 0.30 IQR / binomial — ${ser.label} — ${phaseName(si,pA)} → ${phaseName(si,pB)}`,[`Reference-phase Theil–Sen trend residual IQR = ${fmt(iqrStats.iqr,3)}; 0.30 × IQR = ${fmt(iqrStats.margin,3)}. Parallel bounds were projected at trend ± ${fmt(iqrStats.margin,3)}.`,`${phaseName(si,pB)}: ${cls.above} observations above the upper bound, ${cls.below} below the lower bound, and ${cls.within} within the 0.30-IQR envelope.`,`${cls.successes}/${cls.n} observations (${fmt(cls.successes/cls.n*100,1)}%) crossed the ${dir==='decrease'?'lower':'upper'} boundary in the improvement direction.`,`One-sided binomial p ≈ ${fmt(p,4)} assuming p₀ = .50. ${sig?'Significant':'Not significant'} at α = ${fmt(alpha,3)}.`],`Series ${si+1}`,analysisId);renderGraph();return;
+        const comparisonSpan=phaseDisplaySpan(ser,pB);
+        state.overlays.push({type:'trendBinomialShade',...comparisonSpan,...tr,margin:iqrStats.margin,direction:dir,trendX1:ser.phases[pA].startSession,trendX2:ser.maxSessions,seriesIndex:si,...(analysisId?{analysisId}:{})});
+        addResult(`Trend + 0.30 IQR / binomial — ${ser.label} — ${phaseName(si,pA)} → ${phaseName(si,pB)}`,[`Reference-phase Theil–Sen trend residual IQR = ${fmt(iqrStats.iqr,3)}; 0.30 × IQR = ${fmt(iqrStats.margin,3)}. Parallel bounds were projected at trend ± ${fmt(iqrStats.margin,3)}.`,`${phaseName(si,pB)}: ${cls.above} observations above the upper bound, ${cls.below} below the lower bound, and ${cls.within} within the 0.30-IQR envelope.`,`${cls.successes}/${cls.n} observations (${fmt(cls.successes/cls.n*100,1)}%) crossed the ${dir==='decrease'?'lower':'upper'} boundary in the improvement direction.`,`Gray shading in the comparison phase appears only ${dir==='decrease'?'above':'below'} the projected A trend line, marking the non-improvement side for ${dir==='decrease'?'lower':'higher'} scores = improvement. The shading follows the central trend line and does not switch on/off with cumulative p values.`, `The ±0.30 residual-IQR bounds remain visible and define which observations count as improvement-side successes for the one-sided binomial test. Statistical significance is given by the whole-phase p value below; the gray region itself is a directional reference. Missing/ghosted sessions add no observations.`, `One-sided binomial p ≈ ${fmt(p,4)} assuming p₀ = .50. ${sig?'Significant':'Not significant'} at α = ${fmt(alpha,3)}.`],`Series ${si+1}`,analysisId,{...resultContext,comparison:'Trend + 0.3 IQR',lines:[`Note: ${cls.successes} of ${cls.n} (${fmt(cls.successes/cls.n*100,1)}%) data points cross the ${dir==='decrease'?'lower':'upper'} trend + 0.3 IQR criterion in the improvement direction. ${estimatedPText(p,false)} (1-tail).`,statisticalChangeSummary(p,alpha,dir)]});renderGraph();return;
       }
-      if(kind==='t-u'||kind==='tu'||kind==='tau-u'||kind==='tauu'){
+      if(isTauRun){
         const ptsA=activePoints(pA,si),ptsB=activePoints(pB,si);
         const mode=els.tauCorrectionSelect.value;
-        const r=tauUTest(a,b,ptsA,dir,mode),non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length;
+        const r=tauUTest(a,b,ptsA,dir,mode,els.tauAlternativeSelect?.value||'one-sided'),non=b.filter(y=>dir==='decrease'?y<Math.min(...a):y>Math.max(...a)).length;
         const pointTau=tauPointContributions(ptsA,ptsB,dir,r.sA,r.correct);
         const tr=ptsA.length>=2?theilSen(ptsA):null;
         const cloudStats=tr?trendIQRMargin(ptsA,tr):null;
         const cloudSigma=cloudStats?Math.max(.45,Math.abs(cloudStats.q1),Math.abs(cloudStats.q3),cloudStats.iqr*.75):.75;
         const cloudOuterSpan=Math.max(1.2,cloudSigma*2.4);
         const phaseA=ser.phases[pA],phaseB=ser.phases[pB];
+        const lengthMode=els.tauLengthModeSelect?.value||'sessions';
+        const bandBasis=tauBandPhaseBasis(ptsA,phaseA,r.sA,r.correct,lengthMode);
+        const lengthA=phaseA.endSession-phaseA.startSession+1,lengthB=phaseB.endSession-phaseB.startSession+1;
+        const shadingSegments=tauSessionShading(ptsA,ptsB,phaseB,dir,r.sA,r.correct,{phaseA,mode:lengthMode});
+        const phaseDisplayCorrection=tauBandCorrection(bandBasis,b.length,lengthB);
+        const phaseDisplayIndex=r.rawTau-phaseDisplayCorrection;
+        state.overlays.push({type:'tauDistinction',...phaseDisplaySpan(ser,pB),segments:shadingSegments,lengthMode,phaseASessions:lengthA,phaseBSessions:lengthB,finalTau:r.tau,seriesIndex:si,...(analysisId?{analysisId}:{})});
         state.overlays.push({
           type:'tauInfluenceCloud',
           pointsB:ptsB.map(p=>({session:p.session,score:p.score})),
@@ -2653,6 +2995,7 @@ title: Reading Fluency</div>
         });
         state.overlays.push({
           type:'tauPointViz',
+          bandLengthMode:lengthMode,phaseASessions:lengthA,phaseBSessions:lengthB,
           pointsA:ptsA.map(p=>({session:p.session,score:p.score})),
           pointsB:ptsB.map(p=>({session:p.session,score:p.score})),
           rawLocalB:pointTau.rawLocalB,
@@ -2661,6 +3004,7 @@ title: Reading Fluency</div>
           tauUCumulative:pointTau.tauUCumulative,
           baselineLocal:pointTau.baselineLocal,
           rawTau:r.rawTau,
+          alternative:r.alternative,rawP:r.rawP,
           baselineTau:r.baselineTau,
           sAB:r.sAB,
           sA:r.sA,
@@ -2682,24 +3026,44 @@ title: Reading Fluency</div>
         const correctionLine=r.correct
           ? `Baseline correction = S_A/(nA × nB) = ${fmt(r.sA,0)}/(${a.length} × ${b.length}) = ${fmt(r.correction,3)}. Final Tau-U = ${fmt(r.tau,3)}.`
           : `Baseline correction was not applied. Final Tau-U = raw phase contrast τ = ${fmt(r.tau,3)}.`;
+        const alternativeLabel=r.alternative==='two-sided'?'two-sided':'one-sided';
+        const alternativeDescription=r.alternative==='two-sided'?'a difference in either direction':`improvement in the selected ${dir==='decrease'?'lower':'higher'}-scores direction`;
         const pLine=r.correct
-          ? `Because the sampling distribution of baseline-corrected Tau-U is not established, SCGraph2 does not report a corrected Tau-U p value. For reference only, the uncorrected A→B rank contrast has approximate two-sided p = ${fmt(r.rawP,4)}.`
-          : `Approximate two-sided p for the A→B rank contrast = ${fmt(r.rawP,4)}; ${r.rawP<alpha?'significant':'not significant'} at α = ${fmt(alpha,3)}.`;
+          ? `SCGraph2 does not report a p value for the baseline-corrected Tau-U. For reference only, the uncorrected A→B rank contrast has approximate ${alternativeLabel} p = ${fmt(r.rawP,4)} for ${alternativeDescription}; this is not a significance test of corrected Tau-U.`
+          : `Approximate ${alternativeLabel} p for the A→B rank contrast = ${fmt(r.rawP,4)}; ${r.rawP<alpha?'significant':'not significant'} at α = ${fmt(alpha,3)} for ${alternativeDescription}.`;
         const firstCorr=pointTau.correctionBySession[0]??0,lastCorr=pointTau.correctionBySession.at(-1)??0;
         const teachingLine=r.correct
-          ? `Session-dependent correction: the amount subtracted falls from ${fmt(firstCorr,3)} at the first intervention observation to ${fmt(lastCorr,3)} at intervention observation ${b.length}. The dashed gray rings around B points visualize this waning influence on a relative scale: B1 = 100%, and each later ring is scaled by |C_j|/|C_1|. The optional blue cloud uses the same session-dependent correction as a continuous background influence field; it is not a probability distribution or confidence region.`
+          ? `Session-dependent correction: the amount subtracted falls from ${fmt(firstCorr,3)} at the first intervention observation to ${fmt(lastCorr,3)} at intervention observation ${b.length}. The dashed gray rings around B points visualize this waning influence on a relative scale: B1 = 100%, and each later ring is scaled by |C_j|/|C_1|. The optional legacy blue cloud uses the same session-dependent correction as a continuous background influence field; it is not a probability distribution or confidence region.`
           : `No session-dependent baseline correction is shown because baseline correction was not applied.`;
         addResult(`Tau-U — ${ser.label} — ${phaseName(si,pA)} vs ${phaseName(si,pB)}`,[
+          `Statistical alternative: ${alternativeLabel}${r.alternative==='one-sided'?' (default)':''} — ${alternativeDescription}. α = ${fmt(alpha,3)} applies to this selected alternative.`,
           `Raw A→B contrast: S_AB = ${fmt(r.sAB,0)} across ${a.length*b.length} pairs; raw τ = ${fmt(r.rawTau,3)}.`,
           `Baseline trend: S_A = ${fmt(r.sA,0)} across ${r.sA===0?ptsA.length*(ptsA.length-1)/2:ptsA.length*(ptsA.length-1)/2} ordered baseline pairs; baseline τ = ${fmt(r.baselineTau,3)}.`,
           correctionLine,
+          `Band phase-length mode: ${lengthMode==='sessions'?'FULL A:B PHASE LENGTHS — custom weighting includes blanks':'OBSERVED PHASE LENGTHS ONLY — original Tau-U display'}. A: ${a.length} active observations across ${lengthA} session positions; B: ${b.length} active observations across ${lengthB} session positions. Ghosted values are excluded from active observations but retain their positions.`,
+          ...(lengthMode==='sessions'?[
+            `Custom band correction = baseline rank-trend τ_A × (A session length − 1)/(2 × B session position), when correction is applied. Equivalently, observed τ_A is weighted by A session-pair opportunities and divided by A length × B position. At equal baseline trend strength and B length, longer A phases retain more correction influence and shorter A phases fall below the same influence threshold earlier. For fixed A, longer accumulated B reduces A's relative correction influence. This applies to populated phases as well as blanks; blank positions extend the selected phase's full length. This is a custom display index, not a standard Tau-U estimate or significance test; no missing scores or rank comparisons are imputed.`,
+            `At the end of B: raw observed contrast ${fmt(r.rawTau,3)} − custom phase-weighted correction ${fmt(phaseDisplayCorrection,3)} = display index ${fmt(phaseDisplayIndex,3)} (${practicalDistinction(phaseDisplayIndex*100).label} in the improvement direction). Standard observed-data Tau-U remains ${fmt(r.tau,3)}. ${r.correct&&r.sA!==0?'':'No phase-length effect occurs because baseline correction is off or baseline trend is zero.'}`
+          ]:[]),
+          ...(r.correct&&tr&&cloudStats?[`Descriptive trend/IQR reference (teal): A-phase Theil–Sen slope ${fmt(tr.slope,3)} per session; residual Q1 ${fmt(cloudStats.q1,3)}, Q3 ${fmt(cloudStats.q3,3)}, residual IQR ${fmt(cloudStats.iqr,3)}. Boundaries follow projected A trend + residual Q1/Q3 across A through B. This envelope is separate from the gray rank-based Tau-U category bands; its width is not a Tau-U confidence interval or correction amount.`]:[]),
+          `Practical distinction in the selected improvement direction: ${practicalDistinction((r.tau)*100).label} (signed final Tau-U × 100 = ${fmt((r.tau)*100,1)}). ${r.tau>0?'Effect is in the improvement direction.':r.tau<0?'Effect is opposite to the improvement direction.':'No net directional effect.'} This one-sided index is not a percentage of non-overlapping observations. Negative values indicate an opposite-direction contrast; a dark region does not establish equivalence.`,
+          `One-sided Tau-U band categories in B (signed improvement index): below 50 = no difference (dark); 50–<70 = negligible difference (dark); 70–<90 = noticeable difference (light); ≥90 = distinct difference (unshaded). These user-defined practical categories are separate from statistical significance.`,
+          `Band raw contrast at each B position = [S_AB from actual earlier B observations + directional signs comparing a hypothetical current score with A] / [active nA × (earlier active B count + 1)]. ${lengthMode==='sessions'?'Subtract the custom phase-weighted correction described above.':'Subtract S_A/[active nA × (earlier active B count + 1)] when correction is applied.'} Classification is one-sided: negative values remain dark.`,
+          `Missing and ghosted positions remain on the axis and add no score or rank comparison. ${lengthMode==='sessions'?'Full A and B session lengths affect the custom band correction; calendar time does not. Gray bands can therefore differ from the standard point/ring statistics.':'Blank positions alone do not change the observed-data calculation; at an active B score the band index equals cumulative statistical Tau-U.'} Teal trend/IQR is descriptive and does not determine gray category thresholds.`,
+          `Score bands are conditional rank-based regions, not confidence intervals or bands of statistical significance. They can be asymmetric, discontinuous, absent for some categories, or extend beyond the plotted range; later observations can widen or narrow them. Baseline-score ties are classified separately. No interpolation of unattainable .50/.70/.90 values is used.`,
+          `Observed cumulative one-sided categories: ${ptsB.map((p,i)=>`Session ${p.session}: Tau-U ${fmt(pointTau.tauUCumulative[i],3)}, ${pointTau.tauUCumulative[i]<0?'opposite direction (dark; no demonstrated improvement)':practicalDistinction(pointTau.tauUCumulative[i]*100).label}`).join('; ')}. These are standard observed-data values; ${lengthMode==='sessions'?'gray phase-weighted bands use the separate custom index':'hypothetical score bands use the same rank calculation'}.`,
           pLine,
           teachingLine,
           `Graph encoding: solid outer B ring = that observation's raw comparison with A; colored B point = cumulative Tau-U through that intervention session; dashed gray B ring = baseline influence remaining relative to B1 (ring radius/width/opacity shrink across B); dashed A rings = local preexisting trend evidence.`,
           `Direction: ${dir==='decrease'?'decrease':'increase'} = improvement. Separately, completely non-overlapping treatment observations = ${fmt(non/b.length*100,1)}%.`
-        ],`Series ${si+1}; nA=${a.length}, nB=${b.length}`,analysisId);
+        ],`Series ${si+1}; nA=${a.length}, nB=${b.length}`,analysisId,{...resultContext,comparison:'Tau-U',lines:[
+          `Note: Uncorrected Tau = ${fmt(r.rawTau,3)} (${fmt(r.rawTau*100,1)}% net pairwise non-overlap). ${estimatedPText(r.rawP)} (${r.alternative==='two-sided'?'2-tail':'1-tail'}${r.correct?'; uncorrected comparison only':''}).`,
+          r.correct?`Tau-U (baseline trend corrected) = ${fmt(r.tau,3)}. Corrected p-value: unavailable.`:'Baseline trend correction was not applied.',
+          `Practical distinction: ${r.tau<0?'No improvement; the effect is in the opposite direction':practicalDistinction(r.tau*100).label}.`,
+          r.correct?'Alert: A statistical conclusion about change is unavailable for corrected Tau-U.':statisticalChangeSummary(r.rawP,alpha,dir,r.alternative)
+        ]});
         renderGraph();
-        status(`Tau-U complete. ${els.tauVizSelect?.value==='off'?'Visualization is currently OFF.':els.tauVizSelect?.value==='cloud'?'Cloud-only Tau-U influence visualization added to the graph.':els.tauVizSelect?.value==='points'?'Point-only Tau-U visualization added to the graph.':'Session-dependent Tau-U visualization added to the graph.'}`,'ok');
+        status(`Tau-U complete. ${els.tauVizSelect?.value==='off'?'Visualization is currently OFF.':els.tauVizSelect?.value==='cloud'?'Tau-U distinction shading added to the graph.':els.tauVizSelect?.value==='points'?'Point-only Tau-U visualization added to the graph.':'Session-dependent Tau-U visualization added to the graph.'}`,'ok');
         return;
       }
       throw new Error('Command not recognized.');
@@ -2733,7 +3097,7 @@ title: Reading Fluency</div>
   function transformGhostInData(session,makeGhost,seriesIdx){
     if(!Number.isInteger(session)||session<1)throw new Error('Give a valid session number.');const ser=state.parsed?.series?.[seriesIdx];if(!ser)throw new Error('Series not found.');
     const lines=els.dataInput.value.split(/\n/),lineIndex=ser.sourceLineIndex,line=lines[lineIndex];if(line===undefined)throw new Error('Source series line not found.');const colon=line.indexOf(':');if(colon<0)throw new Error('Source series line is invalid.');
-    const prefix=line.slice(0,colon+1),raw=line.slice(colon+1);let counter=0,found=false;const rebuilt=raw.split('|').map(chunk=>chunk.split(',').map(token=>{if(!token.trim())return token;counter++;if(counter!==session)return token;found=true;const lead=(token.match(/^\s*/)||[''])[0],trail=(token.match(/\s*$/)||[''])[0];let core=token.trim(),wrapped=core.match(/^\(\s*(.*?)\s*\)$/);core=wrapped?wrapped[1].trim():core;return lead+(makeGhost?`(${core})`:core)+trail;}).join(',')).join('|');
+    const prefix=line.slice(0,colon+1),raw=line.slice(colon+1);let counter=0,found=false;const rebuilt=raw.split('|').map(chunk=>chunk.split(',').map(token=>{counter++;if(counter!==session)return token;if(!token.trim())throw new Error(`Session ${session} is missing; there is no observation to ghost or restore.`);found=true;const lead=(token.match(/^\s*/)||[''])[0],trail=(token.match(/\s*$/)||[''])[0];let core=token.trim(),wrapped=core.match(/^\(\s*(.*?)\s*\)$/);core=wrapped?wrapped[1].trim():core;return lead+(makeGhost?`(${core})`:core)+trail;}).join(',')).join('|');
     if(!found)throw new Error(`Session ${session} not found in ${ser.label}.`);lines[lineIndex]=prefix+rebuilt;els.dataInput.value=lines.join('\n');loadData();
   }
   function ghostSession(session,seriesIdx){const label=state.parsed.series[seriesIdx].label;transformGhostInData(session,true,seriesIdx);status(`${label}, Session ${session} is now parenthesized and ghosted in the data stream.`,'ok');}
@@ -2778,9 +3142,12 @@ title: Reading Fluency</div>
       if(state.parsed.inferredPhaseLayoutCount)loadMessages.push(`phase boundaries inferred for ${state.parsed.inferredPhaseLayoutCount} companion series`);
       if(state.parsed.autoSplitCount)loadMessages.push(`incompatible phase lengths separated into ${state.parsed.graphs.length} graphs`);
       status(loadMessages.length?`Data loaded: ${loadMessages.join('; ')}.`:'Data loaded. Would you like to adjust the graph, perform an analysis, or add material to the report?','ok');
-    }catch(e){status(e.message,'error');}
+      return true;
+    }catch(e){status(e.message,'error');return false;}
   }
   function reset(){
+    if(els.tauAlternativeSelect)els.tauAlternativeSelect.value='one-sided';
+    if(els.detailedResultsCheck)els.detailedResultsCheck.checked=false;
     if(els.graphDataTableDrawer)els.graphDataTableDrawer.classList.remove('open');if(els.toggleDataTableBtn){els.toggleDataTableBtn.setAttribute('aria-expanded','false');els.toggleDataTableBtn.textContent='Show Data Table';}
     els.dataInput.value='Sniffing: 2,4,5,2|6,7,4,5';els.phaseNamesData.value='';els.phaseLabelInput.value='';els.titleInput.value='Performance Scores Over Sessions';els.xLabelInput.value='Session';els.markerSizeInput.value=5;els.lineWidthInput.value=2;if(els.lineDashSelect)els.lineDashSelect.value='solid';if(els.lineColorInput)els.lineColorInput.value='#111827';if(els.showConnectingLineCheck)els.showConnectingLineCheck.checked=true;loadTimelineControls({mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[]});els.gridCheck.checked=false;els.legendCheck.checked=true;els.phaseLabelsCheck.checked=true;els.showGhostCheck.checked=true;els.directionSelect.value='increase';els.analysisCommand.value='T-U, 1, 2';els.graphCommand.value='';if(els.reportEditor){els.reportEditor.innerHTML='';setReportPreview(false);syncReportEditors(els.reportEditor);clearReportAutosave();}state.ghosted.clear();state.overlays=[];state.goalLines=[];state.graphSettings=[];state.results=[];loadData();
   }
@@ -2789,7 +3156,7 @@ title: Reading Fluency</div>
     const modules=[...document.querySelectorAll('details.module')];
     return {
       format:'SCGraph2-state',
-      version:37,
+      version:52,
       savedAt:new Date().toISOString(),
       data:{
         source:els.dataInput.value,
@@ -2825,8 +3192,12 @@ title: Reading Fluency</div>
         selectedPhases:selectedAnalysisPhases(),
         alpha:els.alphaInput.value,
         tauCorrection:els.tauCorrectionSelect.value,
+        tauAlternative:els.tauAlternativeSelect?.value||'one-sided',
+        resultsFormat:els.detailedResultsCheck?.checked?'detailed':'simple',
+        tauLengthMode:els.tauLengthModeSelect?.value||'sessions',
         tauVisualization:els.tauVizSelect?.value||'both',
         tauLegendVisible:els.tauLegendCheck?.checked!==false,
+        tauIQRVisible:els.tauIQRCheck?.checked!==false,
         visualSourcePhase:Number(els.visualSourcePhaseSelect?.value)||0,
         visualDisplayThrough:Number(els.visualDisplayThroughSelect?.value)||0,
         overlays:JSON.parse(JSON.stringify(state.overlays||[])),
@@ -3027,6 +3398,7 @@ title: Reading Fluency</div>
     if(payload.format!=='SCGraph2-state')throw new Error('This JSON file is not an SCGraph2 saved-state file.');
     if(!Number.isFinite(Number(payload.version))||Number(payload.version)<1)throw new Error('The SCGraph2 state version is missing or invalid.');
     const d=payload.data||{},g=payload.graph||{},a=payload.analysis||{},r=payload.report||{},ui=payload.interface||{};
+    if(els.detailedResultsCheck)els.detailedResultsCheck.checked=a.resultsFormat==='detailed';
     if(typeof d.source!=='string'||!d.source.trim())throw new Error('The saved state does not contain valid source data.');
     els.dataInput.value=d.source;els.phaseNamesData.value=typeof d.phaseNames==='string'?d.phaseNames:'';els.phaseLabelInput.value=typeof g.phaseLabels==='string'?g.phaseLabels:els.phaseNamesData.value;els.directionSelect.value=d.direction==='decrease'?'decrease':'increase';
     els.titleInput.value=typeof g.title==='string'?g.title:'Performance Scores Over Sessions';els.xLabelInput.value=typeof g.xLabel==='string'?g.xLabel:'Session';els.markerSizeInput.value=g.markerSize??5;els.lineWidthInput.value=g.lineWidth??2;els.gridCheck.checked=!!g.grid;els.legendCheck.checked=g.legend!==false;els.phaseLabelsCheck.checked=g.showPhaseLabels!==false;els.showGhostCheck.checked=g.showGhosts!==false;els.graphCommand.value=typeof g.graphCommand==='string'?g.graphCommand:'';
@@ -3036,7 +3408,7 @@ title: Reading Fluency</div>
     if(!savedGraphSettings.length)state.graphSettings=state.graphSettings.map((cfg,gi)=>normalizeGraphSetting({...cfg,xLabel:typeof g.xLabel==='string'?g.xLabel:'Session',phaseLabels:typeof g.phaseLabels==='string'?g.phaseLabels:''},gi));
     state.goalLines=normalizeGoalLinesAfterParse(Array.isArray(g.goalLines)?g.goalLines:[]);
     loadTimelineControls(g.timeline||{mode:'sequential',minSessions:'15',customMinSessions:15,labelMode:'session',firstSessionDate:'',weekdays:[],dateOverrides:{}});updateGraphEditOptions(Number.isInteger(Number(g.selectedGraphIndex))?Number(g.selectedGraphIndex):0);loadSelectedGraphControls();updateGoalControls();
-    els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';els.alphaInput.value=a.alpha??0.05;els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';if(els.tauVizSelect)els.tauVizSelect.value=['both','cloud','points','raw','corrected','off'].includes(a.tauVisualization)?a.tauVisualization:'both';if(els.tauLegendCheck)els.tauLegendCheck.checked=a.tauLegendVisible!==false;
+    els.analysisCommand.value=typeof a.command==='string'?a.command:'T-U, 1, 2';els.alphaInput.value=a.alpha??0.05;els.tauCorrectionSelect.value=['auto','yes','no'].includes(a.tauCorrection)?a.tauCorrection:'auto';if(els.tauVizSelect)els.tauVizSelect.value=['both','cloud','influence','points','raw','corrected','off'].includes(a.tauVisualization)?a.tauVisualization:'both';if(els.tauLegendCheck)els.tauLegendCheck.checked=a.tauLegendVisible!==false;if(els.tauIQRCheck)els.tauIQRCheck.checked=a.tauIQRVisible!==false;if(els.tauLengthModeSelect)els.tauLengthModeSelect.value=['sessions','observed'].includes(a.tauLengthMode)?a.tauLengthMode:'sessions';if(els.tauAlternativeSelect)els.tauAlternativeSelect.value=a.tauAlternative==='two-sided'?'two-sided':'one-sided';
     updateAnalysisGraphOptions(Number.isInteger(Number(a.selectedGraphIndex))?Number(a.selectedGraphIndex):0,a.selectedSeriesLabel||'');
     if(a.selectedSeriesLabel)updateAnalysisSeriesOptions(a.selectedSeriesLabel,selectedAnalysisGraph());
     updateAnalysisPhaseOptions(Array.isArray(a.selectedPhases)?a.selectedPhases:[]);updateVisualSpanOptions(Number.isInteger(Number(a.visualSourcePhase))?Number(a.visualSourcePhase):null,Number.isInteger(Number(a.visualDisplayThrough))?Number(a.visualDisplayThrough):null);
@@ -3167,7 +3539,7 @@ title: Reading Fluency</div>
     try{
       const si=requireAnalysisSeries(null),command=analysisCommandForButton(b),key=analysisToggleKey(command,si);
       els.analysisCommand.value=command;
-      if(analysisIsActive(key)){removeAnalysisById(key);status(`${b.textContent.trim().replace(/\s*✓$/,'')} removed for ${state.parsed.series[si].label}.`,'ok');return;}
+      if(!isQuantitativeAnalysis(b.dataset.analysis)&&analysisIsActive(key)){removeAnalysisById(key);status(`${b.textContent.trim().replace(/\s*✓$/,'')} removed for ${state.parsed.series[si].label}.`,'ok');return;}
       runAnalysis(command,null,key);updateAnalysisToggleButtons();
     }catch(e){status(e.message,'error');}
   });});
@@ -3367,6 +3739,10 @@ title: Reading Fluency</div>
   els.directionSelect.addEventListener('change',()=>{state.direction=els.directionSelect.value;}); els.phaseNamesData.addEventListener('change',()=>{els.phaseLabelInput.value=els.phaseNamesData.value;if(state.parsed){const si=els.goalSeriesSelect.value,sp=els.goalStartPhaseSelect.value,ep=els.goalEndPhaseSelect.value;state.parsed.phaseNames=getPhaseNames(state.parsed.phaseCount);updateGoalControls(state.parsed.series[Number(si)]?.label||'');els.goalStartPhaseSelect.value=sp;els.goalEndPhaseSelect.value=ep;renderGoalLineList();}renderGraph();});
   if(els.tauVizSelect)els.tauVizSelect.addEventListener('change',renderGraph);
   if(els.tauLegendCheck)els.tauLegendCheck.addEventListener('change',renderGraph);
+  if(els.tauIQRCheck)els.tauIQRCheck.addEventListener('change',renderGraph);
+  if(els.tauLengthModeSelect)els.tauLengthModeSelect.addEventListener('change',()=>status('Phase-length mode changed. Run Tau-U to apply it to a fresh plot.','ok'));
+  if(els.tauAlternativeSelect)els.tauAlternativeSelect.addEventListener('change',()=>status('Statistical alternative changed. Run Tau-U to refresh its p value and results.','ok'));
+  if(els.detailedResultsCheck)els.detailedResultsCheck.addEventListener('change',renderResults);
   window.addEventListener('resize',()=>{});
   restoreRememberedSaveDirectory();
   loadTimelineControls(state.timeline);
