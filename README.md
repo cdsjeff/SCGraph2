@@ -1,3 +1,9 @@
+# SCGraph2 v61
+
+Open `index.html` or `SCGraph2.html` in a browser. For GitHub Pages, extract the files to the repository root.
+
+IQR Level and IQR Trend now report a numerical IQR for each selected phase in concise and detailed results, including report insertion. Level uses score Q3 − Q1; Trend uses residual Q3 − Q1 around the fitted line. Existing bands, fits and tests are unchanged. Rerun an existing analysis to update its saved results.
+
 # SCGraph2 v60
 
 Open `index.html` or `SCGraph2.html` in a modern browser. This standalone app works offline with no build or external dependencies. For GitHub Pages, extract the ZIP into the repository root and use that branch/root in Pages settings.
